@@ -139,10 +139,10 @@
   min-height: 40px;
   padding: 0 14px;
   transition:
-    background 170ms ease,
-    border-color 170ms ease,
-    color 170ms ease,
-    transform 170ms ease;
+          background 170ms ease,
+          border-color 170ms ease,
+          color 170ms ease,
+          transform 170ms ease;
 }
 
 .wf-primary-button {
@@ -196,10 +196,10 @@
   justify-content: center;
   padding: 0;
   transition:
-    background 170ms ease,
-    border-color 170ms ease,
-    color 170ms ease,
-    transform 170ms ease;
+          background 170ms ease,
+          border-color 170ms ease,
+          color 170ms ease,
+          transform 170ms ease;
   width: 38px;
 }
 
@@ -276,8 +276,8 @@
   position: relative;
   text-align: left;
   transition:
-    background 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          transform 180ms ease;
 }
 
 button.wf-metric-card {
@@ -325,9 +325,9 @@ button.wf-metric-card:active {
   right: 14px;
   top: 14px;
   transition:
-    background 170ms ease,
-    color 170ms ease,
-    transform 170ms ease;
+          background 170ms ease,
+          color 170ms ease,
+          transform 170ms ease;
   width: 26px;
 }
 
@@ -494,9 +494,9 @@ button.wf-metric-card:hover > i {
   margin-top: 1px;
   padding: 0;
   transition:
-    background 170ms ease,
-    border-color 170ms ease,
-    transform 170ms ease;
+          background 170ms ease,
+          border-color 170ms ease,
+          transform 170ms ease;
   width: 21px;
 }
 
@@ -664,9 +664,9 @@ button.wf-metric-card:hover > i {
   min-height: 30px;
   padding: 0 7px;
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
+          background 160ms ease,
+          border-color 160ms ease,
+          color 160ms ease;
 }
 
 .wf-task-actions > button:not(.wf-icon-button):hover {
@@ -997,6 +997,12 @@ button.wf-metric-card:hover > i {
   color: var(--wf-danger);
 }
 
+.wf-calendar-summary .wf-summary-action {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  margin-inline-end: 8px;
+}
+
 .wf-filter-bar {
   align-items: end;
   background: var(--wf-surface-raised);
@@ -1160,8 +1166,8 @@ button.wf-metric-card:hover > i {
   position: relative;
   text-align: left;
   transition:
-    background 160ms ease,
-    box-shadow 160ms ease;
+          background 160ms ease,
+          box-shadow 160ms ease;
 }
 
 .wf-calendar-day:not(:nth-child(7n + 1)) {
@@ -1461,8 +1467,8 @@ button.wf-metric-card:hover > i {
   padding: 0 10px;
   resize: vertical;
   transition:
-    background 160ms ease,
-    border-color 160ms ease;
+          background 160ms ease,
+          border-color 160ms ease;
   width: 100%;
 }
 
@@ -1534,8 +1540,8 @@ button.wf-metric-card:hover > i {
   position: fixed;
   transform: translate(-50%, 10px);
   transition:
-    opacity 170ms ease,
-    transform 170ms ease;
+          opacity 170ms ease,
+          transform 170ms ease;
   z-index: 70;
 }
 
@@ -1557,6 +1563,28 @@ button.wf-metric-card:hover > i {
 
 .wf-stat-filters select {
   min-width: 135px;
+}
+
+.wf-stat-toolbar {
+  align-items: center;
+  border-bottom: 1px solid var(--wf-line);
+  column-gap: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  row-gap: 4px;
+}
+
+.wf-stat-toolbar .wf-stat-tabs {
+  border-bottom: 0;
+  flex: 1 1 auto;
+  margin-bottom: 0;
+}
+
+.wf-stat-toolbar .wf-stat-filters {
+  flex: 0 0 auto;
+  padding-bottom: 6px;
 }
 
 .wf-stat-tabs {
@@ -1929,12 +1957,12 @@ button.wf-metric-card:hover > i {
 
 .wf-sales-hero {
   background:
-    radial-gradient(
-      circle at 84% 12%,
-      color-mix(in srgb, var(--wf-hero-accent) 18%, transparent),
-      transparent 38%
-    ),
-    var(--wf-hero-surface);
+          radial-gradient(
+                  circle at 84% 12%,
+                  color-mix(in srgb, var(--wf-hero-accent) 18%, transparent),
+                  transparent 38%
+          ),
+          var(--wf-hero-surface);
   color: var(--wf-hero-ink);
   min-height: 335px;
   padding: 21px;

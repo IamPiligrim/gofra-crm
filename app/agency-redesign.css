@@ -112,9 +112,9 @@ body {
 
 body::before {
   background-image: repeating-radial-gradient(
-    circle at 22% 31%,
-    color-mix(in srgb, var(--ink) 8%, transparent) 0 0.35px,
-    transparent 0.45px 3px
+          circle at 22% 31%,
+          color-mix(in srgb, var(--ink) 8%, transparent) 0 0.35px,
+          transparent 0.45px 3px
   );
   background-size: 5px 5px;
   content: "";
@@ -270,16 +270,12 @@ button {
   gap: 22px;
   margin: 0 -28px 18px;
   max-width: none;
-  min-height: 76px;
+  min-height: 92px;
   padding: 13px 28px;
   position: sticky;
   top: 0;
   z-index: 20;
   backdrop-filter: blur(12px);
-}
-
-.workspace-header.is-feature-module {
-  grid-template-columns: minmax(300px, 1fr) auto;
 }
 
 .workspace-header p,
@@ -453,12 +449,12 @@ button {
   --wf-hero-muted: var(--muted);
   --wf-hero-tile: var(--surface-muted);
   background:
-    radial-gradient(
-      circle at 88% 8%,
-      color-mix(in srgb, var(--accent-soft) 74%, transparent),
-      transparent 38%
-    ),
-    var(--surface-raised);
+          radial-gradient(
+                  circle at 88% 8%,
+                  color-mix(in srgb, var(--accent-soft) 74%, transparent),
+                  transparent 38%
+          ),
+          var(--surface-raised);
   border-left: 3px solid var(--accent);
   color: var(--ink);
 }
