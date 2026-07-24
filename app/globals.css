@@ -16,8 +16,8 @@
   font-display: swap;
   src: url("/fonts/geist-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+  U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -36,8 +36,8 @@
   font-display: swap;
   src: url("/fonts/geist-mono-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
-    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+  U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 :root {
@@ -152,8 +152,8 @@ html {
 body {
   background-color: var(--canvas);
   background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+          linear-gradient(var(--grid-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   color: var(--ink);
   font-family: "Geist", "Segoe UI", sans-serif;
@@ -211,9 +211,9 @@ button {
   justify-content: center;
   padding: 0;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          border-color 180ms ease,
+          transform 180ms ease;
   width: 40px;
 }
 
@@ -250,9 +250,9 @@ button {
   min-height: 36px;
   padding: 0 12px;
   transition:
-    background 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          color 180ms ease,
+          transform 180ms ease;
 }
 
 .theme-switch button:hover {
@@ -387,10 +387,10 @@ html[data-theme="dark"] textarea {
   padding: 7px 10px;
   text-align: left;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          border-color 180ms ease,
+          color 180ms ease,
+          transform 180ms ease;
   width: 100%;
 }
 
@@ -440,9 +440,9 @@ html[data-theme="dark"] textarea {
   padding: 7px 9px;
   position: relative;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          border-color 180ms ease,
+          transform 180ms ease;
 }
 
 .account-switcher:hover {
@@ -539,14 +539,6 @@ html[data-theme="dark"] textarea {
   max-width: 1680px;
 }
 
-.workspace-header.is-feature-module {
-  grid-template-columns: minmax(300px, 1fr) auto;
-}
-
-.workspace-header.is-feature-module .workspace-title {
-  display: none;
-}
-
 .workspace-header p,
 .section-kicker {
   color: var(--accent);
@@ -614,8 +606,8 @@ html[data-theme="dark"] textarea {
   min-height: 42px;
   outline: none;
   transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+          border-color 180ms ease,
+          box-shadow 180ms ease;
 }
 
 .global-search input {
@@ -704,10 +696,10 @@ html[data-theme="dark"] textarea {
   min-height: 40px;
   padding: 0 14px;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+          background 180ms ease,
+          border-color 180ms ease,
+          color 180ms ease,
+          transform 180ms ease;
 }
 
 .primary-button {
@@ -901,8 +893,8 @@ html[data-theme="dark"] textarea {
   min-height: 590px;
   scroll-snap-align: start;
   transition:
-    background 180ms ease,
-    border-color 180ms ease;
+          background 180ms ease,
+          border-color 180ms ease;
 }
 
 .kanban-column.is-dragging {
@@ -992,8 +984,8 @@ html[data-theme="dark"] textarea {
   box-shadow: var(--shadow);
   overflow: hidden;
   transition:
-    border-color 180ms ease,
-    transform 180ms ease;
+          border-color 180ms ease,
+          transform 180ms ease;
 }
 
 .record-card:hover {
@@ -2136,9 +2128,9 @@ html[data-theme="dark"] textarea {
   padding: 8px 10px;
   text-align: left;
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+          background 160ms ease,
+          border-color 160ms ease,
+          transform 160ms ease;
 }
 
 .status-options button:hover {
@@ -2213,8 +2205,8 @@ html[data-theme="dark"] textarea {
   position: fixed;
   transform: translate(-50%, 12px);
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+          opacity 180ms ease,
+          transform 180ms ease;
   z-index: 60;
 }
 
