@@ -92,9 +92,13 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(domain, /CRM_SCHEMA_VERSION = 2/);
   assert.match(domain, /UserRole = "manager" \| "employee"/);
   assert.match(domain, /interface Task/);
+  assert.match(domain, /type TaskSource/);
+  assert.match(domain, /interface TaskChecklistItem/);
   assert.match(domain, /"dashboard"[\s\S]*"calendar"[\s\S]*"statistics"[\s\S]*"chat"/);
   assert.match(gateway, /LEGACY_CRM_STORAGE_KEY/);
   assert.match(gateway, /createTasksFromLegacyRecords/);
+  assert.match(gateway, /checklist/);
+  assert.match(gateway, /sourceId/);
 
   assert.match(app, /DashboardView/);
   assert.match(app, /CalendarView/);
@@ -146,6 +150,12 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(features, /export function DashboardView/);
   assert.match(features, /export function CalendarView/);
   assert.match(features, /export function StatisticsView/);
+  assert.match(features, /TASK_SOURCE_LABELS/);
+  assert.match(features, /Поставить задачу сотруднику/);
+  assert.match(features, /canAssignTasks/);
+  assert.match(features, /wf-checklist-editor/);
+  assert.match(featureStyles, /\.wf-task-origin/);
+  assert.match(featureStyles, /\.wf-task-assignment-bar/);
   assert.match(features, /function DonutChart/);
   assert.match(features, /function DistributionChart/);
   assert.match(chat, /export function ChatView/);

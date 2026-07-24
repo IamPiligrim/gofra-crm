@@ -515,6 +515,10 @@ button.wf-metric-card:hover > i {
   border-color: var(--wf-accent);
 }
 
+.wf-task-check.is-readonly {
+  cursor: default;
+}
+
 .wf-task-row.is-completed .wf-task-main > header > strong,
 .wf-task-row.is-completed .wf-task-main > p {
   color: var(--wf-faint);
@@ -591,6 +595,115 @@ button.wf-metric-card:hover > i {
   font-size: 11px;
   line-height: 1.45;
   margin: 6px 0 0;
+}
+
+.wf-task-origin {
+  align-items: baseline;
+  color: var(--wf-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 4px 7px;
+  margin-top: 7px;
+}
+
+.wf-task-origin > span::before {
+  background: currentColor;
+  content: "";
+  display: inline-block;
+  height: 5px;
+  margin-right: 6px;
+  width: 5px;
+}
+
+.wf-task-origin > strong {
+  color: var(--wf-muted);
+  font-weight: 620;
+}
+
+.wf-checklist-progress {
+  align-items: center;
+  color: var(--wf-faint);
+  display: grid;
+  font-size: 11px;
+  gap: 8px;
+  grid-template-columns: auto minmax(44px, 92px) auto;
+  margin-top: 8px;
+  width: fit-content;
+}
+
+.wf-checklist-progress > i {
+  background: var(--wf-line);
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  width: 72px;
+}
+
+.wf-checklist-progress > i > b {
+  background: var(--wf-accent);
+  display: block;
+  height: 100%;
+  transition: width 180ms ease;
+}
+
+.wf-checklist-progress > strong {
+  color: var(--wf-muted);
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+}
+
+.wf-task-checklist {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.wf-task-checklist > li {
+  align-items: center;
+  color: var(--wf-muted);
+  display: grid;
+  font-size: 11px;
+  gap: 7px;
+  grid-template-columns: 17px minmax(0, 1fr);
+  line-height: 1.35;
+}
+
+.wf-task-checklist > li > button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--wf-line-strong);
+  color: var(--wf-on-accent);
+  display: flex;
+  height: 16px;
+  justify-content: center;
+  padding: 0;
+  width: 16px;
+}
+
+.wf-task-checklist > li > button:not(:disabled):hover {
+  border-color: var(--wf-accent);
+}
+
+.wf-task-checklist > li > button:disabled {
+  cursor: default;
+}
+
+.wf-task-checklist > li > button svg {
+  height: 11px;
+  width: 11px;
+}
+
+.wf-task-checklist > li.is-completed > button {
+  background: var(--wf-accent);
+  border-color: var(--wf-accent);
+}
+
+.wf-task-checklist > li.is-completed > span {
+  color: var(--wf-faint);
+  text-decoration: line-through;
 }
 
 .wf-task-main > footer {
@@ -1003,6 +1116,14 @@ button.wf-metric-card:hover > i {
   margin-inline-end: 8px;
 }
 
+.wf-calendar-summary > .wf-calendar-readonly {
+  border-left: 1px solid var(--wf-line);
+  color: var(--wf-faint);
+  font-family: "Geist Mono", monospace;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
 .wf-filter-bar {
   align-items: end;
   background: var(--wf-surface-raised);
@@ -1119,6 +1240,34 @@ button.wf-metric-card:hover > i {
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+}
+
+.wf-task-assignment-bar {
+  align-items: center;
+  background: var(--wf-surface-raised);
+  border: 1px solid var(--wf-line);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-top: 12px;
+  min-height: 72px;
+  padding: 12px 16px;
+}
+
+.wf-task-assignment-bar > div {
+  display: grid;
+  gap: 3px;
+}
+
+.wf-task-assignment-bar > div > strong {
+  font-size: 14px;
+  font-weight: 670;
+  text-transform: capitalize;
+}
+
+.wf-task-assignment-bar > span {
+  color: var(--wf-muted);
+  font-size: 11px;
 }
 
 .wf-month-card,
@@ -1502,6 +1651,116 @@ button.wf-metric-card:hover > i {
   font-size: 11px;
   min-height: 42px;
   padding: 0 10px;
+}
+
+.wf-task-source-field {
+  align-items: baseline;
+  background: var(--wf-surface-muted);
+  border-left: 2px solid var(--wf-accent);
+  display: grid;
+  gap: 4px 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 10px 12px;
+}
+
+.wf-task-source-field > span {
+  color: var(--wf-faint);
+  font-size: 10px;
+  grid-column: 1 / -1;
+}
+
+.wf-task-source-field > strong {
+  font-size: 12px;
+}
+
+.wf-task-source-field > small {
+  color: var(--wf-muted);
+  font-size: 11px;
+}
+
+.wf-checklist-editor {
+  border-top: 1px solid var(--wf-line);
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.wf-checklist-editor > header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.wf-checklist-editor > header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.wf-checklist-editor > header span {
+  color: var(--wf-ink);
+  font-size: 12px;
+  font-weight: 670;
+}
+
+.wf-checklist-editor > header small,
+.wf-checklist-editor > p {
+  color: var(--wf-faint);
+  font-size: 11px;
+  margin: 0;
+}
+
+.wf-checklist-editor > header button {
+  min-height: 34px;
+}
+
+.wf-checklist-editor-list {
+  display: grid;
+  gap: 7px;
+}
+
+.wf-checklist-editor-row {
+  align-items: center;
+  display: grid;
+  gap: 7px;
+  grid-template-columns: 20px minmax(0, 1fr) 30px;
+}
+
+.wf-checklist-editor-row > button:first-child {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--wf-line-strong);
+  color: var(--wf-on-accent);
+  display: flex;
+  height: 19px;
+  justify-content: center;
+  padding: 0;
+  width: 19px;
+}
+
+.wf-checklist-editor-row > button:first-child.is-completed {
+  background: var(--wf-accent);
+  border-color: var(--wf-accent);
+}
+
+.wf-checklist-editor-row > button:first-child svg {
+  height: 12px;
+  width: 12px;
+}
+
+.wf-checklist-editor-row > input {
+  background: var(--wf-canvas);
+  border: 1px solid var(--wf-line);
+  color: var(--wf-ink);
+  font-size: 12px;
+  min-height: 38px;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.wf-checklist-editor-row > input:focus {
+  border-color: var(--wf-accent);
+  outline: none;
 }
 
 .wf-form-error {
@@ -2758,6 +3017,22 @@ button.wf-metric-card:hover > i {
     grid-template-columns: 1fr;
   }
 
+  .wf-task-assignment-bar {
+    align-items: stretch;
+    gap: 10px;
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .wf-task-assignment-bar > span {
+    display: none;
+  }
+
+  .wf-task-assignment-bar > button {
+    min-height: 44px;
+    width: 100%;
+  }
+
   .wf-task-row {
     grid-template-columns: 22px minmax(0, 1fr);
   }
@@ -2844,6 +3119,29 @@ button.wf-metric-card:hover > i {
   .wf-field textarea {
     font-size: 16px;
     min-height: 48px;
+  }
+
+  .wf-task-source-field {
+    grid-template-columns: 1fr;
+  }
+
+  .wf-checklist-editor > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wf-checklist-editor > header button {
+    min-height: 42px;
+    width: 100%;
+  }
+
+  .wf-checklist-editor-row {
+    grid-template-columns: 22px minmax(0, 1fr) 36px;
+  }
+
+  .wf-checklist-editor-row > input {
+    font-size: 16px;
+    min-height: 44px;
   }
 
   .wf-task-editor > footer {

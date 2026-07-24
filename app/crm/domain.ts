@@ -246,6 +246,18 @@ export type TaskKind =
 
 export type TaskStatus = "open" | "completed" | "cancelled";
 export type TaskPriority = "low" | "normal" | "high";
+export type TaskSource =
+  | "manual"
+  | "client"
+  | "deal"
+  | "interaction"
+  | "imported";
+
+export interface TaskChecklistItem {
+  id: string;
+  title: string;
+  completed: boolean;
+}
 
 /**
  * A task is the canonical source for calendar entries and reminders.
@@ -263,6 +275,9 @@ export interface Task extends TimestampedEntity {
   completedAt: string | null;
   assigneeId: string;
   createdById: string;
+  source: TaskSource;
+  sourceId: string | null;
+  checklist: TaskChecklistItem[];
   clientId: string | null;
   dealId: string | null;
   contactId: string | null;

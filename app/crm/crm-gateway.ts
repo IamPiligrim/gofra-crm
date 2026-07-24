@@ -204,6 +204,7 @@ const normalizeTask = (
 ): Task => {
   const record = asRecord(value);
   const createdAt = asString(record.createdAt, now);
+  const id = asString(record.id, `task-imported-${index + 1}`);
   const status =
     record.status === "completed" ||
     record.status === "cancelled" ||
@@ -226,10 +227,46 @@ const normalizeTask = (
     record.priority === "high"
       ? record.priority
       : "normal";
+  const source: Task["source"] =
+    record.source === "manual" ||
+    record.source === "client" ||
+    record.source === "deal" ||
+    record.source === "interaction" ||
+    record.source === "imported"
+      ? record.source
+      : id.includes("interaction") || id.includes("ИВ")
+        ? "interaction"
+        : id.includes("deal") || id.includes("СД")
+          ? "deal"
+          : id.includes("client") || id.includes("КЛ")
+            ? "client"
+            : "imported";
+  const sourceId =
+    asNullableString(record.sourceId) ??
+    (source === "client"
+      ? asNullableString(record.clientId)
+      : source === "deal"
+        ? asNullableString(record.dealId)
+        : null);
+  const checklist = asArray(record.checklist)
+    .map((value, checklistIndex) => {
+      const checklistItem = asRecord(value);
+      const title = asString(checklistItem.title).trim();
+      if (!title) return null;
+      return {
+        id: asString(
+          checklistItem.id,
+          `${id}-checklist-${checklistIndex + 1}`,
+        ),
+        title,
+        completed: asBoolean(checklistItem.completed),
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return {
     ...record,
-    id: asString(record.id, `task-imported-${index + 1}`),
+    id,
     title: asString(record.title, "Задача без названия"),
     description: asString(record.description),
     kind,
@@ -239,6 +276,9 @@ const normalizeTask = (
     completedAt: asNullableString(record.completedAt),
     assigneeId: asString(record.assigneeId, fallbackAssigneeId),
     createdById: asString(record.createdById, fallbackAssigneeId),
+    source,
+    sourceId,
+    checklist,
     clientId: asNullableString(record.clientId),
     dealId: asNullableString(record.dealId),
     contactId: asNullableString(record.contactId),
@@ -321,6 +361,9 @@ const createTasksFromLegacyRecords = (
       completedAt: null,
       assigneeId: client.ownerId,
       createdById,
+      source: "client",
+      sourceId: client.id,
+      checklist: [],
       clientId: client.id,
       dealId: null,
       contactId: null,
@@ -341,6 +384,9 @@ const createTasksFromLegacyRecords = (
       completedAt: null,
       assigneeId: deal.ownerId,
       createdById,
+      source: "deal",
+      sourceId: deal.id,
+      checklist: [],
       clientId: deal.clientId,
       dealId: deal.id,
       contactId: deal.contactId,
@@ -361,6 +407,9 @@ const createTasksFromLegacyRecords = (
       completedAt: null,
       assigneeId: interaction.ownerId,
       createdById,
+      source: "interaction",
+      sourceId: interaction.id,
+      checklist: [],
       clientId: interaction.clientId,
       dealId: null,
       contactId: interaction.contactId,

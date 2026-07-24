@@ -95,6 +95,14 @@ const TASK_PRIORITY_LABELS: Record<Task["priority"], string> = {
   high: "Высокий",
 };
 
+const TASK_SOURCE_LABELS: Record<Task["source"], string> = {
+  manual: "Поставлена руководителем",
+  client: "Из карточки клиента",
+  deal: "Из сделки",
+  interaction: "После взаимодействия",
+  imported: "Импортирована",
+};
+
 const MONTH_FORMATTER = new Intl.DateTimeFormat("ru-RU", {
   month: "long",
   year: "numeric",
@@ -251,6 +259,31 @@ function getTaskDeal(snapshot: CrmSnapshot, task: Task) {
       : null;
 }
 
+function getTaskSource(snapshot: CrmSnapshot, task: Task) {
+  const creator =
+      snapshot.users.find((user) => user.id === task.createdById) ?? null;
+  const client = getTaskClient(snapshot, task);
+  const deal = getTaskDeal(snapshot, task);
+  const interaction =
+      task.source === "interaction" && task.sourceId
+          ? snapshot.interactions.find((item) => item.id === task.sourceId) ?? null
+          : null;
+
+  return {
+    label: TASK_SOURCE_LABELS[task.source],
+    detail:
+        task.source === "client"
+            ? client?.companyName ?? ""
+            : task.source === "deal"
+              ? deal?.title ?? ""
+              : task.source === "interaction"
+                ? interaction?.subject ?? client?.companyName ?? ""
+                : task.source === "manual"
+                  ? creator?.fullName ?? ""
+                  : "",
+  };
+}
+
 function taskIsCompleted(task: Task) {
   return task.status === "completed";
 }
@@ -289,6 +322,8 @@ function legacyTask(
       clientId?: string | null;
       dealId?: string | null;
       kind?: Task["kind"];
+      taskSource: Exclude<Task["source"], "manual" | "imported">;
+      sourceId: string;
     },
 ): Task {
   const assignedUser =
@@ -308,6 +343,9 @@ function legacyTask(
     completedAt: null,
     assigneeId: assignedUser?.id ?? "",
     createdById: assignedUser?.id ?? "",
+    source: source.taskSource,
+    sourceId: source.sourceId,
+    checklist: [],
     clientId: source.clientId ?? null,
     dealId: source.dealId ?? null,
     contactId: null,
@@ -343,6 +381,8 @@ function getWorkspaceTasks(snapshot: CrmSnapshot | null) {
           managerName: client.managerName,
           clientId: client.id,
           kind: "follow_up",
+          taskSource: "client",
+          sourceId: client.id,
         }),
     );
   });
@@ -362,6 +402,8 @@ function getWorkspaceTasks(snapshot: CrmSnapshot | null) {
           clientId: deal.clientId,
           dealId: deal.id,
           kind: "follow_up",
+          taskSource: "deal",
+          sourceId: deal.id,
         }),
     );
   });
@@ -380,6 +422,8 @@ function getWorkspaceTasks(snapshot: CrmSnapshot | null) {
           managerName: interaction.managerName,
           clientId: interaction.clientId,
           kind: "follow_up",
+          taskSource: "interaction",
+          sourceId: interaction.id,
         }),
     );
   });
@@ -749,8 +793,15 @@ function TaskRow({
   const client = getTaskClient(snapshot, task);
   const deal = getTaskDeal(snapshot, task);
   const assignee = getTaskAssignee(snapshot, task);
+  const source = getTaskSource(snapshot, task);
+  const checklist = task.checklist ?? [];
+  const completedChecklistItems = checklist.filter(
+      (item) => item.completed,
+  ).length;
+  const canManage = currentUser.role === "manager";
 
   const updateStatus = () => {
+    if (!canManage) return;
     const completed = taskIsCompleted(task);
     const now = new Date().toISOString();
     persistTask(
@@ -767,6 +818,7 @@ function TaskRow({
   };
 
   const snooze = (amount: number) => {
+    if (!canManage) return;
     const base = safeDate(task.dueAt) ?? new Date();
     const next = addDays(base, amount);
     persistTask(
@@ -783,24 +835,47 @@ function TaskRow({
     onNotice(amount === 1 ? "Перенесено на завтра" : "Перенесено на неделю");
   };
 
+  const toggleChecklistItem = (itemId: string) => {
+    if (!canManage) return;
+    const now = new Date().toISOString();
+    const nextChecklist = checklist.map((item) =>
+        item.id === itemId ? { ...item, completed: !item.completed } : item,
+    );
+    persistTask(
+        snapshot,
+        {
+          ...task,
+          checklist: nextChecklist,
+          updatedAt: now,
+        },
+        onSnapshotChange,
+    );
+  };
+
   return (
       <article
           className={`wf-task-row priority-${task.priority} ${
               taskIsCompleted(task) ? "is-completed" : ""
           } ${compact ? "is-compact" : ""}`}
       >
-        <button
-            aria-label={
-              taskIsCompleted(task)
-                  ? `Вернуть задачу «${task.title}»`
-                  : `Выполнить задачу «${task.title}»`
-            }
-            className="wf-task-check"
-            onClick={updateStatus}
-            type="button"
-        >
-          {taskIsCompleted(task) ? <Icon name="check" /> : null}
-        </button>
+        {canManage ? (
+            <button
+                aria-label={
+                  taskIsCompleted(task)
+                      ? `Вернуть задачу «${task.title}»`
+                      : `Выполнить задачу «${task.title}»`
+                }
+                className="wf-task-check"
+                onClick={updateStatus}
+                type="button"
+            >
+              {taskIsCompleted(task) ? <Icon name="check" /> : null}
+            </button>
+        ) : (
+            <span aria-hidden="true" className="wf-task-check is-readonly">
+              {taskIsCompleted(task) ? <Icon name="check" /> : null}
+            </span>
+        )}
         <div className="wf-task-main">
           <header>
             <span className="wf-kind-mark">{TASK_KIND_SHORT[task.kind]}</span>
@@ -808,6 +883,51 @@ function TaskRow({
             <span className={`wf-due tone-${due.tone}`}>{due.text}</span>
           </header>
           {!compact && task.description ? <p>{task.description}</p> : null}
+          <div className="wf-task-origin">
+            <span>{source.label}</span>
+            {source.detail ? <strong>{source.detail}</strong> : null}
+          </div>
+          {checklist.length ? (
+              <>
+                <div
+                    aria-label={`Чеклист: ${completedChecklistItems} из ${checklist.length}`}
+                    className="wf-checklist-progress"
+                >
+                  <span>Чеклист</span>
+                  <i aria-hidden="true">
+                    <b
+                        style={{
+                          width: `${(completedChecklistItems / checklist.length) * 100}%`,
+                        }}
+                    />
+                  </i>
+                  <strong>
+                    {completedChecklistItems}/{checklist.length}
+                  </strong>
+                </div>
+                {!compact ? (
+                    <ul className="wf-task-checklist">
+                      {checklist.map((item) => (
+                          <li className={item.completed ? "is-completed" : ""} key={item.id}>
+                            <button
+                                aria-label={
+                                  item.completed
+                                      ? `Вернуть пункт «${item.title}»`
+                                      : `Выполнить пункт «${item.title}»`
+                                }
+                                disabled={!canManage}
+                                onClick={() => toggleChecklistItem(item.id)}
+                                type="button"
+                            >
+                              {item.completed ? <Icon name="check" /> : null}
+                            </button>
+                            <span>{item.title}</span>
+                          </li>
+                      ))}
+                    </ul>
+                ) : null}
+              </>
+          ) : null}
           <footer>
             {task.dueAt ? (
                 <time dateTime={task.dueAt}>
@@ -841,7 +961,7 @@ function TaskRow({
             ) : null}
           </footer>
         </div>
-        {!compact ? (
+        {!compact && canManage ? (
             <div className="wf-task-actions">
               {taskIsOpen(task) ? (
                   <>
@@ -1410,6 +1530,9 @@ function TaskEditor({
 }) {
   const titleId = useId();
   const [error, setError] = useState("");
+  const [checklist, setChecklist] = useState<Task["checklist"]>(
+      task?.checklist ?? [],
+  );
   const defaultDueAt = task?.dueAt
       ? localDateTimeValue(task.dueAt)
       : localDateTimeValue(
@@ -1420,7 +1543,14 @@ function TaskEditor({
               10,
           ).toISOString(),
       );
-  const availableUsers = snapshot.users.filter((user) => user.isActive);
+  const availableUsers = snapshot.users.filter(
+      (user) =>
+          user.isActive &&
+          (user.role === "employee" || user.id === task?.assigneeId),
+  );
+  const defaultAssigneeId =
+      task?.assigneeId ?? availableUsers[0]?.id ?? currentUser.id;
+  const source = task ? getTaskSource(snapshot, task) : null;
   const visibleClients =
       currentUser.role === "manager"
           ? snapshot.clients
@@ -1433,6 +1563,32 @@ function TaskEditor({
           : snapshot.deals.filter((deal) =>
               belongsToUser(deal, currentUser, deal.managerName),
           );
+
+  const addChecklistItem = () => {
+    setChecklist((items) => [
+      ...items,
+      {
+        id: createId("CHECK"),
+        title: "",
+        completed: false,
+      },
+    ]);
+  };
+
+  const updateChecklistItem = (
+      itemId: string,
+      changes: Partial<Task["checklist"][number]>,
+  ) => {
+    setChecklist((items) =>
+        items.map((item) =>
+            item.id === itemId ? { ...item, ...changes } : item,
+        ),
+    );
+  };
+
+  const removeChecklistItem = (itemId: string) => {
+    setChecklist((items) => items.filter((item) => item.id !== itemId));
+  };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1459,9 +1615,14 @@ function TaskEditor({
       completedAt: task?.completedAt ?? null,
       assigneeId:
           currentUser.role === "manager"
-              ? String(data.get("assigneeId") || currentUser.id)
+              ? String(data.get("assigneeId") || defaultAssigneeId)
               : currentUser.id,
       createdById: task?.createdById ?? currentUser.id,
+      source: task?.source ?? "manual",
+      sourceId: task?.sourceId ?? null,
+      checklist: checklist
+          .map((item) => ({ ...item, title: item.title.trim() }))
+          .filter((item) => item.title),
       clientId: String(data.get("clientId") || "") || null,
       dealId: String(data.get("dealId") || "") || null,
       contactId: task?.contactId ?? null,
@@ -1485,7 +1646,7 @@ function TaskEditor({
               {task ? "Редактирование" : "Новая задача"}
             </span>
               <h2 id={titleId}>
-                {task ? "Обновить напоминание" : "Запланировать действие"}
+                {task ? "Обновить задачу" : "Поставить задачу сотруднику"}
               </h2>
             </div>
             <button
@@ -1499,6 +1660,13 @@ function TaskEditor({
           </header>
 
           <div className="wf-editor-grid">
+            {source ? (
+                <div className="wf-task-source-field wf-field-wide">
+                  <span>Источник задачи</span>
+                  <strong>{source.label}</strong>
+                  {source.detail ? <small>{source.detail}</small> : null}
+                </div>
+            ) : null}
             <label className="wf-field wf-field-wide">
               <span>Что нужно сделать</span>
               <input
@@ -1542,7 +1710,7 @@ function TaskEditor({
                 <label className="wf-field">
                   <span>Ответственный</span>
                   <select
-                      defaultValue={task?.assigneeId ?? currentUser.id}
+                      defaultValue={defaultAssigneeId}
                       name="assigneeId"
                   >
                     {availableUsers.map((user) => (
@@ -1589,6 +1757,66 @@ function TaskEditor({
                   rows={4}
               />
             </label>
+            <section className="wf-checklist-editor wf-field-wide">
+              <header>
+                <div>
+                  <span>Чеклист</span>
+                  <small>Разбейте задачу на конкретные шаги</small>
+                </div>
+                <button
+                    className="wf-secondary-button"
+                    onClick={addChecklistItem}
+                    type="button"
+                >
+                  <Icon name="plus" />
+                  Добавить пункт
+                </button>
+              </header>
+              {checklist.length ? (
+                  <div className="wf-checklist-editor-list">
+                    {checklist.map((item, index) => (
+                        <div className="wf-checklist-editor-row" key={item.id}>
+                          <button
+                              aria-label={
+                                item.completed
+                                    ? `Вернуть пункт ${index + 1}`
+                                    : `Выполнить пункт ${index + 1}`
+                              }
+                              className={item.completed ? "is-completed" : ""}
+                              onClick={() =>
+                                  updateChecklistItem(item.id, {
+                                    completed: !item.completed,
+                                  })
+                              }
+                              type="button"
+                          >
+                            {item.completed ? <Icon name="check" /> : null}
+                          </button>
+                          <input
+                              aria-label={`Пункт чеклиста ${index + 1}`}
+                              onChange={(event) =>
+                                  updateChecklistItem(item.id, {
+                                    title: event.target.value,
+                                  })
+                              }
+                              placeholder={`Шаг ${index + 1}`}
+                              value={item.title}
+                          />
+                          <button
+                              aria-label={`Удалить пункт ${index + 1}`}
+                              className="wf-icon-button"
+                              onClick={() => removeChecklistItem(item.id)}
+                              type="button"
+                          >
+                            <Icon name="close" />
+                          </button>
+                        </div>
+                    ))}
+                  </div>
+              ) : (
+                  <p>Пунктов пока нет</p>
+              )}
+            </section>
             {error ? (
                 <p className="wf-form-error" role="alert">
                   {error}
@@ -1785,6 +2013,10 @@ export function CalendarView({
     return <FeatureSkeleton label="Загрузка календаря" />;
   }
   if (!currentUser) return <MissingIdentity />;
+  const canAssignTasks = currentUser.role === "manager";
+  const activeEmployees = snapshot.users.filter(
+      (user) => user.isActive && user.role === "employee",
+  );
 
   const selectedKey = dateKey(selectedDate);
   const selectedTasks = filteredTasks.filter((task) => {
@@ -1826,6 +2058,7 @@ export function CalendarView({
   };
 
   const saveTask = (task: Task) => {
+    if (!canAssignTasks) return;
     persistTask(snapshot, task, onSnapshotChange);
     setEditorTask(undefined);
     showNotice(
@@ -1850,14 +2083,9 @@ export function CalendarView({
           <strong>{tasksForDay(today).length}</strong>
           на сегодня
         </span>
-          <button
-              className="wf-primary-button wf-summary-action"
-              onClick={() => setEditorTask(null)}
-              type="button"
-          >
-            <Icon name="plus" />
-            Новая задача
-          </button>
+          {!canAssignTasks ? (
+              <span className="wf-calendar-readonly">Только просмотр</span>
+          ) : null}
         </div>
 
         <TaskFilters
@@ -1955,14 +2183,16 @@ export function CalendarView({
                     <span className="wf-eyebrow">Выбранный день</span>
                     <h2>{DAY_FORMATTER.format(selectedDate)}</h2>
                   </div>
-                  <button
-                      aria-label="Добавить задачу на выбранный день"
-                      className="wf-icon-button is-accent"
-                      onClick={() => setEditorTask(null)}
-                      type="button"
-                  >
-                    <Icon name="plus" />
-                  </button>
+                  {canAssignTasks ? (
+                      <button
+                          aria-label="Добавить задачу на выбранный день"
+                          className="wf-icon-button is-accent"
+                          onClick={() => setEditorTask(null)}
+                          type="button"
+                      >
+                        <Icon name="plus" />
+                      </button>
+                  ) : null}
                 </header>
                 {selectedTasks.length ? (
                     <div className="wf-day-task-list">
@@ -1970,7 +2200,7 @@ export function CalendarView({
                           <TaskRow
                               currentUser={currentUser}
                               key={task.id}
-                              onEdit={setEditorTask}
+                              onEdit={canAssignTasks ? setEditorTask : undefined}
                               onNotice={showNotice}
                               onOpenClient={onOpenClient}
                               onOpenDeal={onOpenDeal}
@@ -1982,7 +2212,7 @@ export function CalendarView({
                     </div>
                 ) : (
                     <EmptyState
-                        action={
+                        action={canAssignTasks ? (
                           <button
                               className="wf-text-action"
                               onClick={() => setEditorTask(null)}
@@ -1991,7 +2221,7 @@ export function CalendarView({
                             Запланировать действие
                             <Icon name="arrow" />
                           </button>
-                        }
+                        ) : undefined}
                         description="На выбранную дату ничего не запланировано."
                         title="Свободный день"
                     />
@@ -2030,7 +2260,7 @@ export function CalendarView({
                                   <TaskRow
                                       currentUser={currentUser}
                                       key={task.id}
-                                      onEdit={setEditorTask}
+                                      onEdit={canAssignTasks ? setEditorTask : undefined}
                                       onNotice={showNotice}
                                       onOpenClient={onOpenClient}
                                       onOpenDeal={onOpenDeal}
@@ -2046,7 +2276,7 @@ export function CalendarView({
                   </div>
               ) : (
                   <EmptyState
-                      action={
+                      action={canAssignTasks ? (
                         <button
                             className="wf-primary-button"
                             onClick={() => setEditorTask(null)}
@@ -2055,7 +2285,7 @@ export function CalendarView({
                           <Icon name="plus" />
                           Создать задачу
                         </button>
-                      }
+                      ) : undefined}
                       description="Измените фильтры или добавьте первое напоминание."
                       title="Задач не найдено"
                   />
@@ -2063,7 +2293,32 @@ export function CalendarView({
             </section>
         )}
 
-        {editorTask !== undefined ? (
+        {canAssignTasks ? (
+            <section className="wf-task-assignment-bar">
+              <div>
+                <span className="wf-eyebrow">Постановка задач</span>
+                <strong>{DAY_FORMATTER.format(selectedDate)}</strong>
+              </div>
+              <span>
+                {activeEmployees.length}{" "}
+                {plural(activeEmployees.length, [
+                  "сотрудник",
+                  "сотрудника",
+                  "сотрудников",
+                ])}
+              </span>
+              <button
+                  className="wf-primary-button"
+                  onClick={() => setEditorTask(null)}
+                  type="button"
+              >
+                <Icon name="plus" />
+                Назначить сотруднику
+              </button>
+            </section>
+        ) : null}
+
+        {canAssignTasks && editorTask !== undefined ? (
             <TaskEditor
                 currentUser={currentUser}
                 onClose={() => setEditorTask(undefined)}

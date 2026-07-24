@@ -339,6 +339,23 @@ const clientTasks: Task[] = demoClients
       completedAt: completed ? "2026-07-23T11:12:00.000Z" : null,
       assigneeId: client.ownerId,
       createdById: DEMO_USER_IDS.sofia,
+      source: "client",
+      sourceId: client.id,
+      checklist:
+        index < 3
+          ? [
+              {
+                id: `ЧЛ-КЛ-${index + 1}-1`,
+                title: "Проверить историю контактов",
+                completed,
+              },
+              {
+                id: `ЧЛ-КЛ-${index + 1}-2`,
+                title: "Зафиксировать результат",
+                completed: false,
+              },
+            ]
+          : [],
       clientId: client.id,
       dealId: null,
       contactId: null,
@@ -360,6 +377,23 @@ const dealTasks: Task[] = demoDeals
     completedAt: null,
     assigneeId: deal.ownerId,
     createdById: DEMO_USER_IDS.sofia,
+    source: "deal",
+    sourceId: deal.id,
+    checklist:
+      index < 2
+        ? [
+            {
+              id: `ЧЛ-СД-${index + 1}-1`,
+              title: "Проверить расчёт",
+              completed: index === 0,
+            },
+            {
+              id: `ЧЛ-СД-${index + 1}-2`,
+              title: "Отправить материалы клиенту",
+              completed: false,
+            },
+          ]
+        : [],
     clientId: deal.clientId,
     dealId: deal.id,
     contactId: deal.contactId,
@@ -380,6 +414,9 @@ const interactionTasks: Task[] = demoInteractions
     completedAt: null,
     assigneeId: interaction.ownerId,
     createdById: interaction.ownerId,
+    source: "interaction",
+    sourceId: interaction.id,
+    checklist: [],
     clientId: interaction.clientId,
     dealId: null,
     contactId: interaction.contactId,
@@ -402,6 +439,20 @@ export const demoTasks: Task[] = [
     completedAt: null,
     assigneeId: DEMO_USER_IDS.sofia,
     createdById: DEMO_USER_IDS.sofia,
+    source: "manual",
+    sourceId: null,
+    checklist: [
+      {
+        id: "ЧЛ-НАП-0001-1",
+        title: "Проверить просроченные",
+        completed: false,
+      },
+      {
+        id: "ЧЛ-НАП-0001-2",
+        title: "Распределить ответственных",
+        completed: false,
+      },
+    ],
     clientId: null,
     dealId: null,
     contactId: null,

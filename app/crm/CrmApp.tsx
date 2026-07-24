@@ -670,6 +670,9 @@ export function CrmApp() {
             assigneeId: ownerId,
             createdById:
               currentUser?.id ?? snapshot.session.currentUserId,
+            source: "client",
+            sourceId: client.id,
+            checklist: [],
             clientId: client.id,
             dealId: null,
             contactId: null,
@@ -737,6 +740,9 @@ export function CrmApp() {
             assigneeId: ownerId,
             createdById:
               currentUser?.id ?? snapshot.session.currentUserId,
+            source: "deal",
+            sourceId: deal.id,
+            checklist: [],
             clientId,
             dealId: deal.id,
             contactId: null,
@@ -826,6 +832,9 @@ export function CrmApp() {
             assigneeId: ownerId,
             createdById:
               currentUser?.id ?? snapshot.session.currentUserId,
+            source: "interaction",
+            sourceId: interaction.id,
+            checklist: [],
             clientId,
             dealId: null,
             contactId: null,
