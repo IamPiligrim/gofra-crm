@@ -44,7 +44,8 @@ test("keeps every CRM status in the frontend contract", async () => {
   assert.match(viteConfig, /GITHUB_REPOSITORY/);
   assert.match(viteConfig, /tailwindcss\(\)/);
   assert.match(workflow, /workflow_dispatch/);
-  assert.doesNotMatch(workflow, /\bpush:/);
+  assert.match(workflow, /\bpush:/);
+  assert.match(workflow, /branches:\s*\n\s*-\s*main/);
 
   await assert.rejects(access(new URL("../.openai/hosting.json", projectRoot)));
   await assert.rejects(access(new URL("../worker/index.ts", projectRoot)));
