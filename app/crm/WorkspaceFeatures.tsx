@@ -1764,7 +1764,7 @@ function TaskEditor({
                   <small>Разбейте задачу на конкретные шаги</small>
                 </div>
                 <button
-                    className="wf-secondary-button"
+                    className="wf-secondary-button wf-checklist-add-button"
                     onClick={addChecklistItem}
                     type="button"
                 >

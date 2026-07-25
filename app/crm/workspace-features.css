@@ -1710,8 +1710,20 @@ button.wf-metric-card:hover > i {
   margin: 0;
 }
 
-.wf-checklist-editor > header button {
-  min-height: 34px;
+.wf-checklist-editor .wf-checklist-add-button {
+  flex: 0 0 auto;
+  font-size: 11px;
+  gap: 6px;
+  min-height: 32px;
+  padding-inline: 10px;
+  white-space: nowrap;
+  width: auto;
+}
+
+.wf-checklist-editor .wf-checklist-add-button svg {
+  flex: 0 0 auto;
+  height: 13px;
+  width: 13px;
 }
 
 .wf-checklist-editor-list {
@@ -3130,9 +3142,10 @@ button.wf-metric-card:hover > i {
     flex-direction: column;
   }
 
-  .wf-checklist-editor > header button {
-    min-height: 42px;
-    width: 100%;
+  .wf-checklist-editor .wf-checklist-add-button {
+    align-self: flex-start;
+    min-height: 36px;
+    width: auto;
   }
 
   .wf-checklist-editor-row {
