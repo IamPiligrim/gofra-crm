@@ -769,7 +769,7 @@ button {
 .metric-strip,
 .wf-metric-grid,
 .view-toolbar,
-.module-view > .kanban-board,
+.module-view .kanban-board,
 .wf-dashboard-grid,
 .wf-stat-section,
 .chat-view {
@@ -783,7 +783,7 @@ button {
 
 .wf-dashboard-grid,
 .wf-stat-section,
-.module-view > .kanban-board,
+.module-view .kanban-board,
 .chat-view {
   animation-delay: 95ms;
 }
@@ -793,7 +793,7 @@ button {
   .metric-strip,
   .wf-metric-grid,
   .view-toolbar,
-  .module-view > .kanban-board,
+  .module-view .kanban-board,
   .wf-dashboard-grid,
   .wf-stat-section,
   .chat-view {

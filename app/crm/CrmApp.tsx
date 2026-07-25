@@ -1654,6 +1654,75 @@ function ClientCard({
   );
 }
 
+function HorizontalScrollShell({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className: string;
+}) {
+  const topScrollRef = useRef<HTMLDivElement | null>(null);
+  const bodyScrollRef = useRef<HTMLDivElement | null>(null);
+  const spacerRef = useRef<HTMLDivElement | null>(null);
+  const syncingRef = useRef(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+
+  useEffect(() => {
+    const body = bodyScrollRef.current;
+    if (!body) return;
+
+    const sync = () => {
+      if (spacerRef.current) {
+        spacerRef.current.style.width = `${body.scrollWidth}px`;
+      }
+      setHasOverflow(body.scrollWidth > body.clientWidth + 1);
+    };
+    sync();
+
+    const observer = new ResizeObserver(sync);
+    observer.observe(body);
+    return () => observer.disconnect();
+  });
+
+  const syncScroll = (
+    source: HTMLDivElement,
+    target: HTMLDivElement | null,
+  ) => {
+    if (syncingRef.current) {
+      syncingRef.current = false;
+      return;
+    }
+    if (!target) return;
+    syncingRef.current = true;
+    target.scrollLeft = source.scrollLeft;
+  };
+
+  return (
+    <div className="hscroll-shell">
+      <div
+        aria-hidden="true"
+        className="hscroll-topbar"
+        hidden={!hasOverflow}
+        onScroll={(event) =>
+          syncScroll(event.currentTarget, bodyScrollRef.current)
+        }
+        ref={topScrollRef}
+      >
+        <div className="hscroll-topbar-spacer" ref={spacerRef} />
+      </div>
+      <div
+        className={`${className} hscroll-body`}
+        onScroll={(event) =>
+          syncScroll(event.currentTarget, topScrollRef.current)
+        }
+        ref={bodyScrollRef}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function ClientTable({
   clients,
   onOpen,
@@ -1664,7 +1733,7 @@ function ClientTable({
   onStatus: (client: Client) => void;
 }) {
   return (
-    <div className="table-shell">
+    <HorizontalScrollShell className="table-shell">
       <table>
         <thead>
           <tr>
@@ -1722,7 +1791,7 @@ function ClientTable({
         </tbody>
       </table>
       {!clients.length && <TableEmpty />}
-    </div>
+    </HorizontalScrollShell>
   );
 }
 
@@ -1933,7 +2002,7 @@ function DealTable({
   onStatus: (deal: Deal) => void;
 }) {
   return (
-    <div className="table-shell">
+    <HorizontalScrollShell className="table-shell">
       <table>
         <thead>
           <tr>
@@ -1992,7 +2061,7 @@ function DealTable({
         </tbody>
       </table>
       {!deals.length && <TableEmpty />}
-    </div>
+    </HorizontalScrollShell>
   );
 }
 
