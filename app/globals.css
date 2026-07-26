@@ -948,6 +948,7 @@ html[data-theme="dark"] textarea {
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 9px;
+  min-height: calc(2 * 1.25em + 4px);
 }
 
 .substatus-list span {
@@ -1256,6 +1257,31 @@ html[data-theme="dark"] textarea {
   font-size: 10px;
   font-weight: 700;
   margin: 0;
+}
+
+.hscroll-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hscroll-topbar {
+  height: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.hscroll-topbar-spacer {
+  height: 1px;
+}
+
+.hscroll-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hscroll-body::-webkit-scrollbar {
+  display: none;
 }
 
 .table-shell {
