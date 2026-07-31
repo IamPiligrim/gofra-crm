@@ -1,0 +1,790 @@
+{
+  "schema_version": 2,
+  "project_name": "ГОФРА CRM",
+  "mode": "new",
+  "phase": "handoff-ready",
+  "implementer": "Codex /root",
+  "selected_skills": [
+    {
+      "name": "frontend-product-builder",
+      "source": "custom",
+      "role": "orchestrator"
+    },
+    {
+      "name": "imagegen-frontend-web",
+      "source": "design/taste-skill",
+      "role": "reference-generation"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "role": "independent-quality"
+    }
+  ],
+  "context": {
+    "product_name": "ГОФРА CRM",
+    "product_type": "Операционная веб-CRM для B2B-продаж гофроупаковки",
+    "audience": "Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки",
+    "primary_task": "После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа",
+    "business_goal": "Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены",
+    "tone_of_voice": "Краткий, деловой, операционный русский язык без рекламных формулировок",
+    "real_data_source": "Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт",
+    "content_source": "Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots",
+    "brand_constraints": "Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes",
+    "accessibility_target": "WCAG 2.2 AA",
+    "screen_scope": [
+      "/#/clients",
+      "/#/activity"
+    ],
+    "required_states": [
+      "default"
+    ],
+    "forbidden_patterns": [
+      "card-soup",
+      "empty-hero",
+      "purple-gradient",
+      "glassmorphism",
+      "decorative-orbs",
+      "fabricated-metrics",
+      "generic-saas-copy",
+      "excessive-rounding",
+      "meaningless-motion"
+    ]
+  },
+  "references": [
+    {
+      "id": "rf-20260730204515-1b108b7265-crm-operational-clarity--crm--desktop--default",
+      "label": "Operational clarity desktop candidate",
+      "kind": "local-image",
+      "role": "candidate",
+      "direction_id": "crm-operational-clarity",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--desktop--default.png",
+      "purpose": "Dense operational comparison candidate",
+      "routes": [
+        "/#/clients"
+      ],
+      "viewports": [
+        "1440x960"
+      ],
+      "states": [
+        "ready"
+      ]
+    },
+    {
+      "id": "rf-20260730204515-1b108b7265-crm-operational-clarity--crm--mobile--default",
+      "label": "Operational clarity mobile candidate",
+      "kind": "local-image",
+      "role": "candidate",
+      "direction_id": "crm-operational-clarity",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--mobile--default.png",
+      "purpose": "Dense mobile operational comparison candidate",
+      "routes": [
+        "/#/clients"
+      ],
+      "viewports": [
+        "390x844"
+      ],
+      "states": [
+        "ready"
+      ]
+    },
+    {
+      "id": "rf-20260730204515-1b108b7265-crm-focused-workflow--crm--desktop--default",
+      "label": "Focused workflow desktop approved by user",
+      "kind": "local-image",
+      "role": "inspiration",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--desktop--default.png",
+      "purpose": "Approved desktop shell, sidebar, quick contact and decision map",
+      "routes": [
+        "/#/clients",
+        "/#/activity"
+      ],
+      "viewports": [
+        "1440x960"
+      ],
+      "states": [
+        "ready"
+      ]
+    },
+    {
+      "id": "rf-20260730204515-1b108b7265-crm-focused-workflow--crm--mobile--default",
+      "label": "Focused workflow mobile approved by user",
+      "kind": "local-image",
+      "role": "inspiration",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--mobile--default.png",
+      "purpose": "Approved mobile quick-contact flow and bottom navigation",
+      "routes": [
+        "/#/clients",
+        "/#/activity"
+      ],
+      "viewports": [
+        "390x844"
+      ],
+      "states": [
+        "ready"
+      ]
+    },
+    {
+      "id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--clients--desktop--default",
+      "label": "Focused Workflow: /#/clients desktop default",
+      "kind": "local-image",
+      "role": "baseline",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/clients, desktop, default.",
+      "routes": [
+        "/#/clients"
+      ],
+      "viewports": [
+        "desktop"
+      ],
+      "states": [
+        "default"
+      ],
+      "generation": {
+        "factory_schema_version": 1,
+        "manifest_id": "rf-20260730210111-6c3ba61966",
+        "artifact_id": "crm-focused-workflow--clients--desktop--default",
+        "prompt_sha256": "89a9b907a58b119e1ab7b0e688fda4a5a9d1959bd6d0295b0c12cbfb14623d4d",
+        "file_sha256": "902c2ac88039c8ec59149959e6510d56d98851e769da80bfb2b0e2c57af5a4d9",
+        "width": 1440,
+        "height": 960,
+        "inspection_method": "view_image",
+        "inspection_observations": "Desktop client workspace clearly preserves the user-approved grouped navy sidebar, blue active state, strong page/section headers, visible next step, interaction history, decision map and repeat-order forecast. Secondary table-style metadata is dense, so the implementation must use the larger approved type tokens rather than copying pixels."
+      }
+    },
+    {
+      "id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--clients--mobile--default",
+      "label": "Focused Workflow: /#/clients mobile default",
+      "kind": "local-image",
+      "role": "baseline",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--mobile--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/clients, mobile, default.",
+      "routes": [
+        "/#/clients"
+      ],
+      "viewports": [
+        "mobile"
+      ],
+      "states": [
+        "default"
+      ],
+      "generation": {
+        "factory_schema_version": 1,
+        "manifest_id": "rf-20260730210111-6c3ba61966",
+        "artifact_id": "crm-focused-workflow--clients--mobile--default",
+        "prompt_sha256": "41654bd8d3a9fe90b2d422eacb2f4b0547857b26a8f256430293d78131f21261",
+        "file_sha256": "1d7d560ee0c7731847b133d10bae44f8b62d7ccf12afe332ef510ada50b765b9",
+        "width": 390,
+        "height": 844,
+        "inspection_method": "view_image",
+        "inspection_observations": "Mobile client composition remains task-first and shows the approved navigation character, next action, repeat order, recent contact and key people without horizontal overflow. The generated narrow icon rail and tiny metadata are composition-only; implementation follows the approved 15px mobile minimum, 44px targets and responsive navigation rules."
+      }
+    },
+    {
+      "id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--activity--desktop--default",
+      "label": "Focused Workflow: /#/activity desktop default",
+      "kind": "local-image",
+      "role": "baseline",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--desktop--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/activity, desktop, default.",
+      "routes": [
+        "/#/activity"
+      ],
+      "viewports": [
+        "desktop"
+      ],
+      "states": [
+        "default"
+      ],
+      "generation": {
+        "factory_schema_version": 1,
+        "manifest_id": "rf-20260730210111-6c3ba61966",
+        "artifact_id": "crm-focused-workflow--activity--desktop--default",
+        "prompt_sha256": "06a518b9340705185ca9d2588597344ee6fa5f0055e491fda2e008a387f9f760",
+        "file_sha256": "0bfb2b6d34113c1b4aa1109aac5175cfe9ea9906ab3df0a6fabbeb981f094d3e",
+        "width": 1440,
+        "height": 960,
+        "inspection_method": "view_image",
+        "inspection_observations": "Desktop activity screen gives the post-contact workflow dominant space, explicitly marks the next step as required and keeps influence/repeat-order context in a secondary column. The approved sidebar and active state are coherent; attachments and price approval may continue below the captured fold in implementation."
+      }
+    },
+    {
+      "id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--activity--mobile--default",
+      "label": "Focused Workflow: /#/activity mobile default",
+      "kind": "local-image",
+      "role": "baseline",
+      "direction_id": "crm-focused-workflow",
+      "value": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--mobile--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/activity, mobile, default.",
+      "routes": [
+        "/#/activity"
+      ],
+      "viewports": [
+        "mobile"
+      ],
+      "states": [
+        "default"
+      ],
+      "generation": {
+        "factory_schema_version": 1,
+        "manifest_id": "rf-20260730210111-6c3ba61966",
+        "artifact_id": "crm-focused-workflow--activity--mobile--default",
+        "prompt_sha256": "691c7233e7e3628ef414a41b5ebe5810129565aef5d65c6bcf829481c3744ec3",
+        "file_sha256": "e2b6cd58e9e639f794e24b238be0804337eeeceb338653782a17a2e5bcbfec25",
+        "width": 390,
+        "height": 844,
+        "inspection_method": "view_image",
+        "inspection_observations": "Mobile activity baseline clearly prioritizes result, mandatory next step, decision contacts and linked deal, with visible selected/status cues. The compact rail and generated small labels are not literal size targets; implementation must enforce the approved mobile typography and target sizes."
+      }
+    }
+  ],
+  "directions": [
+    {
+      "id": "crm-operational-clarity",
+      "name": "Operational Clarity",
+      "rationale": "Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.",
+      "reference_ids": [
+        "rf-20260730204515-1b108b7265-crm-operational-clarity--crm--desktop--default",
+        "rf-20260730204515-1b108b7265-crm-operational-clarity--crm--mobile--default"
+      ],
+      "artifacts": [
+        ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--desktop--default.png",
+        ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--mobile--default.png"
+      ],
+      "tradeoffs": [
+        "Less expressive for marketing surfaces",
+        "Requires accurate data and state definitions"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow",
+      "name": "Focused Workflow",
+      "rationale": "Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.",
+      "reference_ids": [
+        "rf-20260730204515-1b108b7265-crm-focused-workflow--crm--desktop--default",
+        "rf-20260730204515-1b108b7265-crm-focused-workflow--crm--mobile--default"
+      ],
+      "artifacts": [
+        ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--desktop--default.png",
+        ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--mobile--default.png"
+      ],
+      "tradeoffs": [
+        "Slower for users who need broad comparison",
+        "Requires good information prioritization"
+      ]
+    }
+  ],
+  "concept_jury": null,
+  "anti_slop_exceptions": [],
+  "approvals": {
+    "direction": {
+      "direction_id": "crm-focused-workflow",
+      "approver": "Пользователь",
+      "evidence": "Пользователь подтвердил все референсы и focused sidebar; screen scope уточнён только техническими route IDs /#/clients и /#/activity, артефакты и выбранное направление не менялись.",
+      "approved_at": "2026-07-30T21:01:01.635Z"
+    },
+    "design_system": {
+      "approver": "Codex on behalf of the user",
+      "evidence": "The user explicitly approved the dark grouped sidebar and then confirmed that all prepared screens are well developed and ready to assemble. The independent concept jury selected crm-focused-workflow. Four desktop/mobile coverage references were generated, inspected, and registered under manifest rf-20260730210111-6c3ba61966. The design system and visual acceptance documents incorporate the required readability corrections: stronger contrast, larger headings, minimum body sizes, grouped navigation, responsive behavior, required next-step states, repeat-sales segments, decision roles, and price-approval states.",
+      "document_hashes": {
+        "design_brief": "e166e259e048d54738edcc856b2a419b7f64923ef02269457d0e88c18ac0c28e",
+        "design_system": "2dd9f2ba86092f95a4f9773006e866a0794615f3e031b9c87b4bb691673218c0",
+        "ui_inventory": "b0c8c05df0a0be8751469ae10a327fa1abb82d490bf4750119ac9a4f9984e9b7",
+        "visual_acceptance": "e732af2282233ac5bfb5fc23becd1511da57414094e5ef73b6edafb527cd5b98"
+      },
+      "baseline": {
+        "kind": "git",
+        "project_root": "C:/Users/sacha/OneDrive/Документы/Сайт Леха",
+        "git": true,
+        "head": "bd12b2fa522a1680ca0d20c124325b9a3230b37b",
+        "branch": "main",
+        "dirty": true,
+        "dirty_files": [
+          ".ai-dev/frontend-qa-report.md",
+          ".ai-dev/README.md",
+          ".ai-dev/frontend/anti-slop-policy.md",
+          ".ai-dev/frontend/design-brief.md",
+          ".ai-dev/frontend/design-system.md",
+          ".ai-dev/frontend/product-quality.json",
+          ".ai-dev/frontend/reference-factory/manifests/rf-20260730204319-3290b6277f.json",
+          ".ai-dev/frontend/reference-factory/manifests/rf-20260730204515-1b108b7265.json",
+          ".ai-dev/frontend/reference-factory/manifests/rf-20260730210111-6c3ba61966.json",
+          ".ai-dev/frontend/reference-factory/plans/rf-20260730204319-3290b6277f.md",
+          ".ai-dev/frontend/reference-factory/plans/rf-20260730204515-1b108b7265.md",
+          ".ai-dev/frontend/reference-factory/plans/rf-20260730210111-6c3ba61966.md",
+          ".ai-dev/frontend/references/README.md",
+          ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--desktop--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--mobile--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--desktop--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--mobile--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--desktop--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--mobile--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png",
+          ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--mobile--default.png",
+          ".ai-dev/frontend/ui-inventory.md",
+          ".ai-dev/frontend/visual-acceptance.md",
+          ".ai-dev/project-brief.md",
+          ".ai-dev/project-map.md",
+          ".ai-dev/quality-gate.md",
+          ".migration-backup-20260730-2015/",
+          "AGENTS.md"
+        ],
+        "status_hash": "e650eadaf667e127b60d7d1cadc7e0ff43ba453e9dd678d32d24163f89d053ae",
+        "fingerprint": "8cb245a3aaa4e74603d6d8b1dd275453fbcb303cd88a6fcf339eb47e12f29c06",
+        "captured_at": "2026-07-30T21:10:56.895Z",
+        "strength": "strong",
+        "application_dirty_files": [
+          ".ai-dev/README.md",
+          ".ai-dev/frontend-qa-report.md",
+          ".ai-dev/project-brief.md",
+          ".ai-dev/project-map.md",
+          ".ai-dev/quality-gate.md",
+          ".migration-backup-20260730-2015/",
+          "AGENTS.md"
+        ],
+        "application_dirty_hashes": {
+          ".ai-dev/README.md": "64cc79b20b5f497e688d17be40a8aa40e0dea2f190e942f756e222b2e5746ba5",
+          ".ai-dev/frontend-qa-report.md": "missing-or-non-file",
+          ".ai-dev/project-brief.md": "0a6f04e4f7f8c5816a8776a112a5d74ac78daab880630f94e0a3b439a521c679",
+          ".ai-dev/project-map.md": "8943e911376fbf6fca58dc4c3c8223ef2a73d9a89eb056907ba2f4bd807dd1d3",
+          ".ai-dev/quality-gate.md": "c8b6b14de95f37e29b59a6acecf047dd09586977c89f2fd5182539531be6c247",
+          ".migration-backup-20260730-2015/": "missing-or-non-file",
+          "AGENTS.md": "89ac0126382e92b53dd41694be38c21d2643cc7edefd488de348fe8c029ba5db"
+        }
+      },
+      "approved_at": "2026-07-30T21:10:56.914Z",
+      "approved_visual_baselines": [
+        {
+          "reference_id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--clients--desktop--default",
+          "route": "/#/clients",
+          "viewport": "desktop",
+          "state": "default",
+          "path": ".ai-dev/frontend/references/approved/clients__desktop__default.png",
+          "sha256": "902c2ac88039c8ec59149959e6510d56d98851e769da80bfb2b0e2c57af5a4d9"
+        },
+        {
+          "reference_id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--clients--mobile--default",
+          "route": "/#/clients",
+          "viewport": "mobile",
+          "state": "default",
+          "path": ".ai-dev/frontend/references/approved/clients__mobile__default.png",
+          "sha256": "1d7d560ee0c7731847b133d10bae44f8b62d7ccf12afe332ef510ada50b765b9"
+        },
+        {
+          "reference_id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--activity--desktop--default",
+          "route": "/#/activity",
+          "viewport": "desktop",
+          "state": "default",
+          "path": ".ai-dev/frontend/references/approved/activity__desktop__default.png",
+          "sha256": "0bfb2b6d34113c1b4aa1109aac5175cfe9ea9906ab3df0a6fabbeb981f094d3e"
+        },
+        {
+          "reference_id": "rf-20260730210111-6c3ba61966-crm-focused-workflow--activity--mobile--default",
+          "route": "/#/activity",
+          "viewport": "mobile",
+          "state": "default",
+          "path": ".ai-dev/frontend/references/approved/activity__mobile__default.png",
+          "sha256": "e2b6cd58e9e639f794e24b238be0804337eeeceb338653782a17a2e5bcbfec25"
+        }
+      ]
+    }
+  },
+  "reference_factory": {
+    "schema_version": 1,
+    "surface": "application",
+    "selected_skills": [
+      {
+        "name": "frontend-product-builder",
+        "source": "custom",
+        "role": "orchestrator"
+      },
+      {
+        "name": "imagegen-frontend-web",
+        "source": "design/taste-skill",
+        "role": "reference-generation"
+      },
+      {
+        "name": "frontend-quality-gate",
+        "source": "custom",
+        "role": "independent-quality"
+      }
+    ],
+    "coverage": {
+      "manifest_id": "rf-20260730210111-6c3ba61966",
+      "manifest_path": ".ai-dev/frontend/reference-factory/manifests/rf-20260730210111-6c3ba61966.json",
+      "plan_path": ".ai-dev/frontend/reference-factory/plans/rf-20260730210111-6c3ba61966.md",
+      "manifest_fingerprint": "89d292bbcee1fb13155218af2b2a831f225b09c54a880ea3036354810bcc269f",
+      "context_fingerprint": "f19087750ce5d3047e3756d324f6f47c000ca556d39b8da87f4565ed8362c86e",
+      "approved_direction_id": "crm-focused-workflow",
+      "surface": "application",
+      "generator": "imagegen",
+      "artifact_count": 4,
+      "status": "registered",
+      "updated_at": "2026-07-30T21:08:02.649Z",
+      "registered_at": "2026-07-30T21:08:02.636Z"
+    },
+    "generator": "imagegen"
+  },
+  "latest_visual_run": {
+    "run_id": "visual-1785499785166-ddf328f4",
+    "status": "passed",
+    "technical_status": "passed",
+    "strict": true,
+    "desktop_and_mobile": true,
+    "required_states_covered": true,
+    "baselines_complete": true,
+    "unwaived_anti_slop_findings": 0,
+    "required_states": [
+      "default"
+    ],
+    "state_coverage": {
+      "required": [
+        "default"
+      ],
+      "captured": [
+        {
+          "route": "/#/clients",
+          "viewport": "desktop",
+          "state": "default",
+          "screenshot": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__desktop__default.png"
+        },
+        {
+          "route": "/#/clients",
+          "viewport": "mobile",
+          "state": "default",
+          "screenshot": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__mobile__default.png"
+        },
+        {
+          "route": "/#/activity",
+          "viewport": "desktop",
+          "state": "default",
+          "screenshot": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__desktop__default.png"
+        },
+        {
+          "route": "/#/activity",
+          "viewport": "mobile",
+          "state": "default",
+          "screenshot": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__mobile__default.png"
+        }
+      ],
+      "missing": [],
+      "complete": true
+    },
+    "artifacts": [
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__desktop__default.png",
+        "type": "screenshot",
+        "route": "/#/clients",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": ".ai-dev/frontend/references/approved/clients__desktop__default.png",
+        "type": "baseline",
+        "route": "/#/clients",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\clients__desktop__default.png",
+        "type": "diff",
+        "route": "/#/clients",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__mobile__default.png",
+        "type": "screenshot",
+        "route": "/#/clients",
+        "viewport": "mobile",
+        "state": "default"
+      },
+      {
+        "path": ".ai-dev/frontend/references/approved/clients__mobile__default.png",
+        "type": "baseline",
+        "route": "/#/clients",
+        "viewport": "mobile",
+        "state": "default"
+      },
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__desktop__default.png",
+        "type": "screenshot",
+        "route": "/#/activity",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": ".ai-dev/frontend/references/approved/activity__desktop__default.png",
+        "type": "baseline",
+        "route": "/#/activity",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\activity__desktop__default.png",
+        "type": "diff",
+        "route": "/#/activity",
+        "viewport": "desktop",
+        "state": "default"
+      },
+      {
+        "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__mobile__default.png",
+        "type": "screenshot",
+        "route": "/#/activity",
+        "viewport": "mobile",
+        "state": "default"
+      },
+      {
+        "path": ".ai-dev/frontend/references/approved/activity__mobile__default.png",
+        "type": "baseline",
+        "route": "/#/activity",
+        "viewport": "mobile",
+        "state": "default"
+      }
+    ],
+    "report_file": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\frontend-qa-report.md",
+    "artifact_dir": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z",
+    "qa_started_at": "2026-07-31T12:09:32.230Z",
+    "qa_finished_at": "2026-07-31T12:09:45.111Z",
+    "recorded_at": "2026-07-31T12:09:45.166Z",
+    "reviewed_at": "2026-07-31T12:12:46.924Z",
+    "review_id": "visual-review-1785499966923-c90fba6b"
+  },
+  "visual_reviews": [
+    {
+      "review_id": "visual-review-1785499966923-c90fba6b",
+      "run_id": "visual-1785499785166-ddf328f4",
+      "reviewer": "Copernicus",
+      "reviewer_role": "independent visual reviewer",
+      "independent": true,
+      "artifact_hashes_current": true,
+      "artifacts": [
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__desktop__default.png",
+          "type": "screenshot",
+          "route": "/#/clients",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__desktop__default.png",
+          "sha256": "833491903ce12996da072e02547cdc054aab610565a4e5425299a599a4565070",
+          "inspection_method": "view_image",
+          "observations": "Run screenshot preserves the client grid, repeat-order segments, filters, table and primary CTA without clipping or overlap."
+        },
+        {
+          "path": ".ai-dev/frontend/references/approved/clients__desktop__default.png",
+          "type": "baseline",
+          "route": "/#/clients",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха\\.ai-dev\\frontend\\references\\approved\\clients__desktop__default.png",
+          "sha256": "cf64a84267aaaf811970446902ce309a77f7554731ed6b650e9a8da772c1b644",
+          "inspection_method": "view_image",
+          "observations": "Approved baseline has the same layout and hierarchy; differences are limited to dynamic aging text and the sidebar account footer."
+        },
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\clients__desktop__default.png",
+          "type": "diff",
+          "route": "/#/clients",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\clients__desktop__default.png",
+          "sha256": "767cd16d2cfecc3942039a2f0c23cdce4f2f0785686370b860d903a45544a0b0",
+          "inspection_method": "view_image",
+          "observations": "Diff pixels are localized to dynamic shipment-age labels and the sidebar account area; no panel, table, search or control geometry changed."
+        },
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__mobile__default.png",
+          "type": "screenshot",
+          "route": "/#/clients",
+          "viewport": "mobile",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\clients__mobile__default.png",
+          "sha256": "e964b8934691bd90080ecd383dc4f791494ee1b5b73f812e847a15b90017c64d",
+          "inspection_method": "view_image",
+          "observations": "Mobile client segments, filters and persistent bottom navigation remain clear, unclipped and free of horizontal overflow."
+        },
+        {
+          "path": ".ai-dev/frontend/references/approved/clients__mobile__default.png",
+          "type": "baseline",
+          "route": "/#/clients",
+          "viewport": "mobile",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха\\.ai-dev\\frontend\\references\\approved\\clients__mobile__default.png",
+          "sha256": "e964b8934691bd90080ecd383dc4f791494ee1b5b73f812e847a15b90017c64d",
+          "inspection_method": "view_image",
+          "observations": "Mobile client baseline visually matches the run exactly; technical diff is zero."
+        },
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__desktop__default.png",
+          "type": "screenshot",
+          "route": "/#/activity",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__desktop__default.png",
+          "sha256": "8866040c553088a8fff531f2a9e87390d424042c3687b61e756498c53963e3a4",
+          "inspection_method": "view_image",
+          "observations": "Activity timeline, rhythm summary, filter controls and CTA remain aligned; the navigation rail is visually independent from workspace content."
+        },
+        {
+          "path": ".ai-dev/frontend/references/approved/activity__desktop__default.png",
+          "type": "baseline",
+          "route": "/#/activity",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха\\.ai-dev\\frontend\\references\\approved\\activity__desktop__default.png",
+          "sha256": "1fd36f9ce360bbfb3bac5676d3c9de982444b18babea4d23e0d28c1a12d1f197",
+          "inspection_method": "view_image",
+          "observations": "Approved activity baseline preserves the same structure; visible differences are isolated to the sidebar profile footer."
+        },
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\activity__desktop__default.png",
+          "type": "diff",
+          "route": "/#/activity",
+          "viewport": "desktop",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\visual-diffs\\activity__desktop__default.png",
+          "sha256": "012efb12ccd53b6af50f371681eeda8bd8795e6818c3a64f3763deb9b3a63f92",
+          "inspection_method": "view_image",
+          "observations": "Diff is confined to the account footer; timeline, toolbar, CTA and content columns show no visual regression."
+        },
+        {
+          "path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__mobile__default.png",
+          "type": "screenshot",
+          "route": "/#/activity",
+          "viewport": "mobile",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\.codex\\artifacts\\frontend-qa\\crm\\2026-07-31T12-09-31-966Z\\activity__mobile__default.png",
+          "sha256": "a48550d30034ae3cc05dd0b872bae0fbf16da5edda33df8adec3577eb81d894e",
+          "inspection_method": "view_image",
+          "observations": "Mobile activity timeline, contact CTA, view switch and bottom navigation render correctly without overlap."
+        },
+        {
+          "path": ".ai-dev/frontend/references/approved/activity__mobile__default.png",
+          "type": "baseline",
+          "route": "/#/activity",
+          "viewport": "mobile",
+          "state": "default",
+          "absolute_path": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха\\.ai-dev\\frontend\\references\\approved\\activity__mobile__default.png",
+          "sha256": "3f46302beebd62b53124e685019b3a1b4f43fdbbec5d6747588dd583760c0a48",
+          "inspection_method": "view_image",
+          "observations": "Mobile activity baseline visually matches the run exactly; technical diff is zero."
+        }
+      ],
+      "scorecard": {
+        "composition": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Stable desktop and mobile grids; diffs do not affect workspace composition.",
+          "findings": []
+        },
+        "hierarchy": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Page title, metrics or filters, data and primary actions retain a clear sequence.",
+          "findings": []
+        },
+        "typography": {
+          "score": 4,
+          "status": "pass",
+          "evidence": "Type scales and wrapping remain readable across both viewports.",
+          "findings": [
+            "Dense secondary metadata remains intentionally compact."
+          ]
+        },
+        "density": {
+          "score": 4,
+          "status": "pass",
+          "evidence": "The CRM table and activity feed remain dense but scannable; mobile prioritizes core controls.",
+          "findings": [
+            "Desktop operational views intentionally carry high information density."
+          ]
+        },
+        "action_clarity": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Selected segments, view switches and blue primary CTAs are immediately distinguishable.",
+          "findings": []
+        },
+        "content_quality": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Client segments, statuses and next actions remain concrete and internally consistent.",
+          "findings": []
+        },
+        "asset_authenticity": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Native CRM icons and components remain coherent with no foreign or placeholder assets.",
+          "findings": []
+        },
+        "mobile_ux": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Bottom navigation and content do not overlap; no visible clipping or horizontal overflow.",
+          "findings": []
+        },
+        "state_coverage": {
+          "score": 4,
+          "status": "pass",
+          "evidence": "Approved default states cover both changed cross-page panel patterns on desktop and mobile; separate browser audits covered the scroll behavior on all seven routes.",
+          "findings": [
+            "Empty, error and loading states are unaffected by this layout-only fix."
+          ]
+        },
+        "brand_coherence": {
+          "score": 5,
+          "status": "pass",
+          "evidence": "Palette, borders, typography, status treatments and navigation stay consistent with approved baselines.",
+          "findings": []
+        }
+      },
+      "reviewed_at": "2026-07-31T12:12:46.924Z"
+    }
+  ],
+  "created_at": "2026-07-30T20:40:46.068Z",
+  "updated_at": "2026-07-31T12:12:46.925Z",
+  "preparation_baseline": {
+    "kind": "git",
+    "project_root": "C:/Users/sacha/OneDrive/Документы/Сайт Леха",
+    "git": true,
+    "head": "bd12b2fa522a1680ca0d20c124325b9a3230b37b",
+    "branch": "main",
+    "dirty": true,
+    "dirty_files": [
+      ".ai-dev/frontend-qa-report.md",
+      ".ai-dev/README.md",
+      ".ai-dev/project-brief.md",
+      ".ai-dev/project-map.md",
+      ".ai-dev/quality-gate.md",
+      ".migration-backup-20260730-2015/",
+      "AGENTS.md"
+    ],
+    "status_hash": "eddc2e16200c53c298e9be8d5363b9dc6499d08bdb44c1597c54b76bbb357523",
+    "fingerprint": "46ea9c6c17e70505759b8dd69fe41f5a9cef298d52ba33a060a1b282669b6c3e",
+    "captured_at": "2026-07-30T20:40:46.020Z",
+    "strength": "strong",
+    "application_dirty_files": [
+      ".ai-dev/README.md",
+      ".ai-dev/frontend-qa-report.md",
+      ".ai-dev/project-brief.md",
+      ".ai-dev/project-map.md",
+      ".ai-dev/quality-gate.md",
+      ".migration-backup-20260730-2015/",
+      "AGENTS.md"
+    ],
+    "application_dirty_hashes": {
+      ".ai-dev/README.md": "64cc79b20b5f497e688d17be40a8aa40e0dea2f190e942f756e222b2e5746ba5",
+      ".ai-dev/frontend-qa-report.md": "missing-or-non-file",
+      ".ai-dev/project-brief.md": "0a6f04e4f7f8c5816a8776a112a5d74ac78daab880630f94e0a3b439a521c679",
+      ".ai-dev/project-map.md": "8943e911376fbf6fca58dc4c3c8223ef2a73d9a89eb056907ba2f4bd807dd1d3",
+      ".ai-dev/quality-gate.md": "c8b6b14de95f37e29b59a6acecf047dd09586977c89f2fd5182539531be6c247",
+      ".migration-backup-20260730-2015/": "missing-or-non-file",
+      "AGENTS.md": "89ac0126382e92b53dd41694be38c21d2643cc7edefd488de348fe8c029ba5db"
+    }
+  }
+}

@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type DragEvent,
   type FormEvent,
   type ReactNode,
@@ -21,8 +22,12 @@ import { ThemeSwitch } from "./theme";
 import {
   CLIENT_PIPELINE,
   CLIENT_STATUSES,
+  DECISION_INFLUENCES,
+  DECISION_ROLES,
   DEAL_PIPELINE,
   DEAL_STATUSES,
+  PREFERRED_CHANNELS,
+  type Attachment,
   type AppModule,
   type Client,
   type ClientStatus,
@@ -32,11 +37,26 @@ import {
   type DealStatus,
   type Interaction,
   type InteractionKind,
+  type PriceApproval,
+  type PriceApprovalStatus,
   type PipelineGroup,
   type Potential,
   type Task,
   type User,
 } from "./domain";
+import {
+  calculateExpectedNextOrder,
+  getDaysWithoutOrder,
+  hasRequiredDealNextAction,
+  isOpenDeal,
+  matchesRepeatSegment,
+  normalizeDealNextAction,
+  recordsShipment,
+  syncClientOrderCycleFromShipment,
+  syncRepeatOrderTasks,
+  TERMINAL_DEAL_STATUSES,
+  type RepeatSegment,
+} from "./sales-automation";
 import {
   canAccessModule,
   canViewFinancials,
@@ -139,6 +159,18 @@ const MODULES: Array<{
   },
 ];
 
+const NAV_GROUPS: Array<{ label: string; modules: AppModule[] }> = [
+  { label: "Рабочий стол", modules: ["dashboard"] },
+  { label: "Клиенты", modules: ["clients", "contacts"] },
+  { label: "Продажи", modules: ["deals"] },
+  {
+    label: "Задачи и контакты",
+    modules: ["activity", "calendar", "chat"],
+  },
+  { label: "Аналитика", modules: ["statistics"] },
+  { label: "Справочники", modules: ["import", "dictionaries"] },
+];
+
 const managers = ["Софья Романова", "Николай Ветров", "Тимур Агапов"];
 const APP_MODULE_IDS = new Set<AppModule>(MODULES.map((module) => module.id));
 
@@ -203,6 +235,14 @@ const getDueState = (value: string | null) => {
   return { className: "due-neutral", label: formatDate(value) };
 };
 
+const approvalStatusLabel = (status: PriceApprovalStatus): string =>
+  ({
+    pending: "Ожидает решения",
+    approved: "Согласовано",
+    rejected: "Отклонено",
+    clarification: "Нужно уточнение",
+  })[status];
+
 const nextClientStatus = (status: ClientStatus | null) => {
   if (!status) return CLIENT_STATUSES[0];
   const linear = CLIENT_STATUSES.filter(
@@ -217,7 +257,10 @@ const nextClientStatus = (status: ClientStatus | null) => {
 
 const nextDealStatus = (status: DealStatus) => {
   const linear = DEAL_STATUSES.filter(
-    (value) => !["Проиграна", "Отложена", "Отменена"].includes(value),
+    (value) =>
+      !TERMINAL_DEAL_STATUSES.includes(
+        value as (typeof TERMINAL_DEAL_STATUSES)[number],
+      ) && value !== "Отложена",
   );
   const index = linear.indexOf(status);
   return index >= 0 && index < linear.length - 1 ? linear[index + 1] : null;
@@ -291,6 +334,7 @@ export function CrmApp() {
   const [moveIntent, setMoveIntent] = useState<MoveIntent>(null);
   const [createKind, setCreateKind] = useState<CreateKind>(null);
   const [createClientId, setCreateClientId] = useState<string | null>(null);
+  const [createDealId, setCreateDealId] = useState<string | null>(null);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef<number | null>(null);
@@ -342,6 +386,11 @@ export function CrmApp() {
       interactions: filterAccessibleRecords(
         currentUser,
         snapshot.interactions,
+        snapshot.users,
+      ),
+      priceApprovals: filterAccessibleRecords(
+        currentUser,
+        snapshot.priceApprovals,
         snapshot.users,
       ),
       tasks: snapshot.tasks.filter(
@@ -517,8 +566,14 @@ export function CrmApp() {
   };
 
   const commit = (next: CrmSnapshot, message?: string) => {
-    setSnapshot(next);
-    void crmGateway.save(next).catch(() => {
+    const deals = next.deals.map((deal) => normalizeDealNextAction(deal));
+    const normalizedNext = {
+      ...next,
+      deals,
+      tasks: syncRepeatOrderTasks(next.clients, next.tasks),
+    };
+    setSnapshot(normalizedNext);
+    void crmGateway.save(normalizedNext).catch(() => {
       setError("Не удалось сохранить изменение.");
     });
     if (message) notify(message);
@@ -566,13 +621,33 @@ export function CrmApp() {
       setMoveIntent(null);
       return;
     }
+    if (!hasRequiredDealNextAction({ ...previous, status })) {
+      notify("Сначала запишите следующий шаг и дату по сделке");
+      setCreateClientId(previous.clientId);
+      setCreateDealId(previous.id);
+      setCreateKind("interaction");
+      setMoveIntent(null);
+      return;
+    }
     const now = new Date().toISOString();
+    const recordsNewShipment =
+      recordsShipment({ status }) && !recordsShipment(previous);
     commit(
       {
         ...snapshot,
         deals: snapshot.deals.map((deal) =>
           deal.id === id ? { ...deal, status, updatedAt: now } : deal,
         ),
+        clients: recordsNewShipment
+          ? snapshot.clients.map((client) =>
+              client.id === previous.clientId
+                ? {
+                    ...syncClientOrderCycleFromShipment(client, now),
+                    updatedAt: now,
+                  }
+                : client,
+            )
+          : snapshot.clients,
         statusEvents: [
           ...snapshot.statusEvents,
           {
@@ -636,6 +711,14 @@ export function CrmApp() {
         snapshot.session.currentUserId;
       const nextAction = String(form.get("nextAction") ?? "").trim();
       const nextActionAt = toIsoOrNull(form.get("nextActionAt"));
+      const orderFrequencyDays =
+        Number(form.get("orderFrequencyDays")) > 0
+          ? Number(form.get("orderFrequencyDays"))
+          : null;
+      const lastShipmentAt =
+        String(form.get("lastShipmentAt") ?? "").trim() || null;
+      const manualExpectedNextOrderAt =
+        String(form.get("expectedNextOrderAt") ?? "").trim() || null;
       const client: Client = {
         id: `КЛ-${Date.now().toString().slice(-4)}`,
         ownerId,
@@ -656,6 +739,18 @@ export function CrmApp() {
         nextAction,
         nextActionAt,
         comment: "",
+        orderFrequencyDays,
+        lastShipmentAt,
+        expectedNextOrderAt:
+          manualExpectedNextOrderAt ??
+          calculateExpectedNextOrder(lastShipmentAt, orderFrequencyDays),
+        expectedNextOrderManual: Boolean(manualExpectedNextOrderAt),
+        averageMonthlyVolume: Math.max(
+          0,
+          Number(form.get("averageMonthlyVolume") ?? 0),
+        ),
+        repeatReminderDays:
+          Number(form.get("repeatReminderDays")) === 7 ? 7 : 14,
       };
       const task: Task | null = nextAction
         ? {
@@ -704,6 +799,20 @@ export function CrmApp() {
         snapshot.session.currentUserId;
       const nextAction = String(form.get("nextAction") ?? "").trim();
       const nextActionAt = toIsoOrNull(form.get("nextActionAt"));
+      const dealStatus = String(
+        form.get("status") ?? "Новая заявка",
+      ) as DealStatus;
+      if (
+        !hasRequiredDealNextAction({
+          status: dealStatus,
+          nextAction,
+          nextActionAt,
+          needsNextAction: false,
+        })
+      ) {
+        notify("Для незакрытой сделки укажите следующий шаг и дату");
+        return;
+      }
       const deal: Deal = {
         id: `СД-${Date.now().toString().slice(-4)}`,
         ownerId,
@@ -720,10 +829,11 @@ export function CrmApp() {
         logistics: Math.round(ourPrice * 0.08),
         margin: Math.round(ourPrice * 0.24),
         marginPercent: 24,
-        status: String(form.get("status") ?? "Новая заявка") as DealStatus,
+        status: dealStatus,
         proposalDate: null,
         nextAction,
         nextActionAt,
+        needsNextAction: false,
         managerName,
         comment: "",
       };
@@ -781,6 +891,16 @@ export function CrmApp() {
         phone: String(form.get("phone") ?? ""),
         email: String(form.get("email") ?? ""),
         comment: "",
+        decisionRole: String(
+          form.get("decisionRole") ?? "Закупщик",
+        ) as Contact["decisionRole"],
+        decisionInfluence: String(
+          form.get("decisionInfluence") ?? "Влияет",
+        ) as Contact["decisionInfluence"],
+        preferredChannel: String(
+          form.get("preferredChannel") ?? "Телефон",
+        ) as Contact["preferredChannel"],
+        introductionNeeded: String(form.get("introductionNeeded") ?? ""),
       };
       commit(
         { ...snapshot, contacts: [contact, ...snapshot.contacts] },
@@ -793,7 +913,12 @@ export function CrmApp() {
         form.get("clientId") ?? createClientId ?? "",
       );
       const subject = String(form.get("subject") ?? "").trim();
-      if (!clientId || !subject) return;
+      const dealId = String(form.get("dealId") ?? "");
+      const contactId = String(form.get("contactId") ?? "");
+      if (!clientId || !dealId || !contactId || !subject) {
+        notify("Выберите клиента, сделку и контактное лицо");
+        return;
+      }
       const managerName = String(
         form.get("manager") ?? currentUser?.fullName ?? managers[0],
       );
@@ -803,6 +928,24 @@ export function CrmApp() {
         snapshot.session.currentUserId;
       const nextStep = String(form.get("nextStep") ?? "").trim();
       const nextStepAt = toIsoOrNull(form.get("nextStepAt"));
+      if (!nextStep || !nextStepAt) {
+        notify("Следующий шаг и его дата обязательны");
+        return;
+      }
+      const attachments: Attachment[] = form
+        .getAll("attachments")
+        .filter(
+          (value): value is File =>
+            typeof File !== "undefined" &&
+            value instanceof File &&
+            value.size > 0,
+        )
+        .map((file, index) => ({
+          id: `ВЛ-${Date.now()}-${index + 1}`,
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+        }));
       const interaction: Interaction = {
         id: `ИВ-${Date.now().toString().slice(-4)}`,
         ownerId,
@@ -810,7 +953,8 @@ export function CrmApp() {
         updatedAt: now,
         occurredAt: now,
         clientId,
-        contactId: null,
+        dealId,
+        contactId,
         kind: String(form.get("kind") ?? "Звонок") as InteractionKind,
         subject,
         result: String(form.get("result") ?? ""),
@@ -818,9 +962,9 @@ export function CrmApp() {
         nextStepAt,
         managerName,
         comment: "",
+        attachments,
       };
-      const task: Task | null = nextStep
-        ? {
+      const task: Task = {
             id: `TASK-ИВ-${Date.now()}`,
             title: nextStep,
             description: `Следующий шаг после взаимодействия «${subject}».`,
@@ -836,29 +980,158 @@ export function CrmApp() {
             sourceId: interaction.id,
             checklist: [],
             clientId,
-            dealId: null,
-            contactId: null,
+            dealId,
+            contactId,
             createdAt: now,
             updatedAt: now,
-          }
-        : null;
+          };
+      const selectedDeal = snapshot.deals.find((deal) => deal.id === dealId);
+      const requestApproval = form.get("requestApproval") === "on";
+      const priceApproval: PriceApproval | null =
+        requestApproval && selectedDeal
+          ? {
+              id: `СЦ-${Date.now()}`,
+              clientId,
+              dealId,
+              product: String(
+                form.get("approvalProduct") ?? selectedDeal.product,
+              ),
+              currentPrice: Number(
+                form.get("currentPrice") ?? selectedDeal.ourPrice,
+              ),
+              requestedPrice: Number(form.get("requestedPrice") ?? 0),
+              volume: String(
+                form.get("approvalVolume") ?? selectedDeal.volume,
+              ),
+              reason: String(form.get("approvalReason") ?? ""),
+              comment: String(form.get("approvalComment") ?? ""),
+              attachments,
+              status: "pending",
+              requestedById:
+                currentUser?.id ?? snapshot.session.currentUserId,
+              reviewedById: null,
+              reviewedAt: null,
+              ownerId,
+              createdAt: now,
+              updatedAt: now,
+            }
+          : null;
       commit(
         {
           ...snapshot,
           interactions: [interaction, ...snapshot.interactions],
-          tasks: task ? [task, ...snapshot.tasks] : snapshot.tasks,
+          tasks: [task, ...snapshot.tasks],
+          deals: snapshot.deals.map((deal) =>
+            deal.id === dealId
+              ? {
+                  ...deal,
+                  nextAction: nextStep,
+                  nextActionAt: nextStepAt,
+                  needsNextAction: false,
+                  updatedAt: now,
+                }
+              : deal,
+          ),
+          clients: snapshot.clients.map((client) =>
+            client.id === clientId
+              ? {
+                  ...client,
+                  lastContactAt: now,
+                  nextAction: nextStep,
+                  nextActionAt: nextStepAt,
+                  updatedAt: now,
+                }
+              : client,
+          ),
+          priceApprovals: priceApproval
+            ? [priceApproval, ...snapshot.priceApprovals]
+            : snapshot.priceApprovals,
         },
-        "Взаимодействие записано",
+        priceApproval
+          ? "Контакт сохранён, запрос на согласование отправлен"
+          : "Контакт сохранён, задача создана",
       );
     }
 
     setCreateKind(null);
     setCreateClientId(null);
+    setCreateDealId(null);
   };
 
-  const openCreate = (kind: Exclude<CreateKind, null>, clientId?: string) => {
+  const updateClientRepeatOrder = (
+    clientId: string,
+    values: {
+      orderFrequencyDays: number | null;
+      lastShipmentAt: string | null;
+      expectedNextOrderAt: string | null;
+      averageMonthlyVolume: number;
+      repeatReminderDays: 7 | 14;
+      expectedNextOrderManual: boolean;
+    },
+  ) => {
+    if (!snapshot) return;
+    const updatedAt = new Date().toISOString();
+    const calculatedExpectedAt = calculateExpectedNextOrder(
+      values.lastShipmentAt,
+      values.orderFrequencyDays,
+    );
+    commit(
+      {
+        ...snapshot,
+        clients: snapshot.clients.map((client) =>
+          client.id === clientId
+            ? {
+                ...client,
+                ...values,
+                expectedNextOrderAt:
+                  values.expectedNextOrderManual
+                    ? values.expectedNextOrderAt
+                    : calculatedExpectedAt,
+                updatedAt,
+              }
+            : client,
+        ),
+      },
+      "Цикл повторных заказов обновлён",
+    );
+  };
+
+  const reviewPriceApproval = (
+    approvalId: string,
+    status: PriceApprovalStatus,
+  ) => {
+    if (!snapshot || !currentUser || !isManager(currentUser)) {
+      notify("Решение по цене доступно руководителю");
+      return;
+    }
+    const reviewedAt = new Date().toISOString();
+    commit(
+      {
+        ...snapshot,
+        priceApprovals: snapshot.priceApprovals.map((approval) =>
+          approval.id === approvalId
+            ? {
+                ...approval,
+                status,
+                reviewedById: currentUser.id,
+                reviewedAt,
+                updatedAt: reviewedAt,
+              }
+            : approval,
+        ),
+      },
+      `Статус согласования: ${approvalStatusLabel(status)}`,
+    );
+  };
+
+  const openCreate = (
+    kind: Exclude<CreateKind, null>,
+    clientId?: string,
+    dealId?: string,
+  ) => {
     setCreateKind(kind);
     setCreateClientId(clientId ?? null);
+    setCreateDealId(dealId ?? null);
   };
 
   const resetDemo = async () => {
@@ -907,22 +1180,33 @@ export function CrmApp() {
           </span>
         </div>
         <nav className="module-nav">
-          {visibleModules.map((module) => (
-            <button
-              className={`${module.id === activeModule ? "is-active" : ""} group/nav`}
-              key={module.id}
-              onClick={() => navigateTo(module.id)}
-              type="button"
-            >
-              <span aria-hidden="true" className="nav-icon">
-                <CrmIcon
-                  className="size-[17px] transition-transform duration-200 group-hover/nav:scale-105"
-                  name={module.icon}
-                />
-              </span>
-              <span>{module.label}</span>
-            </button>
-          ))}
+          {NAV_GROUPS.map((group) => {
+            const groupModules = visibleModules.filter((module) =>
+              group.modules.includes(module.id),
+            );
+            if (!groupModules.length) return null;
+            return (
+              <section className="nav-group" key={group.label}>
+                <span className="nav-group-label">{group.label}</span>
+                {groupModules.map((module) => (
+                  <button
+                    className={`${module.id === activeModule ? "is-active" : ""} group/nav`}
+                    key={module.id}
+                    onClick={() => navigateTo(module.id)}
+                    type="button"
+                  >
+                    <span aria-hidden="true" className="nav-icon">
+                      <CrmIcon
+                        className="size-[17px] transition-transform duration-200 group-hover/nav:scale-105"
+                        name={module.icon}
+                      />
+                    </span>
+                    <span>{module.label}</span>
+                  </button>
+                ))}
+              </section>
+            );
+          })}
         </nav>
         {snapshot && currentUser && (
           <div className="side-nav-footer">
@@ -1300,15 +1584,18 @@ export function CrmApp() {
 
       {drawer && viewSnapshot && (
         <RecordDrawer
+          currentUser={currentUser}
           drawer={drawer}
           snapshot={viewSnapshot}
           onAddContact={(clientId) => openCreate("contact", clientId)}
-          onAddInteraction={(clientId) =>
-            openCreate("interaction", clientId)
+          onAddInteraction={(clientId, dealId) =>
+            openCreate("interaction", clientId, dealId)
           }
           onClose={() => setDrawer(null)}
           onMoveClient={requestClientMove}
           onMoveDeal={requestDealMove}
+          onReviewApproval={reviewPriceApproval}
+          onUpdateRepeatOrder={updateClientRepeatOrder}
           showFinancials={
             currentUser ? canViewFinancials(currentUser) : false
           }
@@ -1333,10 +1620,12 @@ export function CrmApp() {
         <CreateDialog
           clientId={createClientId}
           currentUser={currentUser}
+          dealId={createDealId}
           kind={createKind}
           onClose={() => {
             setCreateKind(null);
             setCreateClientId(null);
+            setCreateDealId(null);
           }}
           onSubmit={handleCreate}
           snapshot={viewSnapshot}
@@ -1475,10 +1764,11 @@ function ClientsView({
   onOpen: (client: Client) => void;
   onRequestMove: (client: Client, statuses?: readonly string[]) => void;
 }) {
-  const [viewMode, setViewMode] = useState<ViewMode>("board");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [potential, setPotential] = useState("all");
   const [status, setStatus] = useState("all");
   const [showClosed, setShowClosed] = useState(false);
+  const [repeatSegment, setRepeatSegment] = useState<RepeatSegment>("all");
 
   const filtered = useMemo(
     () =>
@@ -1492,12 +1782,13 @@ function ClientsView({
             client.industry,
           ]) &&
           (potential === "all" || client.potential === potential) &&
+          matchesRepeatSegment(client, repeatSegment) &&
           (status === "all" ||
             (status === "unassigned"
               ? client.status === null
               : client.status === status)),
       ),
-    [clients, globalSearch, potential, status],
+    [clients, globalSearch, potential, repeatSegment, status],
   );
 
   const potentialA = clients.filter((client) => client.potential === "A").length;
@@ -1513,6 +1804,34 @@ function ClientsView({
         <Metric label="Потенциал A" value={potentialA} />
         <Metric label="Действия сегодня" value={needsAction} tone="attention" />
         <Metric label="Статусы доступны" value={CLIENT_STATUSES.length} />
+      </div>
+      <div className="repeat-segments" aria-label="Сегменты повторных продаж">
+        {(
+          [
+            ["all", "Все клиенты"],
+            ["30", "Активные · 30–59 дней"],
+            ["60", "Активные · 60–89 дней"],
+            ["90", "Активные · 90–119 дней"],
+            ["sleeping", "Спящие для возврата"],
+            ["no_data", "Нет данных об отгрузке"],
+          ] as const
+        ).map(([value, label]) => {
+          const count = clients.filter((client) =>
+            matchesRepeatSegment(client, value),
+          ).length;
+          return (
+            <button
+              aria-pressed={repeatSegment === value}
+              className={repeatSegment === value ? "is-active" : ""}
+              key={value}
+              onClick={() => setRepeatSegment(value)}
+              type="button"
+            >
+              <span>{label}</span>
+              <strong>{count}</strong>
+            </button>
+          );
+        })}
       </div>
       <div className="view-toolbar">
         <div className="filter-cluster">
@@ -1733,7 +2052,8 @@ function ClientTable({
   onStatus: (client: Client) => void;
 }) {
   return (
-    <HorizontalScrollShell className="table-shell">
+    <>
+      <HorizontalScrollShell className="table-shell clients-desktop-table">
       <table>
         <thead>
           <tr>
@@ -1742,6 +2062,9 @@ function ClientTable({
             <th>Город</th>
             <th>Потенциал</th>
             <th>Точный статус</th>
+            <th>Последняя отгрузка</th>
+            <th>Следующий заказ</th>
+            <th>Объём / мес.</th>
             <th>Следующее действие</th>
             <th>Менеджер</th>
             <th aria-label="Действия" />
@@ -1752,6 +2075,7 @@ function ClientTable({
             <tr key={client.id}>
               <td>
                 <button
+                  aria-label={`Открыть клиента ${client.companyName}`}
                   className="table-link"
                   onClick={() => onOpen(client)}
                   type="button"
@@ -1773,6 +2097,21 @@ function ClientTable({
                 </span>
               </td>
               <td>
+                <strong>{formatDate(client.lastShipmentAt)}</strong>
+                <small>
+                  {getDaysWithoutOrder(client) === null
+                    ? "Нет истории"
+                    : `${getDaysWithoutOrder(client)} дн. без заказа`}
+                </small>
+              </td>
+              <td>
+                <strong>{formatDate(client.expectedNextOrderAt)}</strong>
+                <small>Напомнить за {client.repeatReminderDays} дней</small>
+              </td>
+              <td className="mono">
+                {client.averageMonthlyVolume.toLocaleString("ru-RU")} шт.
+              </td>
+              <td>
                 <strong>{client.nextAction || "Не назначено"}</strong>
                 <small>{formatDate(client.nextActionAt)}</small>
               </td>
@@ -1791,7 +2130,67 @@ function ClientTable({
         </tbody>
       </table>
       {!clients.length && <TableEmpty />}
-    </HorizontalScrollShell>
+      </HorizontalScrollShell>
+      <div className="mobile-client-list" aria-label="Клиенты">
+        {clients.map((client) => (
+          <article className="mobile-client-card" key={client.id}>
+            <header>
+              <button
+                aria-label={`Открыть клиента ${client.companyName}`}
+                className="table-link"
+                onClick={() => onOpen(client)}
+                type="button"
+              >
+                <strong>{client.companyName}</strong>
+                <small>
+                  {client.id} · {client.city}
+                </small>
+              </button>
+              <span className={`potential potential-${client.potential}`}>
+                {client.potential}
+              </span>
+            </header>
+            <div className="mobile-client-status">
+              <span className="exact-status">
+                {client.status ?? "Без статуса"}
+              </span>
+              <span>{client.managerName}</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Последняя отгрузка</dt>
+                <dd>{formatDate(client.lastShipmentAt)}</dd>
+              </div>
+              <div>
+                <dt>Следующий заказ</dt>
+                <dd>{formatDate(client.expectedNextOrderAt)}</dd>
+              </div>
+              <div>
+                <dt>Объём / мес.</dt>
+                <dd>
+                  {client.averageMonthlyVolume.toLocaleString("ru-RU")} шт.
+                </dd>
+              </div>
+              <div>
+                <dt>Следующий шаг</dt>
+                <dd>{client.nextAction || "Не назначено"}</dd>
+              </div>
+            </dl>
+            <footer>
+              <span>{formatDate(client.nextActionAt)}</span>
+              <button
+                className="text-button"
+                onClick={() => onStatus(client)}
+                type="button"
+              >
+                Изменить статус
+              </button>
+            </footer>
+          </article>
+        ))}
+        {!clients.length && <TableEmpty />}
+      </div>
+    </>
   );
 }
 
@@ -1840,7 +2239,7 @@ function DealsView({
   );
 
   const pipeline = deals
-    .filter((deal) => !["Проиграна", "Отложена", "Отменена"].includes(deal.status))
+    .filter(isOpenDeal)
     .reduce((sum, deal) => sum + deal.ourPrice, 0);
   const margin = deals.reduce((sum, deal) => sum + deal.margin, 0);
 
@@ -1941,7 +2340,9 @@ function DealCard({
   onOpen: () => void;
   onStatus: () => void;
 }) {
-  const due = getDueState(deal.nextActionAt);
+  const due = deal.needsNextAction
+    ? { className: "due-overdue", label: "Требует действия" }
+    : getDueState(deal.nextActionAt);
   return (
     <article className="record-card deal-card">
       <button className="card-open" onClick={onOpen} type="button">
@@ -2108,9 +2509,12 @@ function ContactsView({
               <th>Контакт</th>
               <th>Компания</th>
               <th>Должность</th>
+              <th>Роль в решении</th>
+              <th>Влияние</th>
+              <th>Канал</th>
+              <th>Познакомиться</th>
               <th>Телефон</th>
               <th>Email</th>
-              <th>Комментарий</th>
               <th aria-label="Действия" />
             </tr>
           </thead>
@@ -2131,9 +2535,18 @@ function ContactsView({
                   </button>
                 </td>
                 <td>{contact.role}</td>
+                <td>{contact.decisionRole}</td>
+                <td>
+                  <span
+                    className={`influence influence-${contact.decisionInfluence === "Блокирует" ? "blocker" : contact.decisionInfluence === "Принимает решение" ? "decision" : "influencer"}`}
+                  >
+                    {contact.decisionInfluence}
+                  </span>
+                </td>
+                <td>{contact.preferredChannel}</td>
+                <td>{contact.introductionNeeded || "Карта закрыта"}</td>
                 <td className="mono">{contact.phone}</td>
                 <td>{contact.email}</td>
-                <td>{contact.comment || "—"}</td>
                 <td>
                   <button
                     className="text-button"
@@ -2169,16 +2582,21 @@ function ActivityView({
   const [kind, setKind] = useState("all");
   const [mode, setMode] = useState<"feed" | "table">("feed");
   const clientMap = new Map(clients.map((client) => [client.id, client]));
-  const filtered = interactions.filter(
-    (interaction) =>
-      (kind === "all" || interaction.kind === kind) &&
-      searchIncludes(globalSearch, [
-        interaction.subject,
-        interaction.result,
-        interaction.managerName,
-        clientMap.get(interaction.clientId)?.companyName ?? "",
-      ]),
-  );
+  const filtered = interactions
+    .filter(
+      (interaction) =>
+        (kind === "all" || interaction.kind === kind) &&
+        searchIncludes(globalSearch, [
+          interaction.subject,
+          interaction.result,
+          interaction.managerName,
+          clientMap.get(interaction.clientId)?.companyName ?? "",
+        ]),
+    )
+    .sort(
+      (left, right) =>
+        Date.parse(right.occurredAt) - Date.parse(left.occurredAt),
+    );
 
   return (
     <section className="module-view">
@@ -2225,7 +2643,7 @@ function ActivityView({
             </button>
           </div>
           <button className="primary-button" onClick={onCreate} type="button">
-            Добавить взаимодействие
+            Записать результат контакта
           </button>
         </div>
       </div>
@@ -2259,6 +2677,14 @@ function ActivityView({
                     <strong>{interaction.nextStep}</strong>
                     <time>{formatDate(interaction.nextStepAt)}</time>
                   </div>
+                  {interaction.attachments.length > 0 && (
+                    <div className="activity-attachments">
+                      <span>Вложения</span>
+                      {interaction.attachments.map((attachment) => (
+                        <strong key={attachment.id}>{attachment.name}</strong>
+                      ))}
+                    </div>
+                  )}
                   <footer>{interaction.managerName}</footer>
                 </div>
               </article>
@@ -2685,6 +3111,7 @@ function DictionariesView({ snapshot }: { snapshot: CrmSnapshot }) {
 }
 
 function RecordDrawer({
+  currentUser,
   drawer,
   snapshot,
   onClose,
@@ -2692,15 +3119,33 @@ function RecordDrawer({
   onMoveDeal,
   onAddContact,
   onAddInteraction,
+  onReviewApproval,
+  onUpdateRepeatOrder,
   showFinancials,
 }: {
+  currentUser: User | null;
   drawer: Exclude<DrawerTarget, null>;
   snapshot: CrmSnapshot;
   onClose: () => void;
   onMoveClient: (client: Client) => void;
   onMoveDeal: (deal: Deal) => void;
   onAddContact: (clientId: string) => void;
-  onAddInteraction: (clientId: string) => void;
+  onAddInteraction: (clientId: string, dealId?: string) => void;
+  onReviewApproval: (
+    approvalId: string,
+    status: PriceApprovalStatus,
+  ) => void;
+  onUpdateRepeatOrder: (
+    clientId: string,
+    values: {
+      orderFrequencyDays: number | null;
+      lastShipmentAt: string | null;
+      expectedNextOrderAt: string | null;
+      averageMonthlyVolume: number;
+      repeatReminderDays: 7 | 14;
+      expectedNextOrderManual: boolean;
+    },
+  ) => void;
   showFinancials: boolean;
 }) {
   const client =
@@ -2726,6 +3171,31 @@ function RecordDrawer({
   const relatedInteractions = snapshot.interactions
     .filter((item) => item.clientId === relatedClient?.id)
     .slice(0, 4);
+  const relatedApprovals = snapshot.priceApprovals.filter((approval) =>
+    deal
+      ? approval.dealId === deal.id
+      : approval.clientId === relatedClient?.id,
+  );
+
+  if (deal && relatedClient) {
+    return (
+      <DealWorkspace
+        approvals={relatedApprovals}
+        client={relatedClient}
+        contacts={relatedContacts}
+        currentUser={currentUser}
+        deal={deal}
+        interactions={relatedInteractions}
+        onAddInteraction={() =>
+          onAddInteraction(relatedClient.id, deal.id)
+        }
+        onClose={onClose}
+        onMoveDeal={() => onMoveDeal(deal)}
+        onReviewApproval={onReviewApproval}
+        showFinancials={showFinancials}
+      />
+    );
+  }
 
   return (
     <div className="dialog-backdrop" role="presentation">
@@ -2778,6 +3248,68 @@ function RecordDrawer({
                   <small>{formatDate(client.nextActionAt, true)}</small>
                 </div>
               </DrawerSection>
+              <DrawerSection
+                action={
+                  <button
+                    className="text-button"
+                    onClick={() => onAddContact(client.id)}
+                    type="button"
+                  >
+                    Добавить
+                  </button>
+                }
+                title="Карта влияния"
+              >
+                <div className="decision-map">
+                  {relatedContacts.length ? (
+                    relatedContacts.map((contact) => (
+                      <article key={contact.id}>
+                        <div className="decision-person">
+                          <span aria-hidden="true" className="decision-avatar">
+                            {contact.fullName
+                              .split(" ")
+                              .slice(0, 2)
+                              .map((part) => part[0])
+                              .join("")}
+                          </span>
+                          <div>
+                            <strong>{contact.fullName}</strong>
+                            <span>{contact.role || contact.decisionRole}</span>
+                          </div>
+                        </div>
+                        <div className="decision-tags">
+                          <span>{contact.decisionRole}</span>
+                          <span
+                            className={`influence influence-${contact.decisionInfluence === "Блокирует" ? "blocker" : contact.decisionInfluence === "Принимает решение" ? "decision" : "influencer"}`}
+                          >
+                            {contact.decisionInfluence}
+                          </span>
+                        </div>
+                        <dl>
+                          <div>
+                            <dt>Канал</dt>
+                            <dd>{contact.preferredChannel}</dd>
+                          </div>
+                          <div>
+                            <dt>Ещё познакомиться</dt>
+                            <dd>
+                              {contact.introductionNeeded || "Карта закрыта"}
+                            </dd>
+                          </div>
+                        </dl>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="muted-copy">Контакты ещё не добавлены.</p>
+                  )}
+                </div>
+              </DrawerSection>
+              <DrawerSection title="Повторные продажи">
+                <RepeatOrderForm
+                  client={client}
+                  onSave={(values) => onUpdateRepeatOrder(client.id, values)}
+                />
+              </DrawerSection>
               <DrawerSection title="Профиль клиента">
                 <dl className="detail-grid">
                   <Detail label="ИНН" value={client.inn} mono />
@@ -2789,34 +3321,6 @@ function RecordDrawer({
                   <Detail label="Источник" value={client.source} />
                   <Detail label="Менеджер" value={client.managerName} />
                 </dl>
-              </DrawerSection>
-              <DrawerSection
-                action={
-                  <button
-                    className="text-button"
-                    onClick={() => onAddContact(client.id)}
-                    type="button"
-                  >
-                    Добавить
-                  </button>
-                }
-                title="Контакты"
-              >
-                <div className="related-list">
-                  {relatedContacts.length ? (
-                    relatedContacts.map((contact) => (
-                      <article key={contact.id}>
-                        <strong>{contact.fullName}</strong>
-                        <span>{contact.role}</span>
-                        <small>
-                          {contact.phone} · {contact.email}
-                        </small>
-                      </article>
-                    ))
-                  ) : (
-                    <p className="muted-copy">Контакты ещё не добавлены.</p>
-                  )}
-                </div>
               </DrawerSection>
               <DrawerSection title="Сделки">
                 <div className="related-list">
@@ -2874,8 +3378,16 @@ function RecordDrawer({
               </DrawerSection>
               <DrawerSection title="Следующий шаг">
                 <div className="next-action drawer-next">
-                  <span className={getDueState(deal.nextActionAt).className}>
-                    {getDueState(deal.nextActionAt).label}
+                  <span
+                    className={
+                      deal.needsNextAction
+                        ? "due-overdue"
+                        : getDueState(deal.nextActionAt).className
+                    }
+                  >
+                    {deal.needsNextAction
+                      ? "Требует действия"
+                      : getDueState(deal.nextActionAt).label}
                   </span>
                   <strong>{deal.nextAction}</strong>
                   <small>{formatDate(deal.nextActionAt, true)}</small>
@@ -2886,6 +3398,74 @@ function RecordDrawer({
               </DrawerSection>
             </>
           )}
+
+          <DrawerSection title="Согласование цены">
+            <div className="approval-list">
+              {relatedApprovals.length ? (
+                relatedApprovals.map((approval) => (
+                  <article key={approval.id}>
+                    <header>
+                      <div>
+                        <strong>{approval.product}</strong>
+                        <span>{approval.volume}</span>
+                      </div>
+                      <span className={`approval-status is-${approval.status}`}>
+                        {approvalStatusLabel(approval.status)}
+                      </span>
+                    </header>
+                    <dl>
+                      <Detail
+                        label="Текущая цена"
+                        value={formatMoney(approval.currentPrice)}
+                        mono
+                      />
+                      <Detail
+                        label="Запрошенная цена"
+                        value={formatMoney(approval.requestedPrice)}
+                        mono
+                      />
+                    </dl>
+                    <p>{approval.reason || "Причина не указана"}</p>
+                    {currentUser &&
+                      isManager(currentUser) &&
+                      ["pending", "clarification"].includes(approval.status) && (
+                        <div className="approval-actions">
+                          <button
+                            className="primary-button"
+                            onClick={() =>
+                              onReviewApproval(approval.id, "approved")
+                            }
+                            type="button"
+                          >
+                            Согласовать
+                          </button>
+                          <button
+                            className="ghost-button"
+                            onClick={() =>
+                              onReviewApproval(approval.id, "clarification")
+                            }
+                            type="button"
+                          >
+                            Запросить уточнение
+                          </button>
+                          <button
+                            className="danger-button"
+                            onClick={() =>
+                              onReviewApproval(approval.id, "rejected")
+                            }
+                            type="button"
+                          >
+                            Отклонить
+                          </button>
+                        </div>
+                      )}
+                  </article>
+                ))
+              ) : (
+                <p className="muted-copy">Запросов на согласование пока нет.</p>
+              )}
+            </div>
+          </DrawerSection>
 
           <DrawerSection
             action={
@@ -2914,6 +3494,540 @@ function RecordDrawer({
         </div>
       </aside>
     </div>
+  );
+}
+
+function DealWorkspace({
+  approvals,
+  client,
+  contacts,
+  currentUser,
+  deal,
+  interactions,
+  onAddInteraction,
+  onClose,
+  onMoveDeal,
+  onReviewApproval,
+  showFinancials,
+}: {
+  approvals: PriceApproval[];
+  client: Client;
+  contacts: Contact[];
+  currentUser: User | null;
+  deal: Deal;
+  interactions: Interaction[];
+  onAddInteraction: () => void;
+  onClose: () => void;
+  onMoveDeal: () => void;
+  onReviewApproval: (
+    approvalId: string,
+    status: PriceApprovalStatus,
+  ) => void;
+  showFinancials: boolean;
+}) {
+  const latestInteraction = interactions[0];
+  const decisionMaker =
+    contacts.find(
+      (contact) => contact.decisionInfluence === "Принимает решение",
+    ) ?? contacts[0];
+  const probability = Math.min(
+    92,
+    Math.max(
+      48,
+      58 +
+        contacts.filter(
+          (contact) => contact.decisionInfluence === "Принимает решение",
+        ).length *
+          12 +
+        (deal.status === "Переговоры" ? 10 : 0),
+    ),
+  );
+  const due = deal.needsNextAction
+    ? { className: "due-overdue", label: "Требует действия" }
+    : getDueState(deal.nextActionAt);
+  const pendingApproval = approvals.find(
+    (approval) => approval.status === "pending",
+  );
+
+  return (
+    <div className="dialog-backdrop deal-workspace-backdrop" role="presentation">
+      <section
+        aria-label="Рабочее пространство сделки"
+        aria-modal="true"
+        className="deal-workspace"
+        role="dialog"
+      >
+        <header className="deal-workspace-header">
+          <div className="deal-workspace-heading">
+            <button className="deal-back-button" onClick={onClose} type="button">
+              <span aria-hidden="true">←</span>
+              К списку сделок
+            </button>
+            <div>
+              <span className="record-id">Сделка {deal.id}</span>
+              <h2>{deal.title}</h2>
+              <p>
+                <strong>{client.companyName}</strong>
+                <span>ИНН {client.inn}</span>
+                <span>{client.status ?? "Без статуса"}</span>
+              </p>
+            </div>
+          </div>
+          <div className="deal-workspace-actions">
+            <button className="ghost-button" onClick={onMoveDeal} type="button">
+              Изменить статус
+            </button>
+            <button
+              className="primary-button"
+              onClick={onAddInteraction}
+              type="button"
+            >
+              <CrmIcon className="size-[16px]" name="activity" />
+              Сохранить контакт
+            </button>
+            <button
+              aria-label="Закрыть карточку сделки"
+              className="deal-close-button"
+              onClick={onClose}
+              type="button"
+            >
+              ×
+            </button>
+          </div>
+        </header>
+
+        <div className="deal-workspace-scroll">
+          <div className="deal-summary-strip">
+            <div>
+              <span>Сумма сделки</span>
+              <strong>{formatMoney(deal.ourPrice)}</strong>
+            </div>
+            <div>
+              <span>Вероятность</span>
+              <strong>{probability}%</strong>
+            </div>
+            <div>
+              <span>Прогноз повт. заказа</span>
+              <strong className="positive">Высокая</strong>
+              <small>{formatDate(client.expectedNextOrderAt)}</small>
+            </div>
+            <div>
+              <span>Последняя отгрузка</span>
+              <strong>{formatDate(client.lastShipmentAt)}</strong>
+              <small>
+                {client.averageMonthlyVolume.toLocaleString("ru-RU")} шт./мес.
+              </small>
+            </div>
+            <div>
+              <span>Ответственный</span>
+              <strong>{deal.managerName}</strong>
+              <small>Менеджер по продажам</small>
+            </div>
+          </div>
+
+          <div className="deal-workspace-layout">
+            <main className="deal-workspace-main">
+              <section className="deal-contact-panel">
+                <header>
+                  <div>
+                    <span className="section-kicker">Быстрое действие</span>
+                    <h3>Сохранить результат контакта</h3>
+                  </div>
+                  <span className="deal-status-badge">{deal.status}</span>
+                </header>
+
+                <div className="deal-contact-context">
+                  <article>
+                    <span>Контактное лицо</span>
+                    <strong>
+                      {decisionMaker?.fullName ?? "Контакт не выбран"}
+                    </strong>
+                    <small>
+                      {decisionMaker
+                        ? `${decisionMaker.decisionRole} · ${decisionMaker.preferredChannel}`
+                        : "Добавьте ЛПР в карточке клиента"}
+                    </small>
+                  </article>
+                  <article>
+                    <span>Последний результат</span>
+                    <strong>
+                      {latestInteraction?.result ||
+                        "Контакт по сделке ещё не зафиксирован"}
+                    </strong>
+                    <small>
+                      {latestInteraction
+                        ? formatDate(latestInteraction.occurredAt, true)
+                        : "Запишите итог разговора"}
+                    </small>
+                  </article>
+                </div>
+
+                <div className="deal-mandatory-step">
+                  <div>
+                    <span>Обязательный следующий шаг</span>
+                    <strong>
+                      {deal.nextAction || "Следующий шаг не назначен"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Крайний срок</span>
+                    <strong>{formatDate(deal.nextActionAt, true)}</strong>
+                  </div>
+                  <span className={due.className}>{due.label}</span>
+                </div>
+
+                <div className="deal-contact-guidance">
+                  <span>
+                    После сохранения CRM автоматически создаст задачу и обновит
+                    следующий шаг сделки.
+                  </span>
+                  <button
+                    className="primary-button"
+                    onClick={onAddInteraction}
+                    type="button"
+                  >
+                    Записать результат контакта
+                  </button>
+                </div>
+              </section>
+
+              <section className="deal-economics-panel">
+                <header>
+                  <div>
+                    <span className="section-kicker">Коммерческие условия</span>
+                    <h3>
+                      {showFinancials ? "Экономика сделки" : "Детали сделки"}
+                    </h3>
+                  </div>
+                  {pendingApproval ? (
+                    <span className="approval-status is-pending">
+                      На согласовании
+                    </span>
+                  ) : null}
+                </header>
+                <dl>
+                  <Detail label="Товар" value={deal.product} />
+                  <Detail label="Объём" value={deal.volume} />
+                  <Detail
+                    label="Цена клиенту"
+                    value={formatMoney(deal.clientPrice)}
+                    mono
+                  />
+                  <Detail
+                    label="Наша цена"
+                    value={formatMoney(deal.ourPrice)}
+                    mono
+                  />
+                  {showFinancials ? (
+                    <>
+                      <Detail
+                        label="Закупка"
+                        value={formatMoney(deal.purchasePrice)}
+                        mono
+                      />
+                      <Detail
+                        label="Логистика"
+                        value={formatMoney(deal.logistics)}
+                        mono
+                      />
+                      <Detail
+                        label="Маржа"
+                        value={`${formatMoney(deal.margin)} · ${deal.marginPercent}%`}
+                        mono
+                      />
+                    </>
+                  ) : null}
+                  <Detail
+                    label="Дата КП"
+                    value={formatDate(deal.proposalDate)}
+                  />
+                </dl>
+              </section>
+
+              <section className="deal-history-panel">
+                <header>
+                  <div>
+                    <span className="section-kicker">Хронология</span>
+                    <h3>История контактов</h3>
+                  </div>
+                  <button
+                    className="text-button"
+                    onClick={onAddInteraction}
+                    type="button"
+                  >
+                    Добавить запись
+                  </button>
+                </header>
+                <div>
+                  {interactions.length ? (
+                    interactions.map((interaction) => (
+                      <article key={interaction.id}>
+                        <span className="deal-history-kind">
+                          {interaction.kind.slice(0, 2)}
+                        </span>
+                        <time>{formatDate(interaction.occurredAt, true)}</time>
+                        <div>
+                          <strong>{interaction.subject}</strong>
+                          <p>{interaction.result}</p>
+                        </div>
+                        <span>{interaction.managerName}</span>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="muted-copy">
+                      По этой сделке пока нет зафиксированных контактов.
+                    </p>
+                  )}
+                </div>
+              </section>
+            </main>
+
+            <aside className="deal-workspace-rail">
+              <section className="deal-influence-panel">
+                <header>
+                  <h3>Карта влияния</h3>
+                  <span>{contacts.length}</span>
+                </header>
+                <div>
+                  {contacts.length ? (
+                    contacts.map((contact) => (
+                      <article key={contact.id}>
+                        <span className="decision-avatar">
+                          {contact.fullName
+                            .split(" ")
+                            .slice(0, 2)
+                            .map((part) => part[0])
+                            .join("")}
+                        </span>
+                        <div>
+                          <strong>{contact.fullName}</strong>
+                          <small>{contact.role || contact.decisionRole}</small>
+                          <em
+                            className={`influence influence-${contact.decisionInfluence === "Блокирует" ? "blocker" : contact.decisionInfluence === "Принимает решение" ? "decision" : "influencer"}`}
+                          >
+                            {contact.decisionInfluence}
+                          </em>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="muted-copy">
+                      Добавьте закупщика, технолога и руководителя производства.
+                    </p>
+                  )}
+                </div>
+              </section>
+
+              <section className="deal-repeat-panel">
+                <header>
+                  <h3>Прогноз повторного заказа</h3>
+                  <span>{probability}%</span>
+                </header>
+                <strong>Высокая вероятность</strong>
+                <dl>
+                  <div>
+                    <dt>Период</dt>
+                    <dd>{formatDate(client.expectedNextOrderAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>Регулярность</dt>
+                    <dd>
+                      {client.orderFrequencyDays
+                        ? `${client.orderFrequencyDays} дней`
+                        : "Не задана"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Средний объём</dt>
+                    <dd>
+                      {client.averageMonthlyVolume.toLocaleString("ru-RU")} шт.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Последняя активность</dt>
+                    <dd>{formatDate(client.lastContactAt)}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section className="deal-approval-panel">
+                <header>
+                  <h3>Согласование цены</h3>
+                  <span>{approvals.length}</span>
+                </header>
+                {approvals.length ? (
+                  approvals.map((approval) => (
+                    <article key={approval.id}>
+                      <div>
+                        <strong>{approval.product}</strong>
+                        <span className={`approval-status is-${approval.status}`}>
+                          {approvalStatusLabel(approval.status)}
+                        </span>
+                      </div>
+                      <p>{approval.reason || "Причина не указана"}</p>
+                      <dl>
+                        <div>
+                          <dt>Текущая</dt>
+                          <dd>{formatMoney(approval.currentPrice)}</dd>
+                        </div>
+                        <div>
+                          <dt>Запрошенная</dt>
+                          <dd>{formatMoney(approval.requestedPrice)}</dd>
+                        </div>
+                      </dl>
+                      {currentUser &&
+                      isManager(currentUser) &&
+                      ["pending", "clarification"].includes(
+                        approval.status,
+                      ) ? (
+                        <div className="deal-approval-actions">
+                          <button
+                            onClick={() =>
+                              onReviewApproval(approval.id, "approved")
+                            }
+                            type="button"
+                          >
+                            Согласовать
+                          </button>
+                          <button
+                            onClick={() =>
+                              onReviewApproval(approval.id, "clarification")
+                            }
+                            type="button"
+                          >
+                            Уточнить
+                          </button>
+                        </div>
+                      ) : null}
+                    </article>
+                  ))
+                ) : (
+                  <button
+                    className="ghost-button"
+                    onClick={onAddInteraction}
+                    type="button"
+                  >
+                    Запросить согласование
+                  </button>
+                )}
+              </section>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function RepeatOrderForm({
+  client,
+  onSave,
+}: {
+  client: Client;
+  onSave: (values: {
+    orderFrequencyDays: number | null;
+    lastShipmentAt: string | null;
+    expectedNextOrderAt: string | null;
+    averageMonthlyVolume: number;
+    repeatReminderDays: 7 | 14;
+    expectedNextOrderManual: boolean;
+  }) => void;
+}) {
+  const daysWithoutOrder = getDaysWithoutOrder(client);
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const frequency = Number(form.get("orderFrequencyDays"));
+    const expectedNextOrderAt =
+      String(form.get("expectedNextOrderAt") ?? "") || null;
+    const expectedNextOrderManual = expectedNextOrderAt
+      ? expectedNextOrderAt !== client.expectedNextOrderAt ||
+        client.expectedNextOrderManual
+      : false;
+    onSave({
+      orderFrequencyDays: frequency > 0 ? frequency : null,
+      lastShipmentAt: String(form.get("lastShipmentAt") ?? "") || null,
+      expectedNextOrderAt,
+      expectedNextOrderManual,
+      averageMonthlyVolume: Math.max(
+        0,
+        Number(form.get("averageMonthlyVolume") ?? 0),
+      ),
+      repeatReminderDays:
+        Number(form.get("repeatReminderDays")) === 7 ? 7 : 14,
+    });
+  };
+
+  return (
+    <form className="repeat-order-form" onSubmit={handleSubmit}>
+      <div className="repeat-order-summary">
+        <div>
+          <span>Без заказа</span>
+          <strong>
+            {daysWithoutOrder === null ? "Нет истории" : `${daysWithoutOrder} дн.`}
+          </strong>
+        </div>
+        <div>
+          <span>Ожидаемый заказ</span>
+          <strong>{formatDate(client.expectedNextOrderAt)}</strong>
+        </div>
+        <div>
+          <span>Средний объём</span>
+          <strong>
+            {client.averageMonthlyVolume.toLocaleString("ru-RU")} шт./мес.
+          </strong>
+        </div>
+      </div>
+      <div className="repeat-order-fields">
+        <label>
+          Периодичность, дней
+          <input
+            defaultValue={client.orderFrequencyDays ?? ""}
+            min="1"
+            name="orderFrequencyDays"
+            type="number"
+          />
+        </label>
+        <label>
+          Последняя отгрузка
+          <input
+            defaultValue={client.lastShipmentAt?.slice(0, 10) ?? ""}
+            name="lastShipmentAt"
+            type="date"
+          />
+        </label>
+        <label>
+          Следующий заказ
+          <input
+            defaultValue={client.expectedNextOrderAt?.slice(0, 10) ?? ""}
+            name="expectedNextOrderAt"
+            type="date"
+          />
+        </label>
+        <label>
+          Средний объём, шт./мес.
+          <input
+            defaultValue={client.averageMonthlyVolume}
+            min="0"
+            name="averageMonthlyVolume"
+            type="number"
+          />
+        </label>
+        <label>
+          Напомнить заранее
+          <select
+            defaultValue={String(client.repeatReminderDays)}
+            name="repeatReminderDays"
+          >
+            <option value="7">За 7 дней</option>
+            <option value="14">За 14 дней</option>
+          </select>
+        </label>
+      </div>
+      <button className="ghost-button" type="submit">
+        Сохранить цикл
+      </button>
+    </form>
   );
 }
 
@@ -2959,6 +4073,7 @@ function StatusPicker({
 function CreateDialog({
   kind,
   clientId,
+  dealId,
   currentUser,
   snapshot,
   onClose,
@@ -2966,6 +4081,7 @@ function CreateDialog({
 }: {
   kind: Exclude<CreateKind, null>;
   clientId: string | null;
+  dealId: string | null;
   currentUser: User;
   snapshot: CrmSnapshot;
   onClose: () => void;
@@ -2975,13 +4091,56 @@ function CreateDialog({
     client: "Новый клиент",
     deal: "Новая сделка",
     contact: "Новый контакт",
-    interaction: "Новое взаимодействие",
+    interaction: "Результат контакта",
   };
   const managerOptions = (
     currentUser.role === "manager"
       ? snapshot.users.filter((user) => user.isActive)
       : [currentUser]
   ).map((user) => user.fullName);
+  const initialClientId =
+    clientId ??
+    snapshot.clients.find(
+      (client) =>
+        snapshot.deals.some((deal) => deal.clientId === client.id) &&
+        snapshot.contacts.some((contact) => contact.clientId === client.id),
+    )?.id ??
+    snapshot.clients[0]?.id ??
+    "";
+  const [selectedClientId, setSelectedClientId] =
+    useState(initialClientId);
+  const clientDeals = snapshot.deals.filter(
+    (deal) => deal.clientId === selectedClientId,
+  );
+  const clientContacts = snapshot.contacts.filter(
+    (contact) => contact.clientId === selectedClientId,
+  );
+  const [selectedDealId, setSelectedDealId] = useState(
+    clientDeals.some((deal) => deal.id === dealId)
+      ? (dealId ?? "")
+      : (clientDeals[0]?.id ?? ""),
+  );
+  const [requestApproval, setRequestApproval] = useState(false);
+  const [attachmentCount, setAttachmentCount] = useState(0);
+  const [formValid, setFormValid] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (clientDeals.some((deal) => deal.id === selectedDealId)) return;
+    setSelectedDealId(clientDeals[0]?.id ?? "");
+  }, [clientDeals, selectedDealId]);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setFormValid(formRef.current?.checkValidity() ?? false);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [kind, requestApproval, selectedClientId, selectedDealId]);
+
+  const selectedDeal = clientDeals.find((deal) => deal.id === selectedDealId);
+  const refreshValidity = () => {
+    setFormValid(formRef.current?.checkValidity() ?? false);
+  };
 
   return (
     <div className="dialog-backdrop centered" role="presentation">
@@ -2989,7 +4148,10 @@ function CreateDialog({
         aria-label={titles[kind]}
         aria-modal="true"
         className="create-dialog"
+        onChange={refreshValidity}
+        onInput={refreshValidity}
         onSubmit={onSubmit}
+        ref={formRef}
         role="dialog"
       >
         <header>
@@ -3047,6 +4209,34 @@ function CreateDialog({
                 type="datetime-local"
                 wide
               />
+              <Field
+                label="Обычная периодичность заказа, дней"
+                name="orderFrequencyDays"
+                type="number"
+              />
+              <Field
+                label="Дата последней отгрузки"
+                name="lastShipmentAt"
+                type="date"
+              />
+              <Field
+                label="Ожидаемая дата следующего заказа"
+                name="expectedNextOrderAt"
+                type="date"
+              />
+              <Field
+                label="Среднемесячный объём, шт."
+                name="averageMonthlyVolume"
+                type="number"
+              />
+              <SelectField
+                label="Напоминание"
+                name="repeatReminderDays"
+                options={[
+                  { label: "За 14 дней", value: "14" },
+                  { label: "За 7 дней", value: "7" },
+                ]}
+              />
             </>
           )}
 
@@ -3074,10 +4264,16 @@ function CreateDialog({
                 name="manager"
                 options={managerOptions}
               />
-              <Field label="Следующее действие" name="nextAction" wide />
               <Field
-                label="Дата следующего действия"
+                label="Следующее действие · обязательно"
+                name="nextAction"
+                required
+                wide
+              />
+              <Field
+                label="Дата следующего действия · обязательно"
                 name="nextActionAt"
+                required
                 type="datetime-local"
                 wide
               />
@@ -3099,19 +4295,61 @@ function CreateDialog({
               <Field label="Должность" name="role" />
               <Field label="Телефон" name="phone" type="tel" />
               <Field label="Email" name="email" type="email" wide />
+              <SelectField
+                label="Роль в решении"
+                name="decisionRole"
+                options={DECISION_ROLES}
+              />
+              <SelectField
+                label="Влияние"
+                name="decisionInfluence"
+                options={DECISION_INFLUENCES}
+              />
+              <SelectField
+                label="Предпочтительный канал"
+                name="preferredChannel"
+                options={PREFERRED_CHANNELS}
+              />
+              <Field
+                label="С кем ещё необходимо познакомиться"
+                name="introductionNeeded"
+                wide
+              />
             </>
           )}
 
           {kind === "interaction" && (
             <>
               <SelectField
-                defaultValue={clientId ?? undefined}
-                label="Клиент"
+                defaultValue={selectedClientId}
+                label="Клиент · обязательно"
                 name="clientId"
+                onChange={setSelectedClientId}
                 options={snapshot.clients.map((client) => ({
                   label: client.companyName,
                   value: client.id,
                 }))}
+                required
+              />
+              <SelectField
+                defaultValue={selectedDealId}
+                label="Сделка · обязательно"
+                name="dealId"
+                onChange={setSelectedDealId}
+                options={clientDeals.map((deal) => ({
+                  label: `${deal.title} · ${deal.status}`,
+                  value: deal.id,
+                }))}
+                required
+              />
+              <SelectField
+                label="Контактное лицо · обязательно"
+                name="contactId"
+                options={clientContacts.map((contact) => ({
+                  label: `${contact.fullName} · ${contact.decisionRole}`,
+                  value: contact.id,
+                }))}
+                required
               />
               <SelectField
                 label="Тип контакта"
@@ -3119,19 +4357,113 @@ function CreateDialog({
                 options={snapshot.dictionaries.interactionTypes}
               />
               <Field label="Тема" name="subject" required wide />
-              <Field label="Итог" name="result" wide />
-              <Field label="Следующий шаг" name="nextStep" wide />
-              <Field
-                label="Дата следующего шага"
-                name="nextStepAt"
-                type="datetime-local"
-                wide
-              />
+              <Field label="Результат контакта · обязательно" name="result" required wide />
+              <div className="mandatory-next-step wide-field">
+                <header>
+                  <strong>Обязательный следующий шаг</strong>
+                  <span>Автоматически станет задачей</span>
+                </header>
+                <div>
+                  <Field label="Что сделать" name="nextStep" required />
+                  <Field
+                    label="Крайний срок"
+                    name="nextStepAt"
+                    required
+                    type="datetime-local"
+                  />
+                </div>
+              </div>
               <SelectField
                 label="Ответственный"
                 name="manager"
                 options={managerOptions}
               />
+              <label className="file-field wide-field">
+                Файл или фотография
+                <input
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  className="file-input-native"
+                  multiple
+                  name="attachments"
+                  onChange={(event) => {
+                    setAttachmentCount(event.target.files?.length ?? 0);
+                    refreshValidity();
+                  }}
+                  type="file"
+                />
+                <span className="file-pick-control">
+                  <strong>Выбрать файлы</strong>
+                  <span>
+                    {attachmentCount
+                      ? `Выбрано: ${attachmentCount}`
+                      : "Файлы не выбраны"}
+                  </span>
+                </span>
+                <small>Можно приложить несколько файлов или фотографий</small>
+              </label>
+              <label className="approval-toggle wide-field">
+                <input
+                  checked={requestApproval}
+                  name="requestApproval"
+                  onChange={(event) =>
+                    setRequestApproval(event.target.checked)
+                  }
+                  type="checkbox"
+                />
+                <span>
+                  <strong>Запросить согласование цены</strong>
+                  <small>Запрос увидит руководитель</small>
+                </span>
+              </label>
+              {requestApproval && (
+                <div
+                  className="price-approval-fields wide-field"
+                  key={selectedDealId}
+                >
+                  <header>
+                    <strong>Параметры согласования</strong>
+                    <span>{selectedDeal?.title ?? "Выберите сделку"}</span>
+                  </header>
+                  <div>
+                    <Field
+                      defaultValue={selectedDeal?.product}
+                      label="Продукт"
+                      name="approvalProduct"
+                      required
+                    />
+                    <Field
+                      defaultValue={selectedDeal?.volume}
+                      label="Объём"
+                      name="approvalVolume"
+                      required
+                    />
+                    <Field
+                      defaultValue={selectedDeal?.ourPrice}
+                      label="Текущая цена"
+                      name="currentPrice"
+                      required
+                      type="number"
+                    />
+                    <Field
+                      label="Запрашиваемая цена"
+                      name="requestedPrice"
+                      required
+                      type="number"
+                    />
+                    <Field
+                      label="Причина изменения"
+                      name="approvalReason"
+                      required
+                      wide
+                    />
+                    <Field
+                      label="Комментарий руководителю"
+                      name="approvalComment"
+                      wide
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -3139,8 +4471,12 @@ function CreateDialog({
           <button className="ghost-button" onClick={onClose} type="button">
             Отмена
           </button>
-          <button className="primary-button" type="submit">
-            Сохранить локально
+          <button
+            className="primary-button"
+            disabled={!formValid}
+            type="submit"
+          >
+            {kind === "interaction" ? "Сохранить контакт" : "Сохранить"}
           </button>
         </footer>
       </form>
@@ -3154,17 +4490,24 @@ function Field({
   required,
   type = "text",
   wide,
+  defaultValue,
 }: {
   label: string;
   name: string;
   required?: boolean;
   type?: string;
   wide?: boolean;
+  defaultValue?: string | number;
 }) {
   return (
     <label className={wide ? "wide-field" : ""}>
       {label}
-      <input name={name} required={required} type={type} />
+      <input
+        defaultValue={defaultValue}
+        name={name}
+        required={required}
+        type={type}
+      />
     </label>
   );
 }
@@ -3176,16 +4519,33 @@ function SelectField({
   name,
   options,
   defaultValue,
+  onChange,
+  required,
 }: {
   label: string;
   name: string;
   options: readonly SelectOption[];
   defaultValue?: string;
+  onChange?: (value: string) => void;
+  required?: boolean;
 }) {
+  const controlledProps = onChange
+    ? {
+        value: defaultValue ?? "",
+        onChange: (event: ChangeEvent<HTMLSelectElement>) =>
+          onChange(event.target.value),
+      }
+    : { defaultValue };
+
   return (
     <label>
       {label}
-      <select defaultValue={defaultValue} name={name}>
+      <select
+        name={name}
+        required={required}
+        {...controlledProps}
+      >
+        {!options.length && <option value="">Нет доступных вариантов</option>}
         {options.map((option) => {
           const value = typeof option === "string" ? option : option.value;
           const text = typeof option === "string" ? option : option.label;

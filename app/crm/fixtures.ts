@@ -7,6 +7,7 @@ import {
   type CrmSnapshot,
   type Deal,
   type Interaction,
+  type PriceApproval,
   type Potential,
   type Session,
   type StatusEvent,
@@ -15,6 +16,7 @@ import {
   type Team,
   type User,
 } from "./domain";
+import { isOpenDeal } from "./sales-automation";
 
 export const DEMO_TEAM_ID = "team-gofra";
 export const DEMO_USER_IDS = {
@@ -180,13 +182,31 @@ const clientsFromStatuses: Client[] = CLIENT_STATUSES.map((status, index) => {
         ][index % 4],
     nextActionAt: closed
       ? null
-      : `2026-07-${String(23 + (index % 6)).padStart(2, "0")}T${
-          9 + (index % 7)
-        }:00:00.000Z`,
+      : `2026-07-${String(23 + (index % 6)).padStart(2, "0")}T${String(
+          9 + (index % 7),
+        ).padStart(2, "0")}:00:00.000Z`,
     comment:
       index % 2 === 0
         ? "Важны сроки поставки и стабильность партии."
         : "Нужен расчёт под несколько типоразмеров.",
+    orderFrequencyDays: [30, 45, 60, 90][index % 4],
+    lastShipmentAt: [
+      "2026-07-12",
+      "2026-06-18",
+      "2026-05-19",
+      "2026-04-18",
+      "2026-03-12",
+    ][index % 5],
+    expectedNextOrderAt: [
+      "2026-08-11",
+      "2026-08-02",
+      "2026-07-18",
+      "2026-07-17",
+      "2026-07-10",
+    ][index % 5],
+    expectedNextOrderManual: index % 3 === 0,
+    averageMonthlyVolume: 28_000 + index * 4_500,
+    repeatReminderDays: index % 2 === 0 ? 14 : 7,
   };
 });
 
@@ -202,7 +222,7 @@ export const demoClients: Client[] = [
   ...clientsFromStatuses,
 ];
 
-export const demoContacts: Contact[] = demoClients
+const primaryContacts: Contact[] = demoClients
   .slice(0, 12)
   .map((client, index) => ({
     id: `КТ-${String(index + 1).padStart(4, "0")}`,
@@ -226,7 +246,79 @@ export const demoContacts: Contact[] = demoClients
       .replaceAll("ё", "e")}.ru`,
     comment:
       index % 3 === 0 ? "Предпочитает связь по телефону до 14:00." : "",
+    decisionRole: [
+      "Закупщик",
+      "Технолог",
+      "Производство",
+      "Качество",
+      "Финансовый директор",
+      "Генеральный директор",
+    ][index % 6] as Contact["decisionRole"],
+    decisionInfluence: [
+      "Принимает решение",
+      "Влияет",
+      "Блокирует",
+    ][index % 3] as Contact["decisionInfluence"],
+    preferredChannel: ["Телефон", "Email", "WhatsApp", "Telegram", "Встреча"][
+      index % 5
+    ] as Contact["preferredChannel"],
+    introductionNeeded:
+      index % 3 === 0
+        ? "Познакомиться с технологом и руководителем производства"
+        : "",
   }));
+
+export const demoContacts: Contact[] = [
+  ...primaryContacts,
+  {
+    id: "КТ-ВЛ-0001",
+    clientId: demoClients[1].id,
+    ownerId: demoClients[1].ownerId,
+    createdAt: DEMO_CREATED_AT,
+    updatedAt: DEMO_UPDATED_AT,
+    fullName: "Иван Соколов",
+    role: "Руководитель закупок",
+    phone: "+7 921 555-24-18",
+    email: "i.sokolov@sever-manuf.ru",
+    comment: "Ведёт переговоры и собирает внутренние согласования.",
+    decisionRole: "Закупщик",
+    decisionInfluence: "Принимает решение",
+    preferredChannel: "Телефон",
+    introductionNeeded: "Познакомиться с генеральным директором",
+  },
+  {
+    id: "КТ-ВЛ-0002",
+    clientId: demoClients[1].id,
+    ownerId: demoClients[1].ownerId,
+    createdAt: DEMO_CREATED_AT,
+    updatedAt: DEMO_UPDATED_AT,
+    fullName: "Сергей Волков",
+    role: "Технический директор",
+    phone: "+7 921 555-31-47",
+    email: "s.volkov@sever-manuf.ru",
+    comment: "Проверяет материал и устойчивость конструкции.",
+    decisionRole: "Технолог",
+    decisionInfluence: "Влияет",
+    preferredChannel: "Email",
+    introductionNeeded: "",
+  },
+  {
+    id: "КТ-ВЛ-0003",
+    clientId: demoClients[1].id,
+    ownerId: demoClients[1].ownerId,
+    createdAt: DEMO_CREATED_AT,
+    updatedAt: DEMO_UPDATED_AT,
+    fullName: "Ольга Миронова",
+    role: "Менеджер по качеству",
+    phone: "+7 921 555-40-62",
+    email: "o.mironova@sever-manuf.ru",
+    comment: "Нужен протокол испытаний до согласования.",
+    decisionRole: "Качество",
+    decisionInfluence: "Блокирует",
+    preferredChannel: "Встреча",
+    introductionNeeded: "Получить контакт начальника производства",
+  },
+];
 
 const dealProducts = [
   "Гофроящик 600×400",
@@ -240,6 +332,7 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
   const purchasePrice = 114000 + index * 16700;
   const logistics = 12000 + (index % 4) * 3900;
   const margin = ourPrice - purchasePrice - logistics;
+  const terminal = !isOpenDeal({ status });
 
   return {
     id: `СД-${String(812 + index).padStart(4, "0")}`,
@@ -262,7 +355,7 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
     proposalDate:
       index < 3 ? null : `2026-07-${String(4 + index).padStart(2, "0")}`,
     nextAction:
-      index > 12
+      terminal
         ? "Зафиксировать причину закрытия"
         : [
             "Получить размеры и марку картона",
@@ -270,9 +363,10 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
             "Подтвердить график поставки",
           ][index % 3],
     nextActionAt:
-      index > 12
+      terminal
         ? null
         : `2026-07-${String(23 + (index % 7)).padStart(2, "0")}T12:00:00.000Z`,
+    needsNextAction: false,
     managerName: managers[index % managers.length],
     comment: index % 2 === 0 ? "Клиент ждёт два варианта расчёта." : "",
   };
@@ -282,17 +376,18 @@ export const demoInteractions: Interaction[] = Array.from(
   { length: 14 },
   (_, index) => ({
     id: `ИВ-${String(3201 + index).padStart(4, "0")}`,
-    occurredAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${
-      9 + (index % 7)
-    }:15:00.000Z`,
+    occurredAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${String(
+      9 + (index % 7),
+    ).padStart(2, "0")}:15:00.000Z`,
     clientId: demoClients[index % demoClients.length].id,
+    dealId: demoDeals[index % demoDeals.length]?.id ?? null,
     ownerId: managerIds[index % managerIds.length],
-    createdAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${
-      9 + (index % 7)
-    }:15:00.000Z`,
-    updatedAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${
-      9 + (index % 7)
-    }:15:00.000Z`,
+    createdAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${String(
+      9 + (index % 7),
+    ).padStart(2, "0")}:15:00.000Z`,
+    updatedAt: `2026-07-${String(22 - (index % 9)).padStart(2, "0")}T${String(
+      9 + (index % 7),
+    ).padStart(2, "0")}:15:00.000Z`,
     contactId:
       index < demoContacts.length ? demoContacts[index].id : null,
     kind: [
@@ -320,6 +415,17 @@ export const demoInteractions: Interaction[] = Array.from(
     nextStepAt: `2026-07-${String(23 + (index % 6)).padStart(2, "0")}T10:00:00.000Z`,
     managerName: managers[index % managers.length],
     comment: index % 2 === 0 ? "Контакт подтверждён." : "",
+    attachments:
+      index === 0
+        ? [
+            {
+              id: "attachment-demo-1",
+              name: "фото-образца.jpg",
+              type: "image/jpeg",
+              size: 842_000,
+            },
+          ]
+        : [],
   }),
 );
 
@@ -418,7 +524,7 @@ const interactionTasks: Task[] = demoInteractions
     sourceId: interaction.id,
     checklist: [],
     clientId: interaction.clientId,
-    dealId: null,
+    dealId: interaction.dealId,
     contactId: interaction.contactId,
     createdAt: interaction.createdAt,
     updatedAt: interaction.updatedAt,
@@ -458,6 +564,47 @@ export const demoTasks: Task[] = [
     contactId: null,
     createdAt: "2026-07-20T08:00:00.000Z",
     updatedAt: "2026-07-20T08:00:00.000Z",
+  },
+];
+
+export const demoPriceApprovals: PriceApproval[] = [
+  {
+    id: "СЦ-0001",
+    clientId: demoClients[1].id,
+    dealId: demoDeals[4].id,
+    product: demoDeals[4].product,
+    currentPrice: 253_200,
+    requestedPrice: 238_000,
+    volume: demoDeals[4].volume,
+    reason: "Клиент готов зафиксировать объём на три месяца при снижении цены.",
+    comment: "Проверить логистику и возможность рамочного графика.",
+    attachments: [],
+    status: "pending",
+    requestedById: DEMO_USER_IDS.nikolai,
+    reviewedById: null,
+    reviewedAt: null,
+    ownerId: DEMO_USER_IDS.nikolai,
+    createdAt: "2026-07-23T12:30:00.000Z",
+    updatedAt: "2026-07-23T12:30:00.000Z",
+  },
+  {
+    id: "СЦ-0002",
+    clientId: demoClients[2].id,
+    dealId: demoDeals[6].id,
+    product: demoDeals[6].product,
+    currentPrice: 312_000,
+    requestedPrice: 304_500,
+    volume: demoDeals[6].volume,
+    reason: "Цена конкурента ниже на 3%.",
+    comment: "Согласовано при предоплате 70%.",
+    attachments: [],
+    status: "approved",
+    requestedById: DEMO_USER_IDS.timur,
+    reviewedById: DEMO_USER_IDS.sofia,
+    reviewedAt: "2026-07-22T15:10:00.000Z",
+    ownerId: DEMO_USER_IDS.timur,
+    createdAt: "2026-07-22T13:00:00.000Z",
+    updatedAt: "2026-07-22T15:10:00.000Z",
   },
 ];
 
@@ -565,6 +712,7 @@ export const demoSnapshot: CrmSnapshot = {
   contacts: demoContacts,
   deals: demoDeals,
   interactions: demoInteractions,
+  priceApprovals: demoPriceApprovals,
   tasks: demoTasks,
   statusEvents: demoStatusEvents,
   targets: demoTargets,

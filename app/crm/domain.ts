@@ -41,8 +41,38 @@ export const DEAL_STATUSES = [
 export type DealStatus = (typeof DEAL_STATUSES)[number];
 export type Potential = "A" | "B" | "C" | "D";
 
-export const CRM_SCHEMA_VERSION = 2 as const;
+export const CRM_SCHEMA_VERSION = 4 as const;
 export type CrmSchemaVersion = typeof CRM_SCHEMA_VERSION;
+
+export const DECISION_ROLES = [
+  "Закупщик",
+  "Технолог",
+  "Производство",
+  "Качество",
+  "Финансовый директор",
+  "Генеральный директор",
+] as const;
+
+export type DecisionRole = (typeof DECISION_ROLES)[number];
+
+export const DECISION_INFLUENCES = [
+  "Принимает решение",
+  "Влияет",
+  "Блокирует",
+] as const;
+
+export type DecisionInfluence = (typeof DECISION_INFLUENCES)[number];
+
+export const PREFERRED_CHANNELS = [
+  "Телефон",
+  "Email",
+  "WhatsApp",
+  "Telegram",
+  "Встреча",
+] as const;
+
+export type PreferredChannel = (typeof PREFERRED_CHANNELS)[number];
+export type RepeatReminderDays = 7 | 14;
 
 export interface TimestampedEntity {
   createdAt: string;
@@ -152,10 +182,11 @@ export const DEAL_PIPELINE: readonly PipelineGroup[] = [
     ],
   },
   { id: "won", label: "Результат", statuses: ["Закрыта успешно"] },
+  { id: "paused", label: "Отложено", statuses: ["Отложена"] },
   {
     id: "closed",
     label: "Закрыто",
-    statuses: ["Проиграна", "Отложена", "Отменена"],
+    statuses: ["Проиграна", "Отменена"],
     closed: true,
   },
 ] as const;
@@ -177,6 +208,12 @@ export interface Client extends OwnedEntity {
   nextAction: string;
   nextActionAt: string | null;
   comment: string;
+  orderFrequencyDays: number | null;
+  lastShipmentAt: string | null;
+  expectedNextOrderAt: string | null;
+  expectedNextOrderManual: boolean;
+  averageMonthlyVolume: number;
+  repeatReminderDays: RepeatReminderDays;
 }
 
 export interface Contact extends OwnedEntity {
@@ -187,6 +224,10 @@ export interface Contact extends OwnedEntity {
   phone: string;
   email: string;
   comment: string;
+  decisionRole: DecisionRole;
+  decisionInfluence: DecisionInfluence;
+  preferredChannel: PreferredChannel;
+  introductionNeeded: string;
 }
 
 export interface Deal extends OwnedEntity {
@@ -206,6 +247,7 @@ export interface Deal extends OwnedEntity {
   proposalDate: string | null;
   nextAction: string;
   nextActionAt: string | null;
+  needsNextAction: boolean;
   managerName: string;
   comment: string;
 }
@@ -225,6 +267,7 @@ export interface Interaction extends OwnedEntity {
   id: string;
   occurredAt: string;
   clientId: string;
+  dealId: string | null;
   contactId: string | null;
   kind: InteractionKind;
   subject: string;
@@ -233,6 +276,37 @@ export interface Interaction extends OwnedEntity {
   nextStepAt: string | null;
   managerName: string;
   comment: string;
+  attachments: Attachment[];
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+}
+
+export type PriceApprovalStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "clarification";
+
+export interface PriceApproval extends OwnedEntity {
+  id: string;
+  clientId: string;
+  dealId: string;
+  product: string;
+  currentPrice: number;
+  requestedPrice: number;
+  volume: string;
+  reason: string;
+  comment: string;
+  attachments: Attachment[];
+  status: PriceApprovalStatus;
+  requestedById: string;
+  reviewedById: string | null;
+  reviewedAt: string | null;
 }
 
 export type TaskKind =
@@ -251,6 +325,8 @@ export type TaskSource =
   | "client"
   | "deal"
   | "interaction"
+  | "repeat_order"
+  | "price_approval"
   | "imported";
 
 export interface TaskChecklistItem {
@@ -335,6 +411,7 @@ export interface CrmSnapshot {
   contacts: Contact[];
   deals: Deal[];
   interactions: Interaction[];
+  priceApprovals: PriceApproval[];
   tasks: Task[];
   statusEvents: StatusEvent[];
   targets: Target[];

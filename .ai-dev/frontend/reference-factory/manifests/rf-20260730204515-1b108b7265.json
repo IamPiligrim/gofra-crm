@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "id": "rf-20260730204515-1b108b7265",
+  "status": "registered",
+  "stage": "concepts",
+  "project_name": "ГОФРА CRM",
+  "mode": "new",
+  "surface": "application",
+  "generator": "imagegen",
+  "task": "Два визуальных направления для системной доработки существующей ГОФРА CRM и новых функций. Обязательно исправить сливающиеся по цвету меню и поверхности, слишком мелкий текст и слабые заголовки: основной текст ≥14px desktop/≥15px mobile, секционные заголовки ≥18px/600, отчётливые active/hover/focus/disabled, контраст WCAG AA. Показать карточку клиента с картой ЛПР и повторными заказами и быстрый результат контакта/согласование цены. Направление A — плотная стальная операционная CRM; направление B — более светлая сфокусированная рабочая CRM. Реалистичный русский интерфейс упаковочной отрасли.",
+  "context_fingerprint": "bff88b88e4cfb4e5b1ae59827070f55388b1a3eb82e47b84dfb6a38d3e60adcc",
+  "approved_direction_id": null,
+  "selected_skills": [
+    {
+      "name": "frontend-product-builder",
+      "source": "custom",
+      "role": "orchestrator"
+    },
+    {
+      "name": "imagegen-frontend-web",
+      "source": "design/taste-skill",
+      "role": "reference-generation"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "role": "independent-quality"
+    }
+  ],
+  "direction_count": 2,
+  "artifact_budget": 4,
+  "directions": [
+    {
+      "id": "crm-operational-clarity",
+      "name": "Operational Clarity",
+      "rationale": "Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.",
+      "layout": "Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.",
+      "typography": "Compact readable text with clear labels, numbers, and state emphasis.",
+      "color": "Quiet neutral surfaces plus semantic status and action colors.",
+      "density": "Dense but organized for expert scanning and repeated actions.",
+      "imagery": "Use real data visualizations, objects, or workflow evidence only where they improve decisions.",
+      "motion": "State transitions, progress, and spatial continuity only.",
+      "tradeoffs": [
+        "Less expressive for marketing surfaces",
+        "Requires accurate data and state definitions"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow",
+      "name": "Focused Workflow",
+      "rationale": "Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.",
+      "layout": "Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.",
+      "typography": "Clear action and instruction hierarchy with generous form readability.",
+      "color": "Restrained brand accent with accessible focus, error, and success states.",
+      "density": "Lower density on the active task and higher density in supporting inspection views.",
+      "imagery": "Use only task-relevant diagrams, previews, or records.",
+      "motion": "Explain step changes, validation, and panel relationships.",
+      "tradeoffs": [
+        "Slower for users who need broad comparison",
+        "Requires good information prioritization"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "crm-operational-clarity--crm--desktop--default",
+      "direction_id": "crm-operational-clarity",
+      "scope": "Глобальная навигация и типографическая система всей CRM",
+      "route": "Глобальная навигация и типографическая система всей CRM",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--desktop--default.png",
+      "purpose": "Compare the Operational Clarity direction for Глобальная навигация и типографическая система всей CRM on desktop.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: Глобальная навигация и типографическая система всей CRM, desktop, 1440x960. Show the normal ready state.\nDirection \"Operational Clarity\": Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.\nLayout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\nTypography: Compact readable text with clear labels, numbers, and state emphasis.\nColor: Quiet neutral surfaces plus semantic status and action colors.\nDensity: Dense but organized for expert scanning and repeated actions.\nImagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\nMotion intent for later implementation: State transitions, progress, and spatial continuity only.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую стальную идентичность и Geist, но системно повысить читаемость: основной текст не мельче 14px на desktop и 15px на mobile, вспомогательный не мельче 12px при достаточном контрасте, заголовки секций минимум 18px/600, явные контрастные active/hover/focus/disabled состояния, различимые границы поверхностей; сохранить светлую и тёмную темы и рабочую плотность CRM без сливающихся меню и карточек\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "7179c05d4170c9c38822a5263711d970d4e60c370c82aa75a120346a4d0ecdbc",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-operational-clarity--crm--mobile--default",
+      "direction_id": "crm-operational-clarity",
+      "scope": "Глобальная навигация и типографическая система всей CRM",
+      "route": "Глобальная навигация и типографическая система всей CRM",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--mobile--default.png",
+      "purpose": "Compare the Operational Clarity direction for Глобальная навигация и типографическая система всей CRM on mobile.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: Глобальная навигация и типографическая система всей CRM, mobile, 390x844. Show the normal ready state.\nDirection \"Operational Clarity\": Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.\nLayout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\nTypography: Compact readable text with clear labels, numbers, and state emphasis.\nColor: Quiet neutral surfaces plus semantic status and action colors.\nDensity: Dense but organized for expert scanning and repeated actions.\nImagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\nMotion intent for later implementation: State transitions, progress, and spatial continuity only.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую стальную идентичность и Geist, но системно повысить читаемость: основной текст не мельче 14px на desktop и 15px на mobile, вспомогательный не мельче 12px при достаточном контрасте, заголовки секций минимум 18px/600, явные контрастные active/hover/focus/disabled состояния, различимые границы поверхностей; сохранить светлую и тёмную темы и рабочую плотность CRM без сливающихся меню и карточек\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "6530f0b75260970bba9d527e23c0414d8730ef2063073aa70cd80c4ef0e07610",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--crm--desktop--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "Глобальная навигация и типографическая система всей CRM",
+      "route": "Глобальная навигация и типографическая система всей CRM",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--desktop--default.png",
+      "purpose": "Compare the Focused Workflow direction for Глобальная навигация и типографическая система всей CRM on desktop.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: Глобальная навигация и типографическая система всей CRM, desktop, 1440x960. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\nTypography: Clear action and instruction hierarchy with generous form readability.\nColor: Restrained brand accent with accessible focus, error, and success states.\nDensity: Lower density on the active task and higher density in supporting inspection views.\nImagery: Use only task-relevant diagrams, previews, or records.\nMotion intent for later implementation: Explain step changes, validation, and panel relationships.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую стальную идентичность и Geist, но системно повысить читаемость: основной текст не мельче 14px на desktop и 15px на mobile, вспомогательный не мельче 12px при достаточном контрасте, заголовки секций минимум 18px/600, явные контрастные active/hover/focus/disabled состояния, различимые границы поверхностей; сохранить светлую и тёмную темы и рабочую плотность CRM без сливающихся меню и карточек\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "c59d7eb245d4882372f75f9dd4240e5c6b57e0284b3463fb607442e65a5bfbbc",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--crm--mobile--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "Глобальная навигация и типографическая система всей CRM",
+      "route": "Глобальная навигация и типографическая система всей CRM",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--mobile--default.png",
+      "purpose": "Compare the Focused Workflow direction for Глобальная навигация и типографическая система всей CRM on mobile.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: Глобальная навигация и типографическая система всей CRM, mobile, 390x844. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\nTypography: Clear action and instruction hierarchy with generous form readability.\nColor: Restrained brand accent with accessible focus, error, and success states.\nDensity: Lower density on the active task and higher density in supporting inspection views.\nImagery: Use only task-relevant diagrams, previews, or records.\nMotion intent for later implementation: Explain step changes, validation, and panel relationships.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую стальную идентичность и Geist, но системно повысить читаемость: основной текст не мельче 14px на desktop и 15px на mobile, вспомогательный не мельче 12px при достаточном контрасте, заголовки секций минимум 18px/600, явные контрастные active/hover/focus/disabled состояния, различимые границы поверхностей; сохранить светлую и тёмную темы и рабочую плотность CRM без сливающихся меню и карточек\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "9bb167761505a122d75d8d337c8281aff1a980768c64565c88778eb1eaf1792f",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    }
+  ],
+  "generation_contract": {
+    "output_format": "png",
+    "tool_boundary": "The MCP server plans and validates. The client agent calls ImageGen or Figma.",
+    "exact_output_paths": true,
+    "prompt_hash_binding": true,
+    "require_actual_visual_inspection": true,
+    "reject_duplicate_images": true,
+    "approval_is_separate": true
+  },
+  "created_at": "2026-07-30T20:45:15.749Z",
+  "updated_at": "2026-07-30T20:52:16.234Z",
+  "registered_at": "2026-07-30T20:52:16.234Z",
+  "outputs": [
+    {
+      "artifact_id": "crm-operational-clarity--crm--desktop--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--desktop--default.png",
+      "prompt_sha256": "7179c05d4170c9c38822a5263711d970d4e60c370c82aa75a120346a4d0ecdbc",
+      "file_sha256": "5156948c046bfcdd8fb209eddf08f11a2046622102f57fb5db3e5d748841d578",
+      "perceptual_hash": "8a5ff5738c52a5febedad466aa5afffe",
+      "width": 1440,
+      "height": 960,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Полноценный desktop-экран с ясной стальной навигацией, заметными секционными заголовками и семантическими статусами. В таблицах и вторичных подписях плотность чрезмерна и шрифт визуально мал — это существенный риск направления для дальнейшего жюри, но артефакт пригоден для сравнения.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-operational-clarity--crm--mobile--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-operational-clarity--crm--mobile--default.png",
+      "prompt_sha256": "6530f0b75260970bba9d527e23c0414d8730ef2063073aa70cd80c4ef0e07610",
+      "file_sha256": "d6b122ba7b1bce743e72211b34b1e64bc1127c4e6adf2bf379b2890a9ba2c828",
+      "perceptual_hash": "ffdf20ff3609de01f2da66ff76e75e3f",
+      "width": 390,
+      "height": 844,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Цельный mobile dashboard с различимой нижней навигацией и статусами. Слишком много данных одновременно, подписи и часть контента заметно мельче требуемого рабочего уровня; направление можно использовать только как отрицательный контраст при выборе.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-focused-workflow--crm--desktop--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--desktop--default.png",
+      "prompt_sha256": "c59d7eb245d4882372f75f9dd4240e5c6b57e0284b3463fb607442e65a5bfbbc",
+      "file_sha256": "c7287eb38e08c56274a2810c144f29a1dd9cbc8e1c4eee05a2a67a4f61a53486",
+      "perceptual_hash": "817ffdfe3fde81fe944efcfc6e7eb6fe",
+      "width": 1440,
+      "height": 960,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Сфокусированный desktop-экран: результат контакта и обязательный следующий шаг образуют один очевидный рабочий поток; активная навигация контрастна, заголовки заметны, карта влияния вынесена в контекстную панель. Мелкие вторичные подписи нужно увеличить в реализации.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-focused-workflow--crm--mobile--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-focused-workflow/crm-focused-workflow--crm--mobile--default.png",
+      "prompt_sha256": "9bb167761505a122d75d8d337c8281aff1a980768c64565c88778eb1eaf1792f",
+      "file_sha256": "c2e559f5b75873e264ab323b62b5f2b6fffebb500375c4fd0b96519ae4f490d1",
+      "perceptual_hash": "ffffd17fff8877935feef37bfeb9edb7",
+      "width": 390,
+      "height": 844,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Mobile-поток сохраняет один главный сценарий, явное обязательное действие и крупную основную кнопку, без горизонтального переполнения. Для реализации требуется поднять базовый размер полей/вторичного текста и высоту контролов до зафиксированных минимумов.",
+        "blocking_findings": []
+      }
+    }
+  ],
+  "manifest_fingerprint": "5040323e30f20f3580e020dcad5a939a921c0041b535259da0c50b82a976f773"
+}

@@ -1,77 +1,32 @@
 # Frontend QA Report
 
-Generated: 2026-07-24T00:04:58.490Z
+Generated: 2026-07-31T10:08:45.408Z
 Gate: pass
-Project: `C:\Users\sacha\Documents\Codex\2026-07-23\new-chat`
-Base URL: `http://127.0.0.1:4179`
+Project: `C:\Users\sacha\OneDrive\Документы\Сайт Леха`
+Base URL: `http://127.0.0.1:5173`
 
 ## Summary
 
-- Routes checked: 5
-- Viewports checked: desktop 1440x960, mobile 390x844
-- Screenshots: 10
+- Routes checked: 1
+- Viewports checked: desktop 1600x900, mobile 390x844
+- Screenshots: 2
+- Required UI states covered: yes
+- Unwaived anti-slop findings: 0
 - Setup warnings: 0
 - Playwright source: runner
-- Artifact directory: `C:\Users\sacha\Documents\Codex\2026-07-23\new-chat\work\steel-palette-qa`
+- Artifact directory: `C:\Users\sacha\OneDrive\Документы\Сайт Леха\.ai-dev\frontend-qa\2026-07-31T10-08-45-411Z`
+- Visual baseline directory: disabled
 
 ## Findings
 
 ### /#/dashboard / desktop
 
 - Status: passed
-- Screenshot: `work/steel-palette-qa/dashboard__desktop.png`
+- Screenshot: `.ai-dev/frontend-qa/2026-07-31T10-08-45-411Z/dashboard__desktop__default.png`
 - No blocking findings recorded.
 
 ### /#/dashboard / mobile
 
 - Status: passed
-- Screenshot: `work/steel-palette-qa/dashboard__mobile.png`
-- No blocking findings recorded.
-
-### /#/clients / desktop
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/clients__desktop.png`
-- No blocking findings recorded.
-
-### /#/clients / mobile
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/clients__mobile.png`
-- No blocking findings recorded.
-
-### /#/deals / desktop
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/deals__desktop.png`
-- No blocking findings recorded.
-
-### /#/deals / mobile
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/deals__mobile.png`
-- No blocking findings recorded.
-
-### /#/statistics / desktop
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/statistics__desktop.png`
-- No blocking findings recorded.
-
-### /#/statistics / mobile
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/statistics__mobile.png`
-- No blocking findings recorded.
-
-### /#/chat / desktop
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/chat__desktop.png`
-- No blocking findings recorded.
-
-### /#/chat / mobile
-
-- Status: passed
-- Screenshot: `work/steel-palette-qa/chat__mobile.png`
+- Screenshot: `.ai-dev/frontend-qa/2026-07-31T10-08-45-411Z/dashboard__mobile__default.png`
 - No blocking findings recorded.

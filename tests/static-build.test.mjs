@@ -89,16 +89,24 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
       readFile(new URL("../app/agency-redesign.css", import.meta.url), "utf8"),
     ]);
 
-  assert.match(domain, /CRM_SCHEMA_VERSION = 2/);
+  assert.match(domain, /CRM_SCHEMA_VERSION = 4/);
   assert.match(domain, /UserRole = "manager" \| "employee"/);
   assert.match(domain, /interface Task/);
   assert.match(domain, /type TaskSource/);
   assert.match(domain, /interface TaskChecklistItem/);
   assert.match(domain, /"dashboard"[\s\S]*"calendar"[\s\S]*"statistics"[\s\S]*"chat"/);
   assert.match(gateway, /LEGACY_CRM_STORAGE_KEY/);
+  assert.match(gateway, /gofra-crm-prototype:v4/);
+  assert.match(gateway, /gofra-crm-prototype:v3/);
+  assert.match(gateway, /normalizeDealNextAction/);
+  assert.match(gateway, /resolveExpectedNextOrder/);
   assert.match(gateway, /createTasksFromLegacyRecords/);
   assert.match(gateway, /checklist/);
   assert.match(gateway, /sourceId/);
+  assert.match(domain, /DECISION_ROLES/);
+  assert.match(domain, /interface PriceApproval/);
+  assert.match(domain, /repeatReminderDays/);
+  assert.match(gateway, /syncRepeatOrderTasks/);
 
   assert.match(app, /DashboardView/);
   assert.match(app, /CalendarView/);
@@ -117,6 +125,11 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(app, /TASK-КЛ-/);
   assert.match(app, /nextActionAt/);
   assert.match(app, /importBatch/);
+  assert.match(app, /Обязательный следующий шаг/);
+  assert.match(app, /Согласование цены/);
+  assert.match(app, /Карта влияния/);
+  assert.match(app, /Активные · 90–119 дней/);
+  assert.match(app, /Нет данных об отгрузке/);
 
   assert.match(theme, /ThemeMode = "system" \| "light" \| "dark"/);
   assert.match(theme, /document\.documentElement\.dataset\.theme/);
@@ -148,6 +161,29 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.doesNotMatch(features, /Результаты команды, движение воронки/);
 
   assert.match(features, /export function DashboardView/);
+  assert.match(features, /function CustomerOverviewDashboard/);
+  assert.match(features, /Прогноз повторного заказа/);
+  assert.match(app, /function DealWorkspace/);
+  assert.match(app, /Рабочее пространство сделки/);
+  assert.match(app, /Сохранить результат контакта/);
+  assert.match(
+    agencyStyles,
+    /\.customer-overview-rail\s*\{[^}]*align-self:\s*start;[^}]*position:\s*static;/s,
+  );
+  assert.match(agencyStyles, /Final workspace-scroll safeguard/);
+  assert.match(
+    agencyStyles,
+    /\.workspace-header\s*\{[^}]*position:\s*relative;[^}]*top:\s*auto;/s,
+  );
+  assert.match(
+    agencyStyles,
+    /Final workspace-scroll safeguard[\s\S]*\.view-toolbar,[\s\S]*\.customer-overview-tabs\s*\{[^}]*position:\s*relative;[^}]*top:\s*auto;/,
+  );
+  assert.match(
+    styles,
+    /\.side-nav\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;/s,
+  );
+  assert.match(agencyStyles, /\.deal-workspace-backdrop/);
   assert.match(features, /export function CalendarView/);
   assert.match(features, /export function StatisticsView/);
   assert.match(features, /TASK_SOURCE_LABELS/);
