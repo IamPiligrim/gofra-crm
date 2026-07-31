@@ -1195,7 +1195,8 @@
 @media (max-width: 760px) {
   .chat-view {
     border-radius: 16px;
-    display: block;
+    display: flex;
+    flex-direction: column;
     height: calc(100dvh - 150px);
     min-height: 520px;
   }
@@ -1203,12 +1204,18 @@
   .chat-sidebar,
   .chat-thread {
     border: 0;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
   }
 
   .chat-thread {
     display: none;
+  }
+
+  .chat-conversation-list,
+  .chat-message-list {
+    overscroll-behavior: auto;
   }
 
   .chat-view.chat-has-active-thread .chat-sidebar {
