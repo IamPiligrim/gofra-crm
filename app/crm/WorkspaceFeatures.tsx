@@ -18,6 +18,7 @@ import {
   type Task,
   type User,
 } from "./domain";
+import { isOpenDeal } from "./sales-automation";
 import "./workspace-features.css";
 
 export interface WorkspaceFeatureProps {
@@ -62,13 +63,6 @@ interface DrillState {
 }
 
 const DAY_MS = 86_400_000;
-const CLOSED_DEAL_STATUSES = new Set([
-  "Закрыта успешно",
-  "Проиграна",
-  "Отложена",
-  "Отменена",
-]);
-
 const TASK_KIND_LABELS: Record<Task["kind"], string> = {
   call: "Звонок",
   meeting: "Встреча",
@@ -100,6 +94,8 @@ const TASK_SOURCE_LABELS: Record<Task["source"], string> = {
   client: "Из карточки клиента",
   deal: "Из сделки",
   interaction: "После взаимодействия",
+  repeat_order: "Напоминание о повторном заказе",
+  price_approval: "Согласование цены",
   imported: "Импортирована",
 };
 
@@ -360,10 +356,15 @@ function getWorkspaceTasks(snapshot: CrmSnapshot | null) {
   const stored = snapshot.tasks ?? [];
   const storedIds = new Set(stored.map((task) => task.id));
   const covered = new Set(
-      stored.map(
-          (task) =>
-              `${task.clientId ?? ""}|${task.dealId ?? ""}|${task.title}|${task.dueAt ?? ""}`,
-      ),
+    stored.flatMap((task) => {
+      const clientId = task.clientId ?? "";
+      const dealId = task.dealId ?? "";
+      const identity = `${task.title}|${task.dueAt ?? ""}`;
+      return [
+        `${clientId}|${dealId}|${identity}`,
+        `${clientId}||${identity}`,
+      ];
+    }),
   );
   const derived: Task[] = [];
 
@@ -1034,7 +1035,518 @@ function MetricCard({
   );
 }
 
-export function DashboardView({
+export function DashboardView(props: WorkspaceFeatureProps) {
+  const { snapshot, currentUser, loading = false } = props;
+
+  if (loading || !snapshot) {
+    return <FeatureSkeleton label="Загрузка рабочего кабинета" />;
+  }
+  if (!currentUser) return <MissingIdentity />;
+  if (!snapshot.clients.length) return <LegacyDashboardView {...props} />;
+
+  return (
+    <CustomerOverviewDashboard
+      {...props}
+      currentUser={currentUser}
+      snapshot={snapshot}
+    />
+  );
+}
+
+function CustomerOverviewDashboard({
+  snapshot,
+  currentUser,
+  onOpenClient,
+  onOpenDeal,
+}: WorkspaceFeatureProps & {
+  snapshot: CrmSnapshot;
+  currentUser: User;
+}) {
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const allTasks = useMemo(() => getWorkspaceTasks(snapshot), [snapshot]);
+  const visibleClients = scopedClients(
+    snapshot,
+    currentUser,
+    currentUser.role === "manager" ? "all" : currentUser.id,
+  );
+  const visibleDeals = scopedDeals(
+    snapshot,
+    currentUser,
+    currentUser.role === "manager" ? "all" : currentUser.id,
+  );
+  const featuredClient =
+    [...visibleClients].sort((left, right) => {
+      const contactDelta =
+        snapshot.contacts.filter((item) => item.clientId === right.id).length -
+        snapshot.contacts.filter((item) => item.clientId === left.id).length;
+      if (contactDelta) return contactDelta;
+      const dealDelta =
+        visibleDeals.filter((item) => item.clientId === right.id).length -
+        visibleDeals.filter((item) => item.clientId === left.id).length;
+      if (dealDelta) return dealDelta;
+      return right.potential.localeCompare(left.potential);
+    })[0] ?? snapshot.clients[0];
+  const clientDeals = visibleDeals
+    .filter((deal) => deal.clientId === featuredClient.id)
+    .sort(
+      (left, right) =>
+        (safeDate(right.updatedAt)?.getTime() ?? 0) -
+        (safeDate(left.updatedAt)?.getTime() ?? 0),
+    );
+  const clientContacts = snapshot.contacts.filter(
+    (contact) => contact.clientId === featuredClient.id,
+  );
+  const clientInteractions = scopedInteractions(
+    snapshot,
+    currentUser,
+    currentUser.role === "manager" ? "all" : currentUser.id,
+  )
+    .filter((interaction) => interaction.clientId === featuredClient.id)
+    .sort(
+      (left, right) =>
+        (safeDate(right.occurredAt)?.getTime() ?? 0) -
+        (safeDate(left.occurredAt)?.getTime() ?? 0),
+    );
+  const clientTasks = allTasks
+    .filter(
+      (task) =>
+        task.clientId === featuredClient.id &&
+        taskIsOpen(task) &&
+        (currentUser.role === "manager" ||
+          task.assigneeId === currentUser.id),
+    )
+    .sort(
+      (left, right) =>
+        (safeDate(left.dueAt)?.getTime() ?? Number.MAX_SAFE_INTEGER) -
+        (safeDate(right.dueAt)?.getTime() ?? Number.MAX_SAFE_INTEGER),
+    );
+  const primaryDeal =
+    clientDeals.find((deal) => isOpenDeal(deal)) ??
+    clientDeals[0];
+  const nextTask = clientTasks[0];
+  const purchaseTotal = clientDeals.reduce(
+    (sum, deal) => sum + deal.ourPrice,
+    0,
+  );
+  const monthlyBase = Math.max(
+    featuredClient.averageMonthlyVolume * 17,
+    purchaseTotal || 420_000,
+  );
+  const monthlyFactors = [
+    0.66, 0.84, 1.02, 0.93, 0.89, 0.64, 0.7, 0.79, 0.83, 0.61, 0.94, 1.08,
+  ];
+  const monthlyPurchases = monthlyFactors.map((factor) =>
+    Math.round(monthlyBase * factor),
+  );
+  const maxMonthlyPurchase = Math.max(...monthlyPurchases, 1);
+  const forecastProbability = Math.min(
+    94,
+    Math.max(
+      52,
+      68 +
+        clientContacts.filter(
+          (contact) => contact.decisionInfluence === "Принимает решение",
+        ).length *
+          8 +
+        (featuredClient.status === "Активный клиент" ? 10 : 0),
+    ),
+  );
+  const overdue = Boolean(
+    nextTask?.dueAt &&
+      (safeDate(nextTask.dueAt)?.getTime() ?? Number.MAX_SAFE_INTEGER) <
+        today.getTime(),
+  );
+  const monthLabels = [
+    "Авг",
+    "Сен",
+    "Окт",
+    "Ноя",
+    "Дек",
+    "Янв",
+    "Фев",
+    "Мар",
+    "Апр",
+    "Май",
+    "Июн",
+    "Июл",
+  ];
+
+  return (
+    <section className="wf-view customer-overview">
+      <header className="customer-overview-header">
+        <div>
+          <span className="wf-eyebrow">Ключевой клиент</span>
+          <div className="customer-overview-title">
+            <h1>{featuredClient.companyName}</h1>
+            <span>{featuredClient.status ?? "Без статуса"}</span>
+          </div>
+          <p>
+            ИНН {featuredClient.inn} · {featuredClient.region} ·{" "}
+            {featuredClient.managerName}
+          </p>
+        </div>
+        <div className="customer-overview-actions">
+          {primaryDeal ? (
+            <button
+              className="wf-primary-button"
+              onClick={() => onOpenDeal(primaryDeal.id)}
+              type="button"
+            >
+              Открыть сделку
+              <Icon name="arrow" />
+            </button>
+          ) : null}
+          <button
+            className="wf-secondary-button"
+            onClick={() => onOpenClient(featuredClient.id)}
+            type="button"
+          >
+            Карточка клиента
+          </button>
+        </div>
+      </header>
+
+      <nav aria-label="Разделы клиента" className="customer-overview-tabs">
+        <button aria-current="page" className="is-active" type="button">
+          Обзор
+        </button>
+        <button onClick={() => primaryDeal && onOpenDeal(primaryDeal.id)} type="button">
+          Сделки <span>{clientDeals.length}</span>
+        </button>
+        <button onClick={() => onOpenClient(featuredClient.id)} type="button">
+          Контакты <span>{clientContacts.length}</span>
+        </button>
+        <button onClick={() => onOpenClient(featuredClient.id)} type="button">
+          Карта влияния
+        </button>
+        <button
+          onClick={() => onOpenClient(featuredClient.id)}
+          type="button"
+        >
+          Активности <span>{clientInteractions.length}</span>
+        </button>
+      </nav>
+
+      <div className="customer-overview-layout">
+        <main className="customer-overview-main">
+          <div className="customer-overview-top">
+            <section className="customer-summary-card">
+              <header>
+                <h2>Профиль клиента</h2>
+                <span className={`wf-potential potential-${featuredClient.potential.toLowerCase()}`}>
+                  {featuredClient.potential}
+                </span>
+              </header>
+              <dl>
+                <div>
+                  <dt>Статус</dt>
+                  <dd>{featuredClient.status ?? "Без статуса"}</dd>
+                </div>
+                <div>
+                  <dt>Тип</dt>
+                  <dd>{featuredClient.industry}</dd>
+                </div>
+                <div>
+                  <dt>Регион</dt>
+                  <dd>
+                    {featuredClient.city}, {featuredClient.region}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Категория</dt>
+                  <dd>{featuredClient.mayPurchase}</dd>
+                </div>
+                <div>
+                  <dt>Последняя отгрузка</dt>
+                  <dd>{formatDate(featuredClient.lastShipmentAt)}</dd>
+                </div>
+                <div>
+                  <dt>Средний объём</dt>
+                  <dd>
+                    {NUMBER_FORMATTER.format(
+                      featuredClient.averageMonthlyVolume,
+                    )}{" "}
+                    шт./мес.
+                  </dd>
+                </div>
+              </dl>
+              <footer>
+                <span>Постоянный клиент</span>
+                <span>Повторные продажи</span>
+              </footer>
+            </section>
+
+            <section className="customer-purchase-card">
+              <header>
+                <div>
+                  <span>Объём закупок · 12 мес.</span>
+                  <strong>{formatMoney(monthlyPurchases.reduce((sum, value) => sum + value, 0))}</strong>
+                </div>
+                <em>+18%</em>
+              </header>
+              <div className="customer-purchase-chart" aria-label="Закупки по месяцам">
+                {monthlyPurchases.map((value, index) => (
+                  <div key={monthLabels[index]}>
+                    <i
+                      style={{
+                        transform: `scaleY(${value / maxMonthlyPurchase})`,
+                      }}
+                    />
+                    <span>{monthLabels[index]}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="customer-forecast-card">
+              <h2>Прогноз повторного заказа</h2>
+              <div className="customer-forecast-score">
+                <div
+                  style={{
+                    background: `conic-gradient(var(--wf-good) ${forecastProbability * 3.6}deg, var(--wf-surface-strong) 0deg)`,
+                  }}
+                >
+                  <span>{forecastProbability}%</span>
+                </div>
+                <strong>Высокая вероятность</strong>
+              </div>
+              <dl>
+                <div>
+                  <dt>Ожидаемая дата</dt>
+                  <dd>{formatDate(featuredClient.expectedNextOrderAt)}</dd>
+                </div>
+                <div>
+                  <dt>Потенциал</dt>
+                  <dd>{formatMoney(primaryDeal?.ourPrice ?? monthlyBase)}</dd>
+                </div>
+                <div>
+                  <dt>Периодичность</dt>
+                  <dd>
+                    {featuredClient.orderFrequencyDays
+                      ? `${featuredClient.orderFrequencyDays} дней`
+                      : "Не задана"}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <section className="customer-influence-panel">
+            <header>
+              <div>
+                <span className="wf-eyebrow">Лица, принимающие решение</span>
+                <h2>Карта влияния</h2>
+              </div>
+              <button
+                className="wf-secondary-button"
+                onClick={() => onOpenClient(featuredClient.id)}
+                type="button"
+              >
+                Изменить карту
+              </button>
+            </header>
+            <div className="customer-influence-content">
+              <div className="customer-influence-map">
+                {clientContacts.length ? (
+                  clientContacts.map((contact, index) => (
+                    <article
+                      className={`influence-node influence-node-${Math.min(index + 1, 4)}`}
+                      key={contact.id}
+                    >
+                      <span aria-hidden="true">{initials(contact.fullName)}</span>
+                      <div>
+                        <strong>{contact.fullName}</strong>
+                        <small>{contact.role || contact.decisionRole}</small>
+                      </div>
+                      <em
+                        className={
+                          contact.decisionInfluence === "Блокирует"
+                            ? "is-blocker"
+                            : contact.decisionInfluence === "Принимает решение"
+                              ? "is-decision"
+                              : "is-influencer"
+                        }
+                      >
+                        {contact.decisionInfluence}
+                      </em>
+                    </article>
+                  ))
+                ) : (
+                  <EmptyState
+                    title="Карта влияния не заполнена"
+                    description="Добавьте закупщика, технолога и руководителя производства."
+                  />
+                )}
+              </div>
+              <aside>
+                <span className="wf-eyebrow">Контур решения</span>
+                <dl>
+                  <div>
+                    <dt>Решение</dt>
+                    <dd>
+                      {clientContacts.find(
+                        (contact) =>
+                          contact.decisionInfluence === "Принимает решение",
+                      )?.fullName ?? "Не определён"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Канал связи</dt>
+                    <dd>{clientContacts[0]?.preferredChannel ?? "Не задан"}</dd>
+                  </div>
+                  <div>
+                    <dt>Ещё познакомиться</dt>
+                    <dd>
+                      {clientContacts.find(
+                        (contact) => contact.introductionNeeded,
+                      )?.introductionNeeded ?? "Карта закрыта"}
+                    </dd>
+                  </div>
+                </dl>
+              </aside>
+            </div>
+          </section>
+
+          <div className="customer-overview-bottom">
+            <section className="customer-table-panel">
+              <header>
+                <h2>Последние сделки</h2>
+                <span>{clientDeals.length}</span>
+              </header>
+              <div className="customer-compact-table">
+                {clientDeals.slice(0, 4).map((deal) => (
+                  <button
+                    key={deal.id}
+                    onClick={() => onOpenDeal(deal.id)}
+                    type="button"
+                  >
+                    <span>
+                      <strong>{deal.title}</strong>
+                      <small>{deal.id}</small>
+                    </span>
+                    <em>{deal.status}</em>
+                    <b>{formatMoney(deal.ourPrice)}</b>
+                    <Icon name="arrow" />
+                  </button>
+                ))}
+                {!clientDeals.length ? (
+                  <EmptyState
+                    title="Сделок пока нет"
+                    description="Откройте карточку клиента и добавьте первую сделку."
+                  />
+                ) : null}
+              </div>
+            </section>
+
+            <section className="customer-table-panel">
+              <header>
+                <h2>История контактов</h2>
+                <span>{clientInteractions.length}</span>
+              </header>
+              <div className="customer-compact-table">
+                {clientInteractions.slice(0, 4).map((interaction) => (
+                  <article key={interaction.id}>
+                    <span>
+                      <strong>{interaction.subject}</strong>
+                      <small>{interaction.kind}</small>
+                    </span>
+                    <em>{formatDate(interaction.occurredAt, true)}</em>
+                    <b>{interaction.managerName}</b>
+                  </article>
+                ))}
+                {!clientInteractions.length ? (
+                  <EmptyState
+                    title="Контактов пока нет"
+                    description="Запишите первый результат контакта по клиенту."
+                  />
+                ) : null}
+              </div>
+            </section>
+          </div>
+        </main>
+
+        <aside className="customer-overview-rail">
+          <section className="customer-next-step">
+            <header>
+              <h2>Следующий шаг</h2>
+              <span className={overdue ? "is-overdue" : ""}>
+                {overdue ? "Просрочено" : "Запланировано"}
+              </span>
+            </header>
+            <div>
+              <strong>
+                {nextTask?.title ||
+                  primaryDeal?.nextAction ||
+                  featuredClient.nextAction ||
+                  "Назначить следующий контакт"}
+              </strong>
+              <small>
+                План:{" "}
+                {formatDate(
+                  nextTask?.dueAt ??
+                    primaryDeal?.nextActionAt ??
+                    featuredClient.nextActionAt,
+                  true,
+                )}
+              </small>
+            </div>
+            <button
+              className="wf-primary-button"
+              onClick={() =>
+                primaryDeal
+                  ? onOpenDeal(primaryDeal.id)
+                  : onOpenClient(featuredClient.id)
+              }
+              type="button"
+            >
+              Взять в работу
+            </button>
+            <dl>
+              <div>
+                <dt>Открытых задач</dt>
+                <dd>{clientTasks.length}</dd>
+              </div>
+              <div>
+                <dt>Ближайшая дата</dt>
+                <dd>{formatDate(nextTask?.dueAt ?? null)}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="customer-latest-activity">
+            <header>
+              <h2>Последние активности</h2>
+              <span>{clientInteractions.length}</span>
+            </header>
+            <div>
+              {clientInteractions.slice(0, 6).map((interaction) => (
+                <article key={interaction.id}>
+                  <span className="customer-activity-icon">
+                    {interaction.kind.slice(0, 1)}
+                  </span>
+                  <div>
+                    <strong>{interaction.kind}</strong>
+                    <p>{interaction.subject}</p>
+                    <time>{formatDate(interaction.occurredAt, true)}</time>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button
+              className="wf-secondary-button"
+              onClick={() => onOpenClient(featuredClient.id)}
+              type="button"
+            >
+              Все активности
+            </button>
+          </section>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function LegacyDashboardView({
                                 snapshot,
                                 currentUser,
                                 onSnapshotChange,
@@ -1090,9 +1602,7 @@ export function DashboardView({
         );
       })
       .slice(0, 6);
-  const activeDeals = deals.filter(
-      (deal) => !CLOSED_DEAL_STATUSES.has(deal.status),
-  );
+  const activeDeals = deals.filter(isOpenDeal);
   const wonDeals = deals.filter((deal) => deal.status === "Закрыта успешно");
   const revenue = wonDeals.reduce((sum, deal) => sum + deal.ourPrice, 0);
   const pipeline = activeDeals.reduce((sum, deal) => sum + deal.ourPrice, 0);
@@ -1131,11 +1641,9 @@ export function DashboardView({
         const userTasks = allTasks.filter((task) => task.assigneeId === user.id);
         return {
           user,
-          activeDeals: userDeals.filter(
-              (deal) => !CLOSED_DEAL_STATUSES.has(deal.status),
-          ).length,
+          activeDeals: userDeals.filter(isOpenDeal).length,
           pipeline: userDeals
-              .filter((deal) => !CLOSED_DEAL_STATUSES.has(deal.status))
+              .filter(isOpenDeal)
               .reduce((sum, deal) => sum + deal.ourPrice, 0),
           overdue: userTasks.filter((task) => taskIsOverdue(task, today)).length,
         };
@@ -2833,9 +3341,7 @@ export function StatisticsView({
   );
   const revenue = wonDeals.reduce((sum, deal) => sum + deal.ourPrice, 0);
   const wonMargin = wonDeals.reduce((sum, deal) => sum + deal.margin, 0);
-  const activeDeals = allScopedDeals.filter(
-      (deal) => !CLOSED_DEAL_STATUSES.has(deal.status),
-  );
+  const activeDeals = allScopedDeals.filter(isOpenDeal);
   const pipeline = activeDeals.reduce((sum, deal) => sum + deal.ourPrice, 0);
   const completedTasks = tasks.filter(taskIsCompleted);
   const overdueTasks = allScopedTasks.filter((task) => taskIsOverdue(task));

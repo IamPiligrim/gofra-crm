@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "id": "rf-20260730210111-6c3ba61966",
+  "status": "registered",
+  "stage": "coverage",
+  "project_name": "ГОФРА CRM",
+  "mode": "new",
+  "surface": "application",
+  "generator": "imagegen",
+  "task": "Approved crm-focused-workflow final baselines for /#/clients and /#/activity at desktop/mobile default state. Preserve the user-approved dark grouped sidebar and layouts. Clients shows decision map and repeat sales; activity shows quick contact with deal/contact selectors, mandatory next step, attachments and price approval. Body >=14px desktop/>=15px mobile, section headings >=18px/600, WCAG AA, 44px touch targets.",
+  "context_fingerprint": "f19087750ce5d3047e3756d324f6f47c000ca556d39b8da87f4565ed8362c86e",
+  "approved_direction_id": "crm-focused-workflow",
+  "selected_skills": [
+    {
+      "name": "frontend-product-builder",
+      "source": "custom",
+      "role": "orchestrator"
+    },
+    {
+      "name": "imagegen-frontend-web",
+      "source": "design/taste-skill",
+      "role": "reference-generation"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "role": "independent-quality"
+    }
+  ],
+  "direction_count": 1,
+  "artifact_budget": 4,
+  "directions": [
+    {
+      "id": "crm-focused-workflow",
+      "name": "Focused Workflow",
+      "rationale": "Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.",
+      "layout": "Preserve the approved composition and layout hierarchy.",
+      "typography": "Preserve the approved type hierarchy and readable measure.",
+      "color": "Preserve the approved semantic and brand color roles.",
+      "density": "Preserve the approved information density.",
+      "imagery": "Use authentic product-specific media and assets.",
+      "motion": "Use motion only for state, hierarchy, or causality.",
+      "tradeoffs": [
+        "Slower for users who need broad comparison",
+        "Requires good information prioritization"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "crm-focused-workflow--clients--desktop--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/clients",
+      "route": "/#/clients",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "baseline",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/clients, desktop, default.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients, desktop, 1440x960. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Preserve the approved composition and layout hierarchy.\nTypography: Preserve the approved type hierarchy and readable measure.\nColor: Preserve the approved semantic and brand color roles.\nDensity: Preserve the approved information density.\nImagery: Use authentic product-specific media and assets.\nMotion intent for later implementation: Use motion only for state, hierarchy, or causality.\nUse truthful content from: Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes\nThis is an approved-direction baseline. Preserve the chosen visual language exactly.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "89a9b907a58b119e1ab7b0e688fda4a5a9d1959bd6d0295b0c12cbfb14623d4d",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--clients--mobile--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/clients",
+      "route": "/#/clients",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "baseline",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--mobile--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/clients, mobile, default.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients, mobile, 390x844. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Preserve the approved composition and layout hierarchy.\nTypography: Preserve the approved type hierarchy and readable measure.\nColor: Preserve the approved semantic and brand color roles.\nDensity: Preserve the approved information density.\nImagery: Use authentic product-specific media and assets.\nMotion intent for later implementation: Use motion only for state, hierarchy, or causality.\nUse truthful content from: Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes\nThis is an approved-direction baseline. Preserve the chosen visual language exactly.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "41654bd8d3a9fe90b2d422eacb2f4b0547857b26a8f256430293d78131f21261",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--activity--desktop--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/activity",
+      "route": "/#/activity",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "baseline",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--desktop--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/activity, desktop, default.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/activity, desktop, 1440x960. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Preserve the approved composition and layout hierarchy.\nTypography: Preserve the approved type hierarchy and readable measure.\nColor: Preserve the approved semantic and brand color roles.\nDensity: Preserve the approved information density.\nImagery: Use authentic product-specific media and assets.\nMotion intent for later implementation: Use motion only for state, hierarchy, or causality.\nUse truthful content from: Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes\nThis is an approved-direction baseline. Preserve the chosen visual language exactly.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "06a518b9340705185ca9d2588597344ee6fa5f0055e491fda2e008a387f9f760",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--activity--mobile--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/activity",
+      "route": "/#/activity",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "baseline",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--mobile--default.png",
+      "purpose": "Approved Focused Workflow baseline for /#/activity, mobile, default.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/activity, mobile, 390x844. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Preserve the approved composition and layout hierarchy.\nTypography: Preserve the approved type hierarchy and readable measure.\nColor: Preserve the approved semantic and brand color roles.\nDensity: Preserve the approved information density.\nImagery: Use authentic product-specific media and assets.\nMotion intent for later implementation: Use motion only for state, hierarchy, or causality.\nUse truthful content from: Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes\nThis is an approved-direction baseline. Preserve the chosen visual language exactly.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "691c7233e7e3628ef414a41b5ebe5810129565aef5d65c6bcf829481c3744ec3",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    }
+  ],
+  "generation_contract": {
+    "output_format": "png",
+    "tool_boundary": "The MCP server plans and validates. The client agent calls ImageGen or Figma.",
+    "exact_output_paths": true,
+    "prompt_hash_binding": true,
+    "require_actual_visual_inspection": true,
+    "reject_duplicate_images": true,
+    "approval_is_separate": true
+  },
+  "created_at": "2026-07-30T21:01:11.751Z",
+  "updated_at": "2026-07-30T21:08:02.636Z",
+  "registered_at": "2026-07-30T21:08:02.636Z",
+  "outputs": [
+    {
+      "artifact_id": "crm-focused-workflow--clients--desktop--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png",
+      "prompt_sha256": "89a9b907a58b119e1ab7b0e688fda4a5a9d1959bd6d0295b0c12cbfb14623d4d",
+      "file_sha256": "902c2ac88039c8ec59149959e6510d56d98851e769da80bfb2b0e2c57af5a4d9",
+      "perceptual_hash": "ff29cb07fe03fd96dcecca76aa6278f4",
+      "width": 1440,
+      "height": 960,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Desktop client workspace clearly preserves the user-approved grouped navy sidebar, blue active state, strong page/section headers, visible next step, interaction history, decision map and repeat-order forecast. Secondary table-style metadata is dense, so the implementation must use the larger approved type tokens rather than copying pixels.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-focused-workflow--clients--mobile--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--mobile--default.png",
+      "prompt_sha256": "41654bd8d3a9fe90b2d422eacb2f4b0547857b26a8f256430293d78131f21261",
+      "file_sha256": "1d7d560ee0c7731847b133d10bae44f8b62d7ccf12afe332ef510ada50b765b9",
+      "perceptual_hash": "7bf483793680fff979f12c7975ddbcb9",
+      "width": 390,
+      "height": 844,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Mobile client composition remains task-first and shows the approved navigation character, next action, repeat order, recent contact and key people without horizontal overflow. The generated narrow icon rail and tiny metadata are composition-only; implementation follows the approved 15px mobile minimum, 44px targets and responsive navigation rules.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-focused-workflow--activity--desktop--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--desktop--default.png",
+      "prompt_sha256": "06a518b9340705185ca9d2588597344ee6fa5f0055e491fda2e008a387f9f760",
+      "file_sha256": "0bfb2b6d34113c1b4aa1109aac5175cfe9ea9906ab3df0a6fabbeb981f094d3e",
+      "perceptual_hash": "e47f922f06fd7a07aee8baa8acbc7aea",
+      "width": 1440,
+      "height": 960,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Desktop activity screen gives the post-contact workflow dominant space, explicitly marks the next step as required and keeps influence/repeat-order context in a secondary column. The approved sidebar and active state are coherent; attachments and price approval may continue below the captured fold in implementation.",
+        "blocking_findings": []
+      }
+    },
+    {
+      "artifact_id": "crm-focused-workflow--activity--mobile--default",
+      "path": ".ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--activity--mobile--default.png",
+      "prompt_sha256": "691c7233e7e3628ef414a41b5ebe5810129565aef5d65c6bcf829481c3744ec3",
+      "file_sha256": "e2b6cd58e9e639f794e24b238be0804337eeeceb338653782a17a2e5bcbfec25",
+      "perceptual_hash": "f7ffd700ff4df601f6eef6267adae63e",
+      "width": 390,
+      "height": 844,
+      "inspection": {
+        "method": "view_image",
+        "status": "pass",
+        "observations": "Mobile activity baseline clearly prioritizes result, mandatory next step, decision contacts and linked deal, with visible selected/status cues. The compact rail and generated small labels are not literal size targets; implementation must enforce the approved mobile typography and target sizes.",
+        "blocking_findings": []
+      }
+    }
+  ],
+  "manifest_fingerprint": "89d292bbcee1fb13155218af2b2a831f225b09c54a880ea3036354810bcc269f"
+}

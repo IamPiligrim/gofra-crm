@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "id": "rf-20260730204319-3290b6277f",
+  "status": "planned",
+  "stage": "concepts",
+  "project_name": "ГОФРА CRM",
+  "mode": "new",
+  "surface": "application",
+  "generator": "imagegen",
+  "task": "Два визуальных направления для расширения существующей ГОФРА CRM без редизайна: экран карточки клиента с картой ЛПР и блоком повторных заказов, а также быстрый экран результата контакта с обязательным следующим шагом и запросом согласования цены. Направление A — плотная стальная операционная CRM, направление B — более светлая редакционная CRM с теми же токенами. Русский интерфейс, desktop, реалистичные данные упаковочной отрасли.",
+  "context_fingerprint": "5c804cc86c00a7132df81fd46ef79a91b2d8d24b8a2233b731b79bc474a1e8c2",
+  "approved_direction_id": null,
+  "selected_skills": [
+    {
+      "name": "frontend-product-builder",
+      "source": "custom",
+      "role": "orchestrator"
+    },
+    {
+      "name": "imagegen-frontend-web",
+      "source": "design/taste-skill",
+      "role": "reference-generation"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "role": "independent-quality"
+    }
+  ],
+  "direction_count": 2,
+  "artifact_budget": 4,
+  "directions": [
+    {
+      "id": "crm-operational-clarity",
+      "name": "Operational Clarity",
+      "rationale": "Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.",
+      "layout": "Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.",
+      "typography": "Compact readable text with clear labels, numbers, and state emphasis.",
+      "color": "Quiet neutral surfaces plus semantic status and action colors.",
+      "density": "Dense but organized for expert scanning and repeated actions.",
+      "imagery": "Use real data visualizations, objects, or workflow evidence only where they improve decisions.",
+      "motion": "State transitions, progress, and spatial continuity only.",
+      "tradeoffs": [
+        "Less expressive for marketing surfaces",
+        "Requires accurate data and state definitions"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow",
+      "name": "Focused Workflow",
+      "rationale": "Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.",
+      "layout": "Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.",
+      "typography": "Clear action and instruction hierarchy with generous form readability.",
+      "color": "Restrained brand accent with accessible focus, error, and success states.",
+      "density": "Lower density on the active task and higher density in supporting inspection views.",
+      "imagery": "Use only task-relevant diagrams, previews, or records.",
+      "motion": "Explain step changes, validation, and panel relationships.",
+      "tradeoffs": [
+        "Slower for users who need broad comparison",
+        "Requires good information prioritization"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "crm-operational-clarity--clients--desktop--default",
+      "direction_id": "crm-operational-clarity",
+      "scope": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "route": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204319-3290b6277f/crm-operational-clarity/crm-operational-clarity--clients--desktop--default.png",
+      "purpose": "Compare the Operational Clarity direction for /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР on desktop.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР, desktop, 1440x960. Show the normal ready state.\nDirection \"Operational Clarity\": Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.\nLayout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\nTypography: Compact readable text with clear labels, numbers, and state emphasis.\nColor: Quiet neutral surfaces plus semantic status and action colors.\nDensity: Dense but organized for expert scanning and repeated actions.\nImagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\nMotion intent for later implementation: State transitions, progress, and spatial continuity only.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую функциональную стальную палитру, Geist, светлую/тёмную темы, плотную иерархию CRM и текущие компоненты; это расширение продукта, не редизайн\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "e81a8a860f2a928b026472aab7ee09169e2ba2b00f7661868f5788a8ff8d6303",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-operational-clarity--clients--mobile--default",
+      "direction_id": "crm-operational-clarity",
+      "scope": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "route": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204319-3290b6277f/crm-operational-clarity/crm-operational-clarity--clients--mobile--default.png",
+      "purpose": "Compare the Operational Clarity direction for /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР on mobile.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР, mobile, 390x844. Show the normal ready state.\nDirection \"Operational Clarity\": Prioritize repeated user work, comparison, and fast status recognition over decorative presentation.\nLayout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\nTypography: Compact readable text with clear labels, numbers, and state emphasis.\nColor: Quiet neutral surfaces plus semantic status and action colors.\nDensity: Dense but organized for expert scanning and repeated actions.\nImagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\nMotion intent for later implementation: State transitions, progress, and spatial continuity only.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую функциональную стальную палитру, Geist, светлую/тёмную темы, плотную иерархию CRM и текущие компоненты; это расширение продукта, не редизайн\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "d74957b3d2255e5f3b3da172a9423c9b32909ff9545826b28c90f6e98c045517",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--clients--desktop--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "route": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "viewport": "desktop",
+      "state": "default",
+      "width": 1440,
+      "height": 960,
+      "orientation": "landscape",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204319-3290b6277f/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png",
+      "purpose": "Compare the Focused Workflow direction for /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР on desktop.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР, desktop, 1440x960. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\nTypography: Clear action and instruction hierarchy with generous form readability.\nColor: Restrained brand accent with accessible focus, error, and success states.\nDensity: Lower density on the active task and higher density in supporting inspection views.\nImagery: Use only task-relevant diagrams, previews, or records.\nMotion intent for later implementation: Explain step changes, validation, and panel relationships.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую функциональную стальную палитру, Geist, светлую/тёмную темы, плотную иерархию CRM и текущие компоненты; это расширение продукта, не редизайн\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "ba9d456be6858b625adf0d1984766bd7b6a2fa7b62c372d0a530ac9ec1be3512",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    },
+    {
+      "id": "crm-focused-workflow--clients--mobile--default",
+      "direction_id": "crm-focused-workflow",
+      "scope": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "route": "/#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР",
+      "viewport": "mobile",
+      "state": "default",
+      "width": 390,
+      "height": 844,
+      "orientation": "portrait",
+      "role": "candidate",
+      "output_path": ".ai-dev/frontend/references/generated/rf-20260730204319-3290b6277f/crm-focused-workflow/crm-focused-workflow--clients--mobile--default.png",
+      "purpose": "Compare the Focused Workflow direction for /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР on mobile.",
+      "prompt": "Create one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients — список, сегменты повторных продаж и карточка клиента с картой ЛПР, mobile, 390x844. Show the normal ready state.\nDirection \"Focused Workflow\": Reduce cognitive load by centering one primary job and revealing secondary detail only when needed.\nLayout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\nTypography: Clear action and instruction hierarchy with generous form readability.\nColor: Restrained brand accent with accessible focus, error, and success states.\nDensity: Lower density on the active task and higher density in supporting inspection views.\nImagery: Use only task-relevant diagrams, previews, or records.\nMotion intent for later implementation: Explain step changes, validation, and panel relationships.\nUse truthful content from: Требования пользователя в текущей задаче, существующие CRM-справочники и демоданные проекта. Use real data from: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт.\nBrand constraints: Сохранить существующую функциональную стальную палитру, Geist, светлую/тёмную темы, плотную иерархию CRM и текущие компоненты; это расширение продукта, не редизайн\nThis is a concept-direction artifact. Make its composition materially different from the other directions.\nRender a single inspectable screen or section, not a moodboard, device mockup, multi-screen collage, or design-system board.\nKeep text legible and concise. Never invent customers, testimonials, ratings, metrics, certifications, or product claims.\nAvoid these default AI patterns unless explicitly approved: Card soup, Oversized empty hero, Default purple gradient, Decorative glassmorphism, Decorative orbs, Fabricated metrics, Generic SaaS copy, Excessive rounding, Meaningless motion.\nUse stable dimensions. Do not crop the primary product evidence or hide it behind atmospheric decoration.",
+      "prompt_sha256": "2a53db6361fc7067e6bf6fa9e1c29eeed030141f1c4ee8f58de87c56c084d327",
+      "negative_prompt": [
+        "multi-screen collage",
+        "device mockup",
+        "moodboard",
+        "illegible text",
+        "fabricated metrics",
+        "generic SaaS copy",
+        "purple gradient",
+        "decorative glassmorphism",
+        "floating orb decoration",
+        "nested card soup"
+      ]
+    }
+  ],
+  "generation_contract": {
+    "output_format": "png",
+    "tool_boundary": "The MCP server plans and validates. The client agent calls ImageGen or Figma.",
+    "exact_output_paths": true,
+    "prompt_hash_binding": true,
+    "require_actual_visual_inspection": true,
+    "reject_duplicate_images": true,
+    "approval_is_separate": true
+  },
+  "created_at": "2026-07-30T20:43:19.101Z",
+  "updated_at": "2026-07-30T20:43:19.101Z",
+  "manifest_fingerprint": "85a864fe3ac57e088652f9bd469f4304e068b0e05aadd414059130d5bfb76739"
+}

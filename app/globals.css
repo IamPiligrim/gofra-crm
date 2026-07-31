@@ -792,9 +792,9 @@ html[data-theme="dark"] textarea {
   justify-content: space-between;
   margin-bottom: 14px;
   padding: 10px;
-  position: sticky;
-  top: 8px;
-  z-index: 5;
+  position: relative;
+  top: auto;
+  z-index: 1;
   backdrop-filter: blur(14px);
 }
 

@@ -1,0 +1,518 @@
+{
+  "schema_version": 1,
+  "id": "ctx-20260731103036-f1fca0e960",
+  "generated_at": "2026-07-31T10:30:36.237Z",
+  "task": "Continue implementation of the saved 2026-07-31 CRM plan. Start with P0 data invariants and repeat-sales segmentation, preserve all current dirty worktree changes, then implement real attachment storage before approval inbox and quick-contact hardening.",
+  "domains": [
+    "frontend"
+  ],
+  "project": {
+    "id": "project-f82e060fa046c964c4c1",
+    "name": "ГОФРА CRM",
+    "root": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха",
+    "repository_id": "repository-389e5e36c94fbedfd2d7",
+    "types": [
+      "frontend"
+    ],
+    "stack": [
+      "Node.js",
+      "TypeScript",
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "GitHub Actions"
+    ],
+    "components": [
+      {
+        "name": "gofra-crm-frontend",
+        "path": ".",
+        "manifest": "package.json",
+        "ecosystem": "node",
+        "package_manager": "pnpm",
+        "stack": [
+          "Node.js",
+          "TypeScript",
+          "React",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "project_types": [
+          "frontend"
+        ],
+        "scripts": {
+          "dev": "vite",
+          "build": "vite build",
+          "preview": "vite preview",
+          "lint": "tsc --noEmit",
+          "test": "vite build && node --test"
+        },
+        "commands": [
+          {
+            "label": "Dev",
+            "command": "pnpm run dev",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Test",
+            "command": "pnpm run test",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Lint",
+            "command": "pnpm run lint",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Typecheck",
+            "command": "Not detected",
+            "cwd": ".",
+            "source": "missing"
+          },
+          {
+            "label": "Build",
+            "command": "pnpm run build",
+            "cwd": ".",
+            "source": "package script"
+          }
+        ]
+      }
+    ]
+  },
+  "acceptance_criteria": [
+    "Preserve all existing user changes; do not reset or delete the current dirty worktree.",
+    "Open deals cannot be created, imported, migrated, or saved without a next action and date.",
+    "Repeat-sale 30/60/90/sleeping segments use explicit active-client rules and correct date boundaries.",
+    "Expected next order and reminders remain idempotent and update from shipment data.",
+    "Attachments persist actual binary content and can be viewed, downloaded, and deleted.",
+    "Price approvals appear in a manager queue with a linked task and permissions.",
+    "Existing decision-map contacts can be edited and persist after reload.",
+    "Quick-contact submit is atomic and cannot create duplicates.",
+    "Relevant unit, integration, build, and desktop/mobile browser checks pass."
+  ],
+  "routed_skills": [
+    {
+      "name": "feature-builder",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "repository-workflows"
+      ],
+      "primary_group": "repository-workflows",
+      "primary_group_label": "Repository Workflows",
+      "subgroups": [],
+      "task_types": [
+        "build",
+        "qa",
+        "design"
+      ],
+      "platforms": [
+        "local-repository"
+      ],
+      "related_skills": [
+        "repo-onboarding",
+        "code-reviewer",
+        "bugfix-investigator"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "scoped implementation workflow",
+      "use_when": "Codex needs to implement a new feature or product behavior in an existing codebase, especially when the work requires reading local architecture, reusing project patterns, adding tests, and verifying the result",
+      "path": "sources/custom/feature-builder/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/feature-builder.md",
+      "score": 236,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:workflow",
+        "rule:workflow"
+      ],
+      "routing_role": "workflow",
+      "routing_rule": "workflow"
+    },
+    {
+      "name": "beta-frontend-maintainer",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "frontend-ui",
+        "interface-engineering"
+      ],
+      "primary_group": "frontend-ui",
+      "primary_group_label": "Frontend & UI",
+      "subgroups": [
+        "interface-engineering"
+      ],
+      "task_types": [
+        "build",
+        "debug",
+        "design"
+      ],
+      "platforms": [
+        "web",
+        "browser"
+      ],
+      "related_skills": [
+        "frontend-quality-gate",
+        "frontend-polisher",
+        "code-reviewer"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "frontend domain",
+      "use_when": "Codex maintains an existing beta or production-like frontend, especially support tasks, UI fixes, responsive bugs, API-bound screens, small feature tweaks, and rare backend-adjacent changes where minimal safe diffs matter",
+      "path": "sources/custom/beta-frontend-maintainer/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/beta-frontend-maintainer.md",
+      "score": 235,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:domain",
+        "rule:frontend"
+      ],
+      "routing_role": "domain",
+      "routing_rule": "frontend"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "testing-quality",
+        "frontend-qa",
+        "code-review"
+      ],
+      "primary_group": "testing-quality",
+      "primary_group_label": "Testing & Quality",
+      "subgroups": [
+        "frontend-qa",
+        "code-review"
+      ],
+      "task_types": [
+        "build",
+        "review",
+        "qa",
+        "design",
+        "deploy",
+        "document"
+      ],
+      "platforms": [
+        "local-repository"
+      ],
+      "related_skills": [
+        "beta-frontend-maintainer",
+        "frontend-polisher",
+        "code-reviewer"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "frontend verification",
+      "use_when": "Codex must verify frontend or UI changes before handoff, release, pull request, review, or beta testing, including responsive QA, accessibility checks, performance risks, visual regressions, forms, and browser behavior",
+      "path": "sources/custom/frontend-quality-gate/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/frontend-quality-gate.md",
+      "score": 234,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:verification",
+        "rule:frontend"
+      ],
+      "routing_role": "verification",
+      "routing_rule": "frontend"
+    }
+  ],
+  "commands": [
+    {
+      "label": "Dev",
+      "command": "pnpm run dev",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Test",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Lint",
+      "command": "pnpm run lint",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Typecheck",
+      "command": "Not detected",
+      "cwd": ".",
+      "source": "missing",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Build",
+      "command": "pnpm run build",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    }
+  ],
+  "quality_gaps": [
+    "Typecheck command is not detected."
+  ],
+  "risk_signals": [
+    "Script `test` may be unsafe for automatic runs: Shell operator '&' is forbidden.."
+  ],
+  "selected_files": [
+    {
+      "path": "app/crm/CrmApp.tsx",
+      "score": 109,
+      "reasons": [
+        "currently changed",
+        "filename matches \"crm\"",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 156257,
+      "modified_at": "2026-07-31T08:51:05.721Z",
+      "sha256": "a6e18222cf69cbb6fd4f327273bbc92300a71d48f0f3d8a66d3326a23a06d9b3",
+      "excerpt": "\"use client\";\r\n\r\nimport {\r\n  useEffect,\r\n  useMemo,\r\n  useRef,\r\n  useState,\n  type ChangeEvent,\n  type DragEvent,\r\n  type FormEvent,\r\n  type ReactNode,\r\n} from \"react\";\r\nimport { crmGateway } from \"./crm-gateway\";\r\nimport { ChatView } from \"./ChatView\";\r\nimport { CrmIcon, type CrmIconName } from \"./Icons\";\r\nimport {\r\n  CalendarView,\r\n  DashboardView,\r\n  StatisticsView,\r\n} from \"./WorkspaceFeatures\";\r\nimport { ThemeSwitch } from \"./theme\";\r\nimport {\r\n  CLIENT_PIPELINE,\n  CLIENT_STATUSES,\n  DECISION_INFLUENCES,\n  DECISION_ROLES,\n  DEAL_PIPELINE,\n  DEAL_STATUSES,\n  PREFERRED_CHANNELS,\n  type Attachment,\n  type AppModule,\r\n  type Client,\r\n  type ClientStatus,\r\n  type Contact,\r\n  type CrmSnapshot,\r\n  type Deal,\r\n  type DealStatus,\r\n  type Interaction,\r\n  type InteractionKind,\n  type PriceApproval,\n  type PriceApprovalStatus,\n  type PipelineGroup,\r\n  type Potential,\r\n  type Task,\r\n  type User,\r\n} from \"./domain\";\nimport {\n  calculateExpectedNextOrder,\n  getDaysWithoutOrder,\n  isOpenDeal,\n  matchesRepeatSegment,\n  syncRepeatOrderTasks,\n  type RepeatSegment,\n} from \"./sales-automation\";\nimport {\r\n  canAccessModule,\r\n  canViewFinancials,\r\n  filterAccessibleRecords,\r\n  isManager,\r\n} from \"./permissions\";\r\n\r\ntype ViewMode = \"board\" | \"list\";\r\ntype DrawerTarget =\r\n  | { kind: \"client\"; id: string }\r\n  | { kind: \"deal\"; id: string }\r\n  | null;\r\ntype MoveIntent =\r\n  | {\r\n      kind: \"client\" | \"deal\";\r\n      id: string;\r\n      title: string;\r\n      statuses: readonly string[];\r\n    }\r\n  | null;\r\ntype CreateKind = \"client\" | \"deal\" | \"contact\" | \"interaction\" | null;\r\ntype GlobalSearchResult = {\r\n  id: string;\r\n  kind: \"client\" | \"deal\" | \"contact\";\r\n  title: string;\r\n  meta: string;\r\n  clientId?: string;\r\n};\r\n\r\nconst MODULES: Array<{\n  id: AppModule;\r\n  icon: CrmIconName;\r\n  label: string;\r\n  eyebrow: string;\r\n  mobile?: boolean;\r\n}> = [\r\n  {\r\n    id: \"dashboard\",\r\n    icon: \"home\",\r\n    label: \"Главная\",\r\n    eyebrow: \"Рабочий стол\",\r\n    mobile: true,\r\n  },\r\n  {\r\n    id: \"clients\",\r\n    icon: \"clients\",\r\n    label: \"Клиенты\",\r\n    eyebrow: \"Воронка клиентов\",\r\n    mobile: tru",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/crm-gateway.ts",
+      "score": 102,
+      "reasons": [
+        "currently changed",
+        "filename matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 25947,
+      "modified_at": "2026-07-30T21:18:38.788Z",
+      "sha256": "bd3566b53babf11d13a6449af38034d809efbf2abe9776bd35142e5c70014603",
+      "excerpt": "import {\n  CRM_SCHEMA_VERSION,\n  DECISION_INFLUENCES,\n  DECISION_ROLES,\n  PREFERRED_CHANNELS,\n  type Attachment,\n  type Client,\n  type Contact,\n  type CrmSnapshot,\n  type Deal,\n  type Dictionaries,\n  type Interaction,\n  type PriceApproval,\n  type PriceApprovalStatus,\n  type Session,\n  type StatusEvent,\n  type Target,\n  type Task,\n  type Team,\n  type User,\n  type UserRole,\n} from \"./domain\";\nimport {\n  calculateExpectedNextOrder,\n  syncRepeatOrderTasks,\n} from \"./sales-automation\";\nimport {\n  DEMO_TEAM_ID,\n  DEMO_USER_IDS,\n  demoSession,\n  demoSnapshot,\n  demoTargets,\n  demoTeams,\n  demoUsers,\n} from \"./fixtures\";\n\nexport const CRM_STORAGE_KEY = \"gofra-crm-prototype:v3\";\nexport const LEGACY_CRM_STORAGE_KEYS = [\n  \"gofra-crm-prototype:v2\",\n  \"gofra-crm-prototype:v1\",\n] as const;\n\ntype JsonRecord = Record<string, unknown>;\n\nconst clone = <T,>(value: T): T =>\n  JSON.parse(JSON.stringify(value)) as T;\n\nconst pause = (duration = 320) =>\n  new Promise<void>((resolve) => {\n    window.setTimeout(resolve, duration);\n  });\n\nconst isRecord = (value: unknown): value is JsonRecord =>\n  typeof value === \"object\" && value !== null && !Array.isArray(value);\n\nconst asRecord = (value: unknown): JsonRecord =>\n  isRecord(value) ? value : {};\n\nconst asString = (value: unknown, fallback = \"\"): string =>\n  typeof value === \"string\" ? value : fallback;\n\nconst asNullableString = (\n  value: unknown,\n  fallback: string | null = null,\n): string | null =>\n  typeof value === \"string\" ? value : value === null ? null : fallback;\n\nconst asNumber = (value: unknown, fallback = 0): number =>\n  typeof value === \"number\" && Number.isFinite(value) ? value : fallback;\n\nconst asNullableNumber = (\n  value: unknown,\n  fallback: number | null = null,\n): number | null =>\n  typeof value === \"number\" && Number.isFinite(value) ? value : fallback;\n\nconst asBoolean = (value: unknown, fallback = false): boolean =>\n  typeof value === \"boolean\" ? value : fallback;\n\nconst asArray = (value: unknown): unknown[] =>\n  Array.isArray(value) ? value : [];\n\nconst normalizeAttachments = (value: unknown): Attachment[] =>\n  asAr",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/WorkspaceFeatures.tsx",
+      "score": 99,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 149169,
+      "modified_at": "2026-07-31T09:01:14.439Z",
+      "sha256": "59527cea398627a0f73b0932c6e7337915b07dc9684d2d5517d4b9653a73457c",
+      "excerpt": "\"use client\";\r\n\r\nimport {\r\n  useEffect,\r\n  useId,\r\n  useMemo,\r\n  useRef,\r\n  useState,\r\n  type FormEvent,\r\n  type ReactNode,\r\n} from \"react\";\r\nimport {\r\n  DEAL_PIPELINE,\r\n  type CrmSnapshot,\r\n  type Deal,\r\n  type Interaction,\r\n  type StatusEvent,\r\n  type Task,\r\n  type User,\r\n} from \"./domain\";\r\nimport \"./workspace-features.css\";\r\n\r\nexport interface WorkspaceFeatureProps {\r\n  snapshot: CrmSnapshot | null;\r\n  currentUser: User | null;\r\n  onSnapshotChange: (snapshot: CrmSnapshot) => void;\r\n  onOpenClient: (clientId: string) => void;\r\n  onOpenDeal: (dealId: string) => void;\r\n  loading?: boolean;\r\n}\r\n\r\ntype CalendarMode = \"month\" | \"agenda\";\r\ntype StatisticsTab = \"overview\" | \"funnel\" | \"sales\" | \"activity\" | \"team\";\r\ntype RangePreset = \"7\" | \"30\" | \"90\" | \"all\";\r\ntype TaskStateFilter = \"open\" | \"completed\" | \"all\";\r\ntype TaskLinkFilter = \"all\" | \"client\" | \"deal\" | \"general\";\r\ntype IconName =\r\n    | \"arrow\"\r\n    | \"calendar\"\r\n    | \"check\"\r\n    | \"chevron-left\"\r\n    | \"chevron-right\"\r\n    | \"clock\"\r\n    | \"close\"\r\n    | \"edit\"\r\n    | \"plus\"\r\n    | \"trend\";\r\n\r\ninterface DrillRow {\r\n  id: string;\r\n  primary: string;\r\n  secondary: string;\r\n  meta: string;\r\n  entity?: \"client\" | \"deal\";\r\n  entityId?: string;\r\n}\r\n\r\ninterface DrillState {\r\n  title: string;\r\n  eyebrow: string;\r\n  rows: DrillRow[];\r\n}\r\n\r\nconst DAY_MS = 86_400_000;\r\nconst CLOSED_DEAL_STATUSES = new Set([\r\n  \"Закрыта успешно\",\r\n  \"Проиграна\",\r\n  \"Отложена\",\r\n  \"Отменена\",\r\n]);\r\n\r\nconst TASK_KIND_LABELS: Record<Task[\"kind\"], string> = {\r\n  call: \"Звонок\",\r\n  meeting: \"Встреча\",\r\n  email: \"Письмо\",\r\n  proposal: \"Коммерческое предложение\",\r\n  follow_up: \"Повторный контакт\",\r\n  reminder: \"Напоминание\",\r\n  other: \"Другое\",\r\n};\r\n\r\nconst TASK_KIND_SHORT: Record<Task[\"kind\"], string> = {\r\n  call: \"ЗВ\",\r\n  meeting: \"ВС\",\r\n  email: \"ПС\",\r\n  proposal: \"КП\",\r\n  follow_up: \"ПК\",\r\n  reminder: \"НП\",\r\n  other: \"ДР\",\r\n};\r\n\r\nconst TASK_PRIORITY_LABELS: Record<Task[\"priority\"], string> = {\n  low: \"Низкий\",\n  normal: \"Обычный\",\n  high: \"Высокий\",\n};\n\nconst TASK_SOURCE_LABELS: Record<Task[\"source\"], string> = {\n  manual: \"Поставлена",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/domain.ts",
+      "score": 92,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 10157,
+      "modified_at": "2026-07-30T21:17:45.798Z",
+      "sha256": "51c2f03243a7ecd02bb01ceab32e34d1999d3043721a32b4ac05629fa018f8e5",
+      "excerpt": "export const CLIENT_STATUSES = [\n  \"Новый лид\",\n  \"Нужно проверить\",\n  \"Подходит\",\n  \"Не подходит\",\n  \"Контакт найден\",\n  \"Первый контакт\",\n  \"Есть интерес\",\n  \"Запросили потребность\",\n  \"Нужно КП\",\n  \"КП отправлено\",\n  \"Переговоры\",\n  \"Тестовая поставка\",\n  \"Активный клиент\",\n  \"Спящий клиент\",\n  \"Отказ\",\n  \"Черный список\",\n] as const;\n\nexport type ClientStatus = (typeof CLIENT_STATUSES)[number];\n\nexport const DEAL_STATUSES = [\n  \"Новая заявка\",\n  \"Уточняем ТЗ\",\n  \"Считаем цену\",\n  \"КП отправлено\",\n  \"Переговоры\",\n  \"Согласование условий\",\n  \"Счет выставлен\",\n  \"Ожидаем оплату\",\n  \"Оплачено\",\n  \"В закупке / производстве\",\n  \"Готово к отгрузке\",\n  \"Отгружено\",\n  \"Закрыта успешно\",\n  \"Проиграна\",\n  \"Отложена\",\n  \"Отменена\",\n] as const;\n\nexport type DealStatus = (typeof DEAL_STATUSES)[number];\nexport type Potential = \"A\" | \"B\" | \"C\" | \"D\";\n\nexport const CRM_SCHEMA_VERSION = 3 as const;\nexport type CrmSchemaVersion = typeof CRM_SCHEMA_VERSION;\n\nexport const DECISION_ROLES = [\n  \"Закупщик\",\n  \"Технолог\",\n  \"Производство\",\n  \"Качество\",\n  \"Финансовый директор\",\n  \"Генеральный директор\",\n] as const;\n\nexport type DecisionRole = (typeof DECISION_ROLES)[number];\n\nexport const DECISION_INFLUENCES = [\n  \"Принимает решение\",\n  \"Влияет\",\n  \"Блокирует\",\n] as const;\n\nexport type DecisionInfluence = (typeof DECISION_INFLUENCES)[number];\n\nexport const PREFERRED_CHANNELS = [\n  \"Телефон\",\n  \"Email\",\n  \"WhatsApp\",\n  \"Telegram\",\n  \"Встреча\",\n] as const;\n\nexport type PreferredChannel = (typeof PREFERRED_CHANNELS)[number];\nexport type RepeatReminderDays = 7 | 14;\n\nexport interface TimestampedEntity {\n  createdAt: string;\n  updatedAt: string;\n}\n\nexport type UserRole = \"manager\" | \"employee\";\n\nexport interface Team extends TimestampedEntity {\n  id: string;\n  name: string;\n}\n\nexport interface User extends TimestampedEntity {\n  id: string;\n  teamId: string;\n  fullName: string;\n  email: string;\n  role: UserRole;\n  jobTitle: string;\n  initials: string;\n  isActive: boolean;\n}\n\nexport interface Session {\n  id: string;\n  currentUserId: string;\n  activeTeamId: string;\n  startedAt: string;\n}\n\nexpo",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/fixtures.ts",
+      "score": 92,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 24975,
+      "modified_at": "2026-07-31T07:25:09.655Z",
+      "sha256": "86c6e74c74809376cd7b5258e6e652b2ac9f27f15519d9dd7d5ed137ff9c1826",
+      "excerpt": "import {\n  CLIENT_STATUSES,\n  CRM_SCHEMA_VERSION,\n  DEAL_STATUSES,\n  type Client,\n  type Contact,\n  type CrmSnapshot,\n  type Deal,\n  type Interaction,\n  type PriceApproval,\n  type Potential,\n  type Session,\n  type StatusEvent,\n  type Target,\n  type Task,\n  type Team,\n  type User,\n} from \"./domain\";\n\nexport const DEMO_TEAM_ID = \"team-gofra\";\nexport const DEMO_USER_IDS = {\n  sofia: \"user-sofia\",\n  nikolai: \"user-nikolai\",\n  timur: \"user-timur\",\n} as const;\n\nconst DEMO_CREATED_AT = \"2026-06-01T08:00:00.000Z\";\nconst DEMO_UPDATED_AT = \"2026-07-23T08:00:00.000Z\";\n\nexport const demoTeams: Team[] = [\n  {\n    id: DEMO_TEAM_ID,\n    name: \"Команда ГОФРА\",\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n];\n\nexport const demoUsers: User[] = [\n  {\n    id: DEMO_USER_IDS.sofia,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Софья Романова\",\n    email: \"sofia@gofra.demo\",\n    role: \"manager\",\n    jobTitle: \"Руководитель отдела продаж\",\n    initials: \"СР\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n  {\n    id: DEMO_USER_IDS.nikolai,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Николай Ветров\",\n    email: \"nikolai@gofra.demo\",\n    role: \"employee\",\n    jobTitle: \"Менеджер по продажам\",\n    initials: \"НВ\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n  {\n    id: DEMO_USER_IDS.timur,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Тимур Агапов\",\n    email: \"timur@gofra.demo\",\n    role: \"employee\",\n    jobTitle: \"Менеджер по продажам\",\n    initials: \"ТА\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n];\n\nexport const demoSession: Session = {\n  id: \"session-demo\",\n  currentUserId: DEMO_USER_IDS.sofia,\n  activeTeamId: DEMO_TEAM_ID,\n  startedAt: DEMO_UPDATED_AT,\n};\n\nconst companies = [\n  \"Северная мануфактура\",\n  \"Линия вкуса\",\n  \"Балтийские напитки\",\n  \"ТерраФорм\",\n  \"Волга Молоко\",\n  \"Уральский кондитер\",\n  \"Чистый дом\",\n  \"МаркетХаб\",\n  \"Вектор Фарм\",\n  \"АгроПтица\",\n  \"ПромСнаб Групп\",\n  \"Каспий Фуд\",\n  \"Лесная кухня\",\n  \"Белая ферма\",\n  \"Орбита Косме",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/sales-automation.ts",
+      "score": 92,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 4315,
+      "modified_at": "2026-07-30T21:17:45.800Z",
+      "sha256": "4e6f30614b72d709c452665895bd0c6a8048544c580f1c4e8fb5066ee834cce8",
+      "excerpt": "import {\n  type Client,\n  type Deal,\n  type DealStatus,\n  type RepeatReminderDays,\n  type Task,\n} from \"./domain\";\n\nexport type RepeatSegment = \"all\" | \"30\" | \"60\" | \"90\" | \"sleeping\";\n\nconst DAY_MS = 86_400_000;\nconst CLOSED_DEAL_STATUSES = new Set<DealStatus>([\n  \"Закрыта успешно\",\n  \"Проиграна\",\n  \"Отменена\",\n]);\n\nconst toDateOnly = (value: Date): string => value.toISOString().slice(0, 10);\n\nconst parseDate = (value: string | null | undefined): Date | null => {\n  if (!value) return null;\n  const date = new Date(value.length === 10 ? `${value}T12:00:00.000Z` : value);\n  return Number.isNaN(date.getTime()) ? null : date;\n};\n\nexport const isOpenDeal = (deal: Pick<Deal, \"status\">): boolean =>\n  !CLOSED_DEAL_STATUSES.has(deal.status);\n\nexport const calculateExpectedNextOrder = (\n  lastShipmentAt: string | null,\n  orderFrequencyDays: number | null,\n): string | null => {\n  const shipmentDate = parseDate(lastShipmentAt);\n  if (!shipmentDate || !orderFrequencyDays || orderFrequencyDays < 1) {\n    return null;\n  }\n\n  shipmentDate.setUTCDate(shipmentDate.getUTCDate() + orderFrequencyDays);\n  return toDateOnly(shipmentDate);\n};\n\nexport const getDaysWithoutOrder = (\n  client: Pick<Client, \"lastShipmentAt\" | \"lastContactAt\">,\n  now = new Date(),\n): number | null => {\n  const anchor = parseDate(client.lastShipmentAt ?? client.lastContactAt);\n  if (!anchor) return null;\n  return Math.max(0, Math.floor((now.getTime() - anchor.getTime()) / DAY_MS));\n};\n\nexport const matchesRepeatSegment = (\n  client: Pick<Client, \"lastShipmentAt\" | \"lastContactAt\">,\n  segment: RepeatSegment,\n  now = new Date(),\n): boolean => {\n  if (segment === \"all\") return true;\n  const days = getDaysWithoutOrder(client, now);\n  if (days === null) return segment === \"sleeping\";\n  if (segment === \"sleeping\") return days >= 120;\n  if (segment === \"90\") return days >= 90 && days < 120;\n  if (segment === \"60\") return days >= 60 && days < 90;\n  return days >= 30 && days < 60;\n};\n\nconst reminderTaskId = (\n  clientId: string,\n  expectedAt: string,\n  reminderDays: RepeatReminderDays,\n) => `repeat-order:${clientId}:${e",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/agency-redesign.css",
+      "score": 91,
+      "reasons": [
+        "currently changed",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 63702,
+      "modified_at": "2026-07-31T10:06:39.282Z",
+      "sha256": "2690f4eb04230340b9592a45adc7f1d0b5c2251d72ab426f599086708e1abfa4",
+      "excerpt": "/*\r\n * GOFRA / Operations System\r\n * Industrial-editorial design layer.\r\n *\r\n * This file intentionally sits after the product styles. It keeps the existing\r\n * application behavior while replacing the generic rounded-card language with\r\n * a stricter, brand-specific visual system.\r\n */\r\n\r\n:root {\r\n  --canvas: #e6e9e8;\r\n  --surface: #eff1f0;\r\n  --surface-raised: #f7f8f6;\r\n  --surface-muted: #dde2e0;\r\n  --surface-strong: #c9d0cd;\r\n  --surface-sunken: #d5dad8;\r\n  --surface-glass: rgba(230, 233, 232, 0.94);\r\n  --ink: #151b1a;\r\n  --muted: #566361;\r\n  --faint: #7d8a87;\r\n  --line: #b8c1be;\r\n  --line-strong: #7d8b88;\r\n  --accent: #3f6873;\r\n  --accent-strong: #294f5a;\r\n  --accent-soft: #c8d8dc;\r\n  --accent-line: #85a7af;\r\n  --danger: #a13b33;\r\n  --danger-soft: #e7c0b9;\r\n  --warning: #8a571e;\r\n  --warning-soft: #e3cfad;\r\n  --success: #4f6943;\r\n  --success-soft: #cbd7c4;\r\n  --nav-bg: #11191b;\r\n  --nav-ink: #eaf0ef;\r\n  --nav-muted: rgba(234, 240, 239, 0.58);\r\n  --nav-hover: rgba(234, 240, 239, 0.055);\r\n  --nav-active: rgba(234, 240, 239, 0.095);\r\n  --nav-line: rgba(234, 240, 239, 0.15);\r\n  --on-accent: #f7fbfa;\r\n  --grid-line: rgba(47, 67, 68, 0.055);\r\n  --hover-row: rgba(63, 104, 115, 0.065);\r\n  --focus-ring: color-mix(in srgb, var(--accent) 72%, white);\r\n  --overlay: rgba(7, 16, 18, 0.64);\r\n  --toast-bg: #152023;\r\n  --toast-ink: #eef3f1;\r\n  --hero-surface: #1d2a2d;\r\n  --hero-ink: #edf2f1;\r\n  --hero-muted: rgba(237, 242, 241, 0.62);\r\n  --hero-line: rgba(237, 242, 241, 0.15);\r\n  --hero-tile: rgba(237, 242, 241, 0.08);\r\n  --hero-accent: #8db2bb;\r\n  --shadow: none;\r\n  --shadow-elevated: 0 24px 70px -46px rgba(20, 46, 50, 0.68);\r\n  --shadow-drawer: -24px 0 70px -48px rgba(7, 19, 21, 0.82);\r\n  --radius-lg: 4px;\r\n  --radius-md: 3px;\r\n  --radius-sm: 2px;\r\n}\r\n\r\nhtml[data-theme=\"dark\"] {\r\n  --canvas: #0d1213;\r\n  --surface: #141a1b;\r\n  --surface-raised: #192123;\r\n  --surface-muted: #202a2c;\r\n  --surface-strong: #2c383a;\r\n  --surface-sunken: #101617;\r\n  --surface-glass: rgba(13, 18, 19, 0.94);\r\n  --ink: #e6ecea;\r\n  --muted: #a4b0ad;\r\n  --faint: #71817e;\r\n  --line: #2f3b3d;\r\n  --line-s",
+      "excerpt_truncated": true
+    },
+    {
+      "path": ".ai-dev/frontend/reference-factory/plans/rf-20260730204319-3290b6277f.md",
+      "score": 88,
+      "reasons": [
+        "currently changed",
+        "path matches \"plan\""
+      ],
+      "size_bytes": 18191,
+      "modified_at": "2026-07-30T20:43:19.136Z",
+      "sha256": "d51490355a283a9443704377208c10975449fbbb17729eef9209dbb15da8f27e",
+      "excerpt": "# Frontend Reference Factory Plan\n\n- Manifest: `rf-20260730204319-3290b6277f`\n- Stage: `concepts`\n- Surface: `application`\n- Generator: `imagegen`\n- Context fingerprint: `5c804cc86c00a7132df81fd46ef79a91b2d8d24b8a2233b731b79bc474a1e8c2`\n- Artifacts: 4\n\nThe MCP server does not fabricate tool execution. Generate every artifact through ImageGen or Figma, save it at the exact path, inspect the image, then register it with the manifest ID.\n\n## Directions\n\n### Operational Clarity\n\nPrioritize repeated user work, comparison, and fast status recognition over decorative presentation.\n\n- Layout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\n- Typography: Compact readable text with clear labels, numbers, and state emphasis.\n- Color: Quiet neutral surfaces plus semantic status and action colors.\n- Density: Dense but organized for expert scanning and repeated actions.\n- Imagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\n- Motion: State transitions, progress, and spatial continuity only.\n- Tradeoffs: Less expressive for marketing surfaces; Requires accurate data and state definitions\n\n### Focused Workflow\n\nReduce cognitive load by centering one primary job and revealing secondary detail only when needed.\n\n- Layout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\n- Typography: Clear action and instruction hierarchy with generous form readability.\n- Color: Restrained brand accent with accessible focus, error, and success states.\n- Density: Lower density on the active task and higher density in supporting inspection views.\n- Imagery: Use only task-relevant diagrams, previews, or records.\n- Motion: Explain step changes, validation, and panel relationships.\n- Tradeoffs: Slower for users who need broad comparison; Requires good information prioritization\n\n## Artifact Jobs\n\n### crm-operational-clarity--clients--desktop--default\n\n- Output: `.ai-dev/frontend/references/generated/rf-20260730204319-3290b6277f/crm-operational-clarity/cr",
+      "excerpt_truncated": true
+    },
+    {
+      "path": ".ai-dev/frontend/reference-factory/plans/rf-20260730204515-1b108b7265.md",
+      "score": 88,
+      "reasons": [
+        "currently changed",
+        "path matches \"plan\""
+      ],
+      "size_bytes": 19531,
+      "modified_at": "2026-07-30T20:45:15.774Z",
+      "sha256": "62399f93307c8110c5f29b8a2b830920f46022296828d87a2aaa06e8a625f923",
+      "excerpt": "# Frontend Reference Factory Plan\n\n- Manifest: `rf-20260730204515-1b108b7265`\n- Stage: `concepts`\n- Surface: `application`\n- Generator: `imagegen`\n- Context fingerprint: `bff88b88e4cfb4e5b1ae59827070f55388b1a3eb82e47b84dfb6a38d3e60adcc`\n- Artifacts: 4\n\nThe MCP server does not fabricate tool execution. Generate every artifact through ImageGen or Figma, save it at the exact path, inspect the image, then register it with the manifest ID.\n\n## Directions\n\n### Operational Clarity\n\nPrioritize repeated user work, comparison, and fast status recognition over decorative presentation.\n\n- Layout: Stable application shell, explicit hierarchy, aligned data regions, and predictable navigation.\n- Typography: Compact readable text with clear labels, numbers, and state emphasis.\n- Color: Quiet neutral surfaces plus semantic status and action colors.\n- Density: Dense but organized for expert scanning and repeated actions.\n- Imagery: Use real data visualizations, objects, or workflow evidence only where they improve decisions.\n- Motion: State transitions, progress, and spatial continuity only.\n- Tradeoffs: Less expressive for marketing surfaces; Requires accurate data and state definitions\n\n### Focused Workflow\n\nReduce cognitive load by centering one primary job and revealing secondary detail only when needed.\n\n- Layout: Task-first canvas with progressive disclosure, contextual side panels, and minimal competing actions.\n- Typography: Clear action and instruction hierarchy with generous form readability.\n- Color: Restrained brand accent with accessible focus, error, and success states.\n- Density: Lower density on the active task and higher density in supporting inspection views.\n- Imagery: Use only task-relevant diagrams, previews, or records.\n- Motion: Explain step changes, validation, and panel relationships.\n- Tradeoffs: Slower for users who need broad comparison; Requires good information prioritization\n\n## Artifact Jobs\n\n### crm-operational-clarity--crm--desktop--default\n\n- Output: `.ai-dev/frontend/references/generated/rf-20260730204515-1b108b7265/crm-operational-clarity/crm-op",
+      "excerpt_truncated": true
+    },
+    {
+      "path": ".ai-dev/frontend/reference-factory/plans/rf-20260730210111-6c3ba61966.md",
+      "score": 88,
+      "reasons": [
+        "currently changed",
+        "path matches \"plan\""
+      ],
+      "size_bytes": 16132,
+      "modified_at": "2026-07-30T21:01:11.766Z",
+      "sha256": "438ea21a29fecfaad118782e6c785b098ff091e7ad05caca945d7da9284b12ec",
+      "excerpt": "# Frontend Reference Factory Plan\n\n- Manifest: `rf-20260730210111-6c3ba61966`\n- Stage: `coverage`\n- Surface: `application`\n- Generator: `imagegen`\n- Context fingerprint: `f19087750ce5d3047e3756d324f6f47c000ca556d39b8da87f4565ed8362c86e`\n- Artifacts: 4\n\nThe MCP server does not fabricate tool execution. Generate every artifact through ImageGen or Figma, save it at the exact path, inspect the image, then register it with the manifest ID.\n\n## Directions\n\n### Focused Workflow\n\nReduce cognitive load by centering one primary job and revealing secondary detail only when needed.\n\n- Layout: Preserve the approved composition and layout hierarchy.\n- Typography: Preserve the approved type hierarchy and readable measure.\n- Color: Preserve the approved semantic and brand color roles.\n- Density: Preserve the approved information density.\n- Imagery: Use authentic product-specific media and assets.\n- Motion: Use motion only for state, hierarchy, or causality.\n- Tradeoffs: Slower for users who need broad comparison; Requires good information prioritization\n\n## Artifact Jobs\n\n### crm-focused-workflow--clients--desktop--default\n\n- Output: `.ai-dev/frontend/references/generated/rf-20260730210111-6c3ba61966/crm-focused-workflow/crm-focused-workflow--clients--desktop--default.png`\n- Target: /#/clients / desktop / default\n- Size: 1440x960\n- Prompt SHA-256: `89a9b907a58b119e1ab7b0e688fda4a5a9d1959bd6d0295b0c12cbfb14623d4d`\n\n```text\nCreate one standalone high-fidelity application interface reference image.\nProduct: ГОФРА CRM. Product type: Операционная веб-CRM для B2B-продаж гофроупаковки.\nAudience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки. Primary task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа.\nBusiness goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены. Tone: Краткий, деловой, операционный русский язык без рекламных формулировок.\nTarget: /#/clients, desktop, 1440x",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "package.json",
+      "score": 85,
+      "reasons": [
+        "currently changed",
+        "project configuration"
+      ],
+      "size_bytes": 685,
+      "modified_at": "2026-07-31T07:15:33.292Z",
+      "sha256": "ae9112a4c6d45897f6625dc17bd603c7b015f82927b7d69851f0b8caba270d21",
+      "excerpt": "{\n  \"name\": \"gofra-crm-frontend\",\n  \"version\": \"0.2.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"engines\": {\n    \"node\": \">=22.13.0\"\n  },\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\",\n    \"lint\": \"tsc --noEmit\",\n    \"test\": \"vite build && node --test\"\n  },\n  \"dependencies\": {\n    \"react\": \"19.2.6\",\n    \"react-dom\": \"19.2.6\"\n  },\n  \"devDependencies\": {\n    \"@tailwindcss/vite\": \"4.3.3\",\n    \"@types/node\": \"22.19.19\",\n    \"@types/react\": \"19.2.14\",\n    \"@types/react-dom\": \"19.2.3\",\n    \"@vitejs/plugin-react\": \"6.0.2\",\n    \"tailwindcss\": \"4.3.3\",\n    \"typescript\": \"5.9.3\",\n    \"vite\": \"8.0.13\"\n  },\n  \"packageManager\": \"pnpm@11.9.0\"\n}\n",
+      "excerpt_truncated": false
+    },
+    {
+      "path": "tests/sales-automation.test.mjs",
+      "score": 82,
+      "reasons": [
+        "currently changed",
+        "test coverage"
+      ],
+      "size_bytes": 3228,
+      "modified_at": "2026-07-31T07:15:33.292Z",
+      "sha256": "15bc0cd58c9ef5496bdd885fde942e931ce6e32ab6bbb1342c4f32dd8dfe8a16",
+      "excerpt": "import assert from \"node:assert/strict\";\nimport { readFile } from \"node:fs/promises\";\nimport test from \"node:test\";\nimport ts from \"typescript\";\n\nconst source = await readFile(\n  new URL(\"../app/crm/sales-automation.ts\", import.meta.url),\n  \"utf8\",\n);\nconst compiled = ts.transpileModule(source, {\n  compilerOptions: {\n    module: ts.ModuleKind.ESNext,\n    target: ts.ScriptTarget.ES2022,\n  },\n}).outputText;\nconst automation = await import(\n  `data:text/javascript;base64,${Buffer.from(compiled).toString(\"base64\")}`\n);\n\nconst createClient = (overrides = {}) => ({\n  id: \"КЛ-ТЕСТ\",\n  companyName: \"Тестовая упаковка\",\n  ownerId: \"user-test\",\n  lastShipmentAt: \"2026-07-01\",\n  lastContactAt: \"2026-07-01T09:00:00.000Z\",\n  expectedNextOrderAt: \"2026-07-31\",\n  repeatReminderDays: 14,\n  ...overrides,\n});\n\ntest(\"calculates the next expected order from shipment and cadence\", () => {\n  assert.equal(\n    automation.calculateExpectedNextOrder(\"2026-07-01\", 30),\n    \"2026-07-31\",\n  );\n  assert.equal(automation.calculateExpectedNextOrder(null, 30), null);\n  assert.equal(automation.calculateExpectedNextOrder(\"2026-07-01\", null), null);\n});\n\ntest(\"classifies 30/60/90 day and sleeping repeat-sale segments\", () => {\n  const now = new Date(\"2026-07-31T12:00:00.000Z\");\n  assert.equal(\n    automation.matchesRepeatSegment(\n      createClient({ lastShipmentAt: \"2026-06-20\" }),\n      \"30\",\n      now,\n    ),\n    true,\n  );\n  assert.equal(\n    automation.matchesRepeatSegment(\n      createClient({ lastShipmentAt: \"2026-05-20\" }),\n      \"60\",\n      now,\n    ),\n    true,\n  );\n  assert.equal(\n    automation.matchesRepeatSegment(\n      createClient({ lastShipmentAt: \"2026-04-20\" }),\n      \"90\",\n      now,\n    ),\n    true,\n  );\n  assert.equal(\n    automation.matchesRepeatSegment(\n      createClient({ lastShipmentAt: \"2026-03-01\" }),\n      \"sleeping\",\n      now,\n    ),\n    true,\n  );\n});\n\ntest(\"creates one stable repeat-order reminder and replaces stale reminders\", () => {\n  const client = createClient();\n  const now = new Date(\"2026-07-10T09:00:00.000Z\");\n  const first = automation.syncRepeatOrderTask",
+      "excerpt_truncated": true
+    }
+  ],
+  "context_sources": {
+    "agents": "# AGENTS.md\n\nGenerated by the AI Dev System project bootstrap command.\n\n## Project\n\n- Name: ГОФРА CRM\n- Root: `C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха`\n- AI Dev System: `C:\\Users\\sacha\\.codex\\links\\ai-dev-system`\n- Project brief: `.ai-dev/project-brief.md`\n- Project map: `.ai-dev/project-map.md`\n- Quality gate: `.ai-dev/quality-gate.md`\n\n## Agent Startup\n\n1. Read this file before changing code.\n2. Read `.ai-dev/project-brief.md` for the short handoff memory.\n3. Read `.ai-dev/project-map.md` for structure and known commands.\n4. Read `.ai-dev/quality-gate.md` before final verification.\n5. Inspect nearby code and existing patterns before editing.\n6. For substantive work, call `begin_task`. It resolves canonical project identity and compiles a bounded task-specific context pack under `.ai-dev/context/`.\n7. Inspect the returned context pack, keep acceptance criteria current with `checkpoint_task`, then use `verify_task` and `complete_task`.\n8. Use the AI Dev System MCP tools for durable knowledge and skill routing:\n   - `project_identity`\n   - `compile_project_context`\n   - `project_context_status`\n   - `match_auto_command`\n   - `read_auto_command`\n   - `search_knowledge`\n   - `recommend_skills`\n   - `search_skills`\n   - `read_skill`\n9. For frontend product or visual work, call `frontend_product_builder` and pass the implementation gate before changing product UI code.\n\n## Detected Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\nPackage manager: `pnpm`\n\nProject types: `frontend`\n\n## Components\n\n| Component | Path | Ecosystem | Types | Stack |\n| --- | --- | --- | --- | --- |\n| gofra-crm-frontend | . | node | frontend | Node.js, TypeScript, React, Vite, Tailwind CSS |\n\n## Commands\n\n| Task | Component | CWD | Command | Source |\n| --- | --- | --- | --- | --- |\n| Dev | gofra-crm-frontend | . | pnpm run dev | package script |\n| Test | gofra-crm-frontend | . | pnpm run test | package script |\n| Lint | gofra-crm-frontend | . | pnpm run lint | package script |\n| Typecheck | gofra-crm-frontend | . | Not detected | missing |\n| Build | gofra-crm-frontend | . | pnpm run build | package script |\n\n## Agent Standards\n\n### Scope Control\n\n- Keep changes scoped to the requested behavior.\n- Prefer existing architecture, naming, components, utilities, and test style.\n- Do not do unrelated refactors, formatting churn, dependency swaps, or file moves.\n- Preserve user changes and never reset unrelated work.\n- Do not introduce dependencies unless the benefit is clear and the project pattern supports it.\n\n### Code Quality\n\n- Read nearby code before editing.\n- Keep changes small, reviewable, and reversible.\n- Add or update tests for bug fixes, shared logic, data transformations, and user-visible behavior.\n- Do not leave TODO placeholders or partial implementations in final work.\n- Do not commit secrets, tokens, API keys, private credentials, or local-only config.\n\n### Quality Gate\n\n- Read `.ai-dev/quality-gate.md` before final verification.\n- Run the narrowest relevant check first, then broader checks when shared behavior or build config is touched.\n- If checks cannot run, report the exact reason.\n- Do not mark work complete while relevant checks are failing.\n\n### Frontend Quality Gate\n\n- Verify responsive layout on desktop and mobile when UI changes are visible.\n- Check loading, empty, error, hover, focus, and disabled states when touched.\n- Ensure text does not overflow buttons, tables, cards, or navigation.\n- Reuse the existing design system before adding one-off UI.\n- For meaningful visual work, inspect the app in a browser or screenshot and report that verification.\n\n\n## Auto Commands\n\nThese phrases are shortcuts for repeatable agent workflows. When the user writes one of them, resolve it through the AI Dev System MCP auto-command tools.\n\n| Phrase | Command | Primary skills |\n| --- | --- | --- |\n| оформи проект для ИИ | `format_project_for_ai` | repo-onboarding, knowledge-curator, code-reviewer |\n| подготовь проект | `prepare_repository` | repo-onboarding, knowledge-curator |\n| обнови память проекта | `refresh_project_memory` | repo-onboarding, knowledge-curator, code-reviewer |\n| начни новую фичу | `start_feature` | feature-builder, code-reviewer, knowledge-curator |\n| найди баг | `investigate_bug` | bugfix-investigator, code-reviewer |\n| сделай ревью | `review_changes` | code-reviewer |\n| сгенерируй референсы для проекта | `generate_frontend_references` | frontend-product-builder |\n| build frontend product | `build_frontend_product` | frontend-product-builder |\n| улучши frontend/design | `improve_frontend_design` | frontend-product-builder |\n| поддержи frontend/beta | `maintain_beta_frontend` | beta-frontend-maintainer, frontend-quality-gate, code-reviewer |\n| проверь frontend quality gate | `frontend_quality_gate` | frontend-product-builder, frontend-quality-gate |\n| проверь лендинг/конверсию | `review_landing_conversion` | landing-conversion-reviewer, design-taste-frontend, frontend-quality-gate |\n| проверь библиотеку скиллов | `audit_skill_library` | knowledge-curator, code-reviewer |\n| обнови базу знаний | `update_knowledge_base` | knowledge-curator |\n\n### Command Rule\n\n- Match the user's phrase with `match_auto_command`.\n- Read the selected runbook with `read_auto_command`.\n- Use the listed skills and tools before editing.\n- Follow the command guardrails and the project quality gate.\n\n\n## Skill Routing\n\n- New feature: use `feature-builder`.\n- Bug or failing behavior: use `bugfix-investigator`.\n- Code review or risk check: use `code-reviewer`.\n- Frontend product/design: use `frontend-product-builder`, its one selected specialist, and `frontend-quality-gate`; never mix more than three skills.\n- Knowledge updates: use `knowledge-curator`.\n\n## Notes For Future Agents\n\n- Update `.ai-dev/project-map.md` when the architecture or command surface changes.\n- Update `.ai-dev/quality-gate.md` when scripts, frameworks, or release checks change.\n",
+    "project_brief": "# Project Brief\n\nGenerated: 2026-07-25T05:44:13.506Z\n\nThis is the short handoff cache for Codex, Claude, and other agents. Read it before loading the larger project map.\n\n## Identity\n\n- Name: gofra-crm\n- Root: `C:\\Users\\sacha\\Documents\\Codex\\2026-07-23\\new-chat`\n- Git repository detected: yes\n- Project types: `frontend`\n- Package manager: `pnpm`\n\n## Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\n## Important Files And Folders\n\n- README.md\n- package.json\n- tsconfig.json\n- vite.config.ts\n- GitHub Actions\n- src/\n- app/\n- tests/\n\n## Command Map\n\n| Task | Command | Source |\n| --- | --- | --- |\n| Install | pnpm install | project files |\n| Dev | pnpm dev | package script: dev |\n| Test | pnpm test | package script: test |\n| Lint | pnpm lint | package script: lint |\n| Typecheck | Not detected | missing |\n| Build | pnpm build | package script: build |\n\n## Quality Gaps\n\n- Typecheck command is not detected.\n\n## Risk Signals\n\n- No automatic risk signals detected.\n\n## Dangerous Or Side-Effectful Scripts\n\n- No package scripts were automatically flagged as side-effectful.\n\n## Documentation\n\n| Item | Status | Type |\n| --- | --- | --- |\n| README.md | present | file |\n| docs | missing | missing |\n| CONTRIBUTING.md | missing | missing |\n| CHANGELOG.md | missing | missing |\n| .github | present | directory |\n| .github/workflows | present | directory |\n\n## Environment And Secrets\n\n- No `.env*` files detected by the lightweight scan.\n\n## Recommended Skills\n\n| Skill | Use when |\n| --- | --- |\n| `repo-onboarding` | Repository setup, AGENTS.md, project map, quality gate. |\n| `feature-builder` | Feature implementation with repo patterns and tests. |\n| `bugfix-investigator` | Bug, regression, failing test, or CI investigation. |\n| `code-reviewer` | Risk review, missing tests, security/data/behavior checks. |\n| `frontend-polisher` | Frontend/UI quality, states, responsiveness. |\n| `beta-frontend-maintainer` | Existing beta frontend support with minimal safe diffs. |\n| `frontend-quality-gate` | Final UI QA: responsive, accessibility, browser checks. |\n| `landing-conversion-reviewer` | Landing page clarity, trust, CTA, and conversion review. |\n| `design-taste-frontend` | Visually important frontend/design work. |\n| `knowledge-curator` | Durable project notes and lessons. |\n\n## Recommended Next Commands\n\n- начни новую фичу: <описание>\n- найди баг: <симптом или ошибка>\n- поддержи frontend/beta: <экран или компонент>\n- проверь frontend quality gate\n- проверь лендинг/конверсию: <страница>\n- улучши frontend/design: <экран или компонент>\n- сделай ревью\n- обнови память проекта\n- обнови базу знаний\n\n## Agent Handoff Rule\n\n- Do not load the whole repository into chat context.\n- Use this file for quick orientation, then `.ai-dev/project-map.md` for structure and `.ai-dev/quality-gate.md` for verification.\n- Use MCP search for specific files, commands, risks, and skills.\n- Do not run side-effectful scripts without explicit user approval.\n",
+    "project_map": "# Project Map\n\nGenerated: 2026-07-25T05:44:13.579Z\n\n## Identity\n\n- Name: gofra-crm\n- Root: `C:\\Users\\sacha\\Documents\\Codex\\2026-07-23\\new-chat`\n- Git repository detected: yes\n- Project types: `frontend`\n\n## Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\nPackage manager: `pnpm`\n\n## Important Files And Folders\n\n- README.md\n- package.json\n- tsconfig.json\n- vite.config.ts\n- GitHub Actions\n- src/\n- app/\n- tests/\n\n## Documentation\n\n| Item | Status | Type |\n| --- | --- | --- |\n| README.md | present | file |\n| docs | missing | missing |\n| CONTRIBUTING.md | missing | missing |\n| CHANGELOG.md | missing | missing |\n| .github | present | directory |\n| .github/workflows | present | directory |\n\n## Environment And Secrets Risk\n\n- No `.env*` files detected by the lightweight scan.\n\n## Commands\n\n| Task | Command | Source |\n| --- | --- | --- |\n| Install | pnpm install | project files |\n| Dev | pnpm dev | package script: dev |\n| Test | pnpm test | package script: test |\n| Lint | pnpm lint | package script: lint |\n| Typecheck | Not detected | missing |\n| Build | pnpm build | package script: build |\n\n## Package Scripts\n\n| Script | Command |\n| --- | --- |\n| dev | vite |\n| build | vite build |\n| preview | vite preview |\n| lint | tsc --noEmit |\n| test | vite build && node --test tests/static-build.test.mjs |\n\n## Quality Gaps\n\n- Typecheck command is not detected.\n\n## Risk Signals\n\n- No automatic risk signals detected.\n\n## Recommended Next Commands\n\n- начни новую фичу: <описание>\n- найди баг: <симптом или ошибка>\n- поддержи frontend/beta: <экран или компонент>\n- проверь frontend quality gate\n- проверь лендинг/конверсию: <страница>\n- улучши frontend/design: <экран или компонент>\n- сделай ревью\n- обнови память проекта\n- обнови базу знаний\n\n## Top-Level Tree\n\n```text\n- .ai-dev/\n  - frontend-qa-report.md\n  - project-brief.md\n  - project-map.md\n- .github/\n  - workflows/\n    - deploy-pages.yml\n- .openai/\n- .vinext/\n  - fonts/\n    - geist-8ac0455e797f/\n    - geist-mono-00e989178794/\n- .wrangler/\n  - deploy/\n    - config.json\n  - registry/\n    - __asset-worker__\n    - __router-worker__\n    - __vite_proxy_worker__\n    - gofra-crm-frontend\n    - site-creator-vinext-starter\n  - state/\n    - v3/\n- app/\n  - _sites-preview/\n  - crm/\n    - chat-gateway.ts\n    - chat.css\n    - ChatView.tsx\n    - crm-gateway.ts\n    - CrmApp.tsx\n    - domain.ts\n    - fixtures.ts\n    - Icons.tsx\n    - permissions.ts\n    - theme.tsx\n    - workspace-features.css\n    - WorkspaceFeatures.tsx\n  - agency-redesign.css\n  - globals.css\n- db/\n- drizzle/\n  - meta/\n- examples/\n  - d1/\n    - app/\n    - db/\n- outputs/\n- public/\n  - fonts/\n    - geist-cyrillic.woff2\n    - geist-latin.woff2\n    - geist-mono-cyrillic.woff2\n    - geist-mono-latin.woff2\n  - .nojekyll\n  - favicon.svg\n  - file.svg\n  - globe.svg\n  - og.png\n  - window.svg\n- src/\n  - main.tsx\n- tests/\n  - static-build.test.mjs\n- work/\n  - agency-redesign-qa/\n    - chat__desktop.png\n    - chat__mobile.png\n    - chat__tablet.png\n    - clients__desktop.png\n    - clients__mobile.png\n    - clients__tablet.png\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - dashboard__tablet.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n    - statistics__tablet.png\n  - custom-icons-stats-qa/\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - dashboard__tablet.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n    - statistics__tablet.png\n  - data-foundation-check/\n  - feature-final-qa/\n    - calendar__mobile.png\n  - feature-routes-qa/\n    - calendar__desktop.png\n    - calendar__mobile.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - frontend-qa/\n    - root__desktop.png\n    - root__mobile.png\n  - frontend-qa-final/\n    - root__desktop.png\n    - root__mobile.png\n  - frontend-qa-retry/\n    - root__desktop.png\n    - root__mobile.png\n  - icon-polish-qa/\n    - root__desktop.png\n    - root__mobile.png\n    - root__tablet.png\n  - redesign-qa/\n    - root__desktop.png\n    - root__mobile.png\n  - sales-light-fix/\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - steel-palette-qa/\n    - chat__desktop.png\n    - chat__mobile.png\n    - clients__desktop.png\n    - clients__mobile.png\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - deals__desktop.png\n    - deals__mobile.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - dev-server.err.log\n  - dev-server.out.log\n  - gofra-crm-site.tar.gz\n  - pages-preview.err.log\n  - pages-preview.out.log\n  - pnpm-install-retry.err.log\n  - pnpm-install-retry.out.log\n  - pnpm-install.err.log\n  - pnpm-install.out.log\n  - preview-4178.err.log\n  - preview-4178.log\n  - preview-4179.err.log\n  - preview-4179.log\n- worker/\n- .gitignore\n- РАЗДЕЛЫ-СИСТЕМЫ.txt\n- index.html\n- next-env.d.ts\n- package.json\n- pnpm-lock.yaml\n- pnpm-workspace.yaml\n- README.md\n- tsconfig.json\n- tsconfig.tsbuildinfo\n- vite.config.ts\n```\n",
+    "quality_gate": "# Quality Gate\n\nGenerated: 2026-07-30T20:40:45.148Z\n\n## Default Verification\n\n- Test: `pnpm run test`\n- Lint: `pnpm run lint`\n- Build: `pnpm run build`\n\n## Missing Checks\n\n- Typecheck command is not detected.\n\n## Unsafe Or Manual Commands\n\n- `test`: Shell operator '&' is forbidden.. Command: `vite build && node --test tests/static-build.test.mjs`\n\n## Minimum Standard\n\n- Run the narrowest fast check that proves the change.\n- Run broader checks when touching shared utilities, build config, routing, auth, data models, or UI foundations.\n- If a check is unavailable or cannot run locally, record the reason in the final response.\n- Do not mark the task complete while known relevant checks are failing.\n\n## Frontend QA\n\n- Check desktop and mobile layouts.\n- Check loading, empty, and error states when touched by the task.\n- Verify text does not overflow buttons, cards, tables, or navigation.\n- Verify interactive controls have clear hover/focus/disabled states.\n- For visual changes, run or open the app and inspect the changed screens.\n- When Playwright is available, run MCP `run_frontend_qa` for desktop/mobile screenshots, console errors, overflow, and basic accessibility.\n- For product/design work, ordinary `run_frontend_qa` is not sufficient: require an approved direction and design system, then use `run_visual_reference_qa`, independent `record_visual_review`, and `frontend_product_gate` with `gate=handoff`.\n- Check hierarchy, composition, typography, density, action clarity, content quality, asset authenticity, mobile UX, state coverage, and brand coherence separately. Do not use one overall design score.\n- For handoff or beta release, use the `frontend-quality-gate` skill and report Gate: pass, warn, or block.\n\n## Final Response Checklist\n\n- Mention changed files.\n- Mention checks run and results.\n- Mention any skipped checks or residual risk.\n"
+  },
+  "unknowns": [],
+  "boundaries": [
+    "Read selected files and their nearby dependencies before editing.",
+    "Do not load unrelated repository files or the full skill catalog.",
+    "Never include .env, private keys, certificates, or secret values in the context pack.",
+    "Recompile after architecture, task scope, project state, or acceptance criteria change."
+  ],
+  "source_state_fingerprint": "ddc56d9d51fd75e21dd58b4564b62c6a16b010972516666cd11e341d0153e321",
+  "source_fingerprint": "f1fca0e960e27ebc0214a7613f5c66d51308d6d5fc726740570c977dcc09e15a",
+  "budget": {
+    "max_chars": 60000,
+    "actual_chars": 39753,
+    "estimated_tokens": 9939,
+    "selected_source_files": 12,
+    "discovered_text_files": 54
+  }
+}

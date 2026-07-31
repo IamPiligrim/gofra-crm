@@ -1,11 +1,18 @@
 import {
   CRM_SCHEMA_VERSION,
+  DEAL_STATUSES,
+  DECISION_INFLUENCES,
+  DECISION_ROLES,
+  PREFERRED_CHANNELS,
+  type Attachment,
   type Client,
   type Contact,
   type CrmSnapshot,
   type Deal,
   type Dictionaries,
   type Interaction,
+  type PriceApproval,
+  type PriceApprovalStatus,
   type Session,
   type StatusEvent,
   type Target,
@@ -14,6 +21,12 @@ import {
   type User,
   type UserRole,
 } from "./domain";
+import {
+  calculateExpectedNextOrder,
+  normalizeDealNextAction,
+  resolveExpectedNextOrder,
+  syncRepeatOrderTasks,
+} from "./sales-automation";
 import {
   DEMO_TEAM_ID,
   DEMO_USER_IDS,
@@ -24,8 +37,12 @@ import {
   demoUsers,
 } from "./fixtures";
 
-export const CRM_STORAGE_KEY = "gofra-crm-prototype:v2";
-export const LEGACY_CRM_STORAGE_KEY = "gofra-crm-prototype:v1";
+export const CRM_STORAGE_KEY = "gofra-crm-prototype:v4";
+export const LEGACY_CRM_STORAGE_KEYS = [
+  "gofra-crm-prototype:v3",
+  "gofra-crm-prototype:v2",
+  "gofra-crm-prototype:v1",
+] as const;
 
 type JsonRecord = Record<string, unknown>;
 
@@ -55,11 +72,28 @@ const asNullableString = (
 const asNumber = (value: unknown, fallback = 0): number =>
   typeof value === "number" && Number.isFinite(value) ? value : fallback;
 
+const asNullableNumber = (
+  value: unknown,
+  fallback: number | null = null,
+): number | null =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
+
 const asBoolean = (value: unknown, fallback = false): boolean =>
   typeof value === "boolean" ? value : fallback;
 
 const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : [];
+
+const normalizeAttachments = (value: unknown): Attachment[] =>
+  asArray(value).map((attachment, index) => {
+    const record = asRecord(attachment);
+    return {
+      id: asString(record.id, `attachment-${index + 1}`),
+      name: asString(record.name, `Файл ${index + 1}`),
+      type: asString(record.type, "application/octet-stream"),
+      size: Math.max(0, asNumber(record.size)),
+    };
+  });
 
 const unique = <T,>(values: readonly T[]): T[] => [...new Set(values)];
 
@@ -449,7 +483,7 @@ const createInitialStatusEvents = (
 ];
 
 /**
- * Upgrades an unversioned/v1 browser snapshot to schema v2.
+ * Upgrades legacy browser snapshots to the current schema.
  * Existing record IDs and legacy display fields are kept verbatim.
  */
 export const migrateCrmSnapshot = (
@@ -471,10 +505,13 @@ export const migrateCrmSnapshot = (
     throw new TypeError("В снимке CRM отсутствуют обязательные коллекции.");
   }
 
-  const isV2 = source.schemaVersion === CRM_SCHEMA_VERSION;
+  const sourceSchemaVersion = asNumber(source.schemaVersion, 1);
+  const isTeamAware = [2, 3, CRM_SCHEMA_VERSION].includes(
+    sourceSchemaVersion,
+  );
 
   const teamsSource =
-    isV2 && Array.isArray(source.teams) ? source.teams : demoTeams;
+    isTeamAware && Array.isArray(source.teams) ? source.teams : demoTeams;
   const teams = teamsSource.map((team, index) =>
     normalizeTeam(team, migratedAt, index),
   );
@@ -482,7 +519,7 @@ export const migrateCrmSnapshot = (
 
   const fallbackTeamId = teams[0]?.id ?? DEMO_TEAM_ID;
   const usersSource =
-    isV2 && Array.isArray(source.users) ? source.users : demoUsers;
+    isTeamAware && Array.isArray(source.users) ? source.users : demoUsers;
   const users = usersSource.map((user, index) =>
     normalizeUser(user, migratedAt, index, fallbackTeamId),
   );
@@ -568,6 +605,29 @@ export const migrateCrmSnapshot = (
     const lastContactAt = asNullableString(record.lastContactAt);
     const createdAt = asString(record.createdAt, lastContactAt ?? migratedAt);
     const updatedAt = asString(record.updatedAt, lastContactAt ?? createdAt);
+    const orderFrequencyDays = asNullableNumber(record.orderFrequencyDays);
+    const lastShipmentAt = asNullableString(record.lastShipmentAt);
+    const storedExpectedNextOrderAt = asNullableString(
+      record.expectedNextOrderAt,
+    );
+    const calculatedExpectedNextOrderAt = calculateExpectedNextOrder(
+      lastShipmentAt,
+      orderFrequencyDays,
+    );
+    const expectedNextOrderManual = asBoolean(
+      record.expectedNextOrderManual,
+      Boolean(
+        storedExpectedNextOrderAt &&
+          storedExpectedNextOrderAt !== calculatedExpectedNextOrderAt,
+      ),
+    );
+    const expectedNextOrderAt = resolveExpectedNextOrder({
+      lastShipmentAt,
+      orderFrequencyDays,
+      expectedNextOrderAt: storedExpectedNextOrderAt,
+      expectedNextOrderManual,
+    });
+    const rawReminderDays = asNumber(record.repeatReminderDays, 14);
 
     return {
       ...record,
@@ -576,6 +636,15 @@ export const migrateCrmSnapshot = (
         record.managerName,
         userById.get(ownerId)?.fullName ?? "",
       ),
+      orderFrequencyDays,
+      lastShipmentAt,
+      expectedNextOrderAt,
+      expectedNextOrderManual,
+      averageMonthlyVolume: Math.max(
+        0,
+        asNumber(record.averageMonthlyVolume),
+      ),
+      repeatReminderDays: rawReminderDays === 7 ? 7 : 14,
       createdAt,
       updatedAt,
     } as unknown as Client;
@@ -591,6 +660,22 @@ export const migrateCrmSnapshot = (
     return {
       ...record,
       ownerId,
+      decisionRole: DECISION_ROLES.includes(
+        record.decisionRole as (typeof DECISION_ROLES)[number],
+      )
+        ? (record.decisionRole as Contact["decisionRole"])
+        : "Закупщик",
+      decisionInfluence: DECISION_INFLUENCES.includes(
+        record.decisionInfluence as (typeof DECISION_INFLUENCES)[number],
+      )
+        ? (record.decisionInfluence as Contact["decisionInfluence"])
+        : "Влияет",
+      preferredChannel: PREFERRED_CHANNELS.includes(
+        record.preferredChannel as (typeof PREFERRED_CHANNELS)[number],
+      )
+        ? (record.preferredChannel as Contact["preferredChannel"])
+        : "Телефон",
+      introductionNeeded: asString(record.introductionNeeded),
       createdAt,
       updatedAt: asString(record.updatedAt, createdAt),
     } as unknown as Contact;
@@ -606,16 +691,26 @@ export const migrateCrmSnapshot = (
       proposalDate ? `${proposalDate}T08:00:00.000Z` : migratedAt,
     );
 
-    return {
+    const rawStatus = asString(record.status, "Новая заявка");
+    const status = DEAL_STATUSES.includes(
+      rawStatus as (typeof DEAL_STATUSES)[number],
+    )
+      ? (rawStatus as Deal["status"])
+      : "Новая заявка";
+    return normalizeDealNextAction({
       ...record,
       ownerId,
+      status,
+      nextAction: asString(record.nextAction),
+      nextActionAt: asNullableString(record.nextActionAt),
+      needsNextAction: asBoolean(record.needsNextAction),
       managerName: asString(
         record.managerName,
         userById.get(ownerId)?.fullName ?? "",
       ),
       createdAt,
       updatedAt: asString(record.updatedAt, createdAt),
-    } as unknown as Deal;
+    } as unknown as Deal, new Date(migratedAt));
   });
 
   const interactions = asArray(source.interactions).map<Interaction>((value) => {
@@ -628,16 +723,18 @@ export const migrateCrmSnapshot = (
     return {
       ...record,
       ownerId,
+      dealId: asNullableString(record.dealId),
       managerName: asString(
         record.managerName,
         userById.get(ownerId)?.fullName ?? "",
       ),
+      attachments: normalizeAttachments(record.attachments),
       createdAt,
       updatedAt: asString(record.updatedAt, createdAt),
     } as unknown as Interaction;
   });
 
-  const tasks = Array.isArray(source.tasks)
+  const baseTasks = Array.isArray(source.tasks)
     ? source.tasks.map((task, index) =>
         normalizeTask(task, migratedAt, index, currentUserId),
       )
@@ -647,6 +744,42 @@ export const migrateCrmSnapshot = (
         interactions,
         currentUserId,
       );
+  const tasks = syncRepeatOrderTasks(clients, baseTasks, new Date(migratedAt));
+
+  const priceApprovals = asArray(source.priceApprovals).map<PriceApproval>(
+    (value, index) => {
+      const record = asRecord(value);
+      const statusValue = asString(record.status, "pending");
+      const status: PriceApprovalStatus = [
+        "pending",
+        "approved",
+        "rejected",
+        "clarification",
+      ].includes(statusValue)
+        ? (statusValue as PriceApprovalStatus)
+        : "pending";
+      const createdAt = asString(record.createdAt, migratedAt);
+      return {
+        id: asString(record.id, `approval-${index + 1}`),
+        clientId: asString(record.clientId),
+        dealId: asString(record.dealId),
+        product: asString(record.product),
+        currentPrice: Math.max(0, asNumber(record.currentPrice)),
+        requestedPrice: Math.max(0, asNumber(record.requestedPrice)),
+        volume: asString(record.volume),
+        reason: asString(record.reason),
+        comment: asString(record.comment),
+        attachments: normalizeAttachments(record.attachments),
+        status,
+        requestedById: asString(record.requestedById, currentUserId),
+        reviewedById: asNullableString(record.reviewedById),
+        reviewedAt: asNullableString(record.reviewedAt),
+        ownerId: resolveOwnerId(record),
+        createdAt,
+        updatedAt: asString(record.updatedAt, createdAt),
+      };
+    },
+  );
 
   const statusEvents = Array.isArray(source.statusEvents)
     ? source.statusEvents.map((event, index) =>
@@ -670,6 +803,7 @@ export const migrateCrmSnapshot = (
     contacts,
     deals,
     interactions,
+    priceApprovals,
     tasks,
     statusEvents,
     targets,
@@ -704,14 +838,15 @@ class BrowserMockGateway implements CrmGateway {
       }
     }
 
-    const legacy = window.localStorage.getItem(LEGACY_CRM_STORAGE_KEY);
-    if (legacy) {
+    for (const legacyKey of LEGACY_CRM_STORAGE_KEYS) {
+      const legacy = window.localStorage.getItem(legacyKey);
+      if (!legacy) continue;
       try {
         const snapshot = migrateCrmSnapshot(JSON.parse(legacy));
         window.localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(snapshot));
         return snapshot;
       } catch {
-        // Keep the v1 value as a recoverable backup and fall back to demo data.
+        // Keep legacy values as recoverable backups and try the next version.
       }
     }
 
@@ -726,7 +861,9 @@ class BrowserMockGateway implements CrmGateway {
   async reset(): Promise<CrmSnapshot> {
     const snapshot = clone(demoSnapshot);
     window.localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(snapshot));
-    window.localStorage.removeItem(LEGACY_CRM_STORAGE_KEY);
+    for (const legacyKey of LEGACY_CRM_STORAGE_KEYS) {
+      window.localStorage.removeItem(legacyKey);
+    }
     await pause(180);
     return snapshot;
   }

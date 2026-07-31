@@ -41,3 +41,9 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# local AI development runtime artifacts
+/.ai-dev/dev-server.*.log
+/.ai-dev/frontend-qa/
+/.ai-dev/frontend-qa-baselines/
+/.migration-backup-*/

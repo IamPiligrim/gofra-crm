@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "id": "ctx-20260731121333-506f8f3e9e",
+  "generated_at": "2026-07-31T12:13:33.529Z",
+  "task": "Handoff context after completing the cross-page scroll fix: all workspace-local headers, tabs, filters and action bars scroll with content; global left sidebar remains independently sticky. Continue future CRM feature work from this verified state.",
+  "domains": [
+    "frontend"
+  ],
+  "project": {
+    "id": "project-f82e060fa046c964c4c1",
+    "name": "ГОФРА CRM",
+    "root": "C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха",
+    "repository_id": "repository-389e5e36c94fbedfd2d7",
+    "types": [
+      "frontend"
+    ],
+    "stack": [
+      "Node.js",
+      "TypeScript",
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "GitHub Actions"
+    ],
+    "components": [
+      {
+        "name": "gofra-crm-frontend",
+        "path": ".",
+        "manifest": "package.json",
+        "ecosystem": "node",
+        "package_manager": "pnpm",
+        "stack": [
+          "Node.js",
+          "TypeScript",
+          "React",
+          "Vite",
+          "Tailwind CSS"
+        ],
+        "project_types": [
+          "frontend"
+        ],
+        "scripts": {
+          "dev": "vite",
+          "build": "vite build",
+          "preview": "vite preview",
+          "lint": "tsc --noEmit",
+          "test": "vite build && node --test"
+        },
+        "commands": [
+          {
+            "label": "Dev",
+            "command": "pnpm run dev",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Test",
+            "command": "pnpm run test",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Lint",
+            "command": "pnpm run lint",
+            "cwd": ".",
+            "source": "package script"
+          },
+          {
+            "label": "Typecheck",
+            "command": "Not detected",
+            "cwd": ".",
+            "source": "missing"
+          },
+          {
+            "label": "Build",
+            "command": "pnpm run build",
+            "cwd": ".",
+            "source": "package script"
+          }
+        ]
+      }
+    ]
+  },
+  "acceptance_criteria": [
+    "Preserve normal-flow positioning for workspace header and shared page-local controls.",
+    "Preserve independent sticky/scrollable global left sidebar.",
+    "Regression assertions in tests/static-build.test.mjs must remain green.",
+    "Current verified checks: lint, 12 tests, production build, seven-route desktop/mobile browser audit, strict visual handoff pass."
+  ],
+  "routed_skills": [
+    {
+      "name": "bugfix-investigator",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "testing-quality",
+        "debugging"
+      ],
+      "primary_group": "testing-quality",
+      "primary_group_label": "Testing & Quality",
+      "subgroups": [
+        "debugging"
+      ],
+      "task_types": [
+        "build",
+        "debug",
+        "qa"
+      ],
+      "platforms": [
+        "local-repository"
+      ],
+      "related_skills": [
+        "code-reviewer",
+        "feature-builder",
+        "frontend-quality-gate"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "root-cause and regression workflow",
+      "use_when": "Codex needs to investigate and fix a bug, failing test, runtime error, CI failure, regression, flaky behavior, or production issue by finding root cause before editing",
+      "path": "sources/custom/bugfix-investigator/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/bugfix-investigator.md",
+      "score": 236,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:workflow",
+        "rule:workflow"
+      ],
+      "routing_role": "workflow",
+      "routing_rule": "workflow"
+    },
+    {
+      "name": "beta-frontend-maintainer",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "frontend-ui",
+        "interface-engineering"
+      ],
+      "primary_group": "frontend-ui",
+      "primary_group_label": "Frontend & UI",
+      "subgroups": [
+        "interface-engineering"
+      ],
+      "task_types": [
+        "build",
+        "debug",
+        "design"
+      ],
+      "platforms": [
+        "web",
+        "browser"
+      ],
+      "related_skills": [
+        "frontend-quality-gate",
+        "frontend-polisher",
+        "code-reviewer"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "frontend domain",
+      "use_when": "Codex maintains an existing beta or production-like frontend, especially support tasks, UI fixes, responsive bugs, API-bound screens, small feature tweaks, and rare backend-adjacent changes where minimal safe diffs matter",
+      "path": "sources/custom/beta-frontend-maintainer/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/beta-frontend-maintainer.md",
+      "score": 235,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:domain",
+        "rule:frontend"
+      ],
+      "routing_role": "domain",
+      "routing_rule": "frontend"
+    },
+    {
+      "name": "frontend-quality-gate",
+      "source": "custom",
+      "type": "development-workflow",
+      "categories": [
+        "development",
+        "workflow",
+        "testing-quality",
+        "frontend-qa",
+        "code-review"
+      ],
+      "primary_group": "testing-quality",
+      "primary_group_label": "Testing & Quality",
+      "subgroups": [
+        "frontend-qa",
+        "code-review"
+      ],
+      "task_types": [
+        "build",
+        "review",
+        "qa",
+        "design",
+        "deploy",
+        "document"
+      ],
+      "platforms": [
+        "local-repository"
+      ],
+      "related_skills": [
+        "beta-frontend-maintainer",
+        "frontend-polisher",
+        "code-reviewer"
+      ],
+      "frameworks": [],
+      "languages": [],
+      "conflicts": [],
+      "maturity": "reviewed",
+      "trust_level": "trusted-local",
+      "quality_score": 100,
+      "quality_grade": "A",
+      "quality_status": "pass",
+      "routed_groups": [
+        "frontend-ui",
+        "backend-api",
+        "mobile",
+        "data-ai",
+        "integrations-automation",
+        "devops-infrastructure",
+        "testing-quality",
+        "security",
+        "design-content",
+        "repository-workflows",
+        "knowledge-productivity"
+      ],
+      "reason": "frontend verification",
+      "use_when": "Codex must verify frontend or UI changes before handoff, release, pull request, review, or beta testing, including responsive QA, accessibility checks, performance risks, visual regressions, forms, and browser behavior",
+      "path": "sources/custom/frontend-quality-gate/SKILL.md",
+      "card_path": "03-skills-catalog/cards/custom/frontend-quality-gate.md",
+      "score": 234,
+      "project": "ГОФРА CRM",
+      "evidence": [
+        "routing:verification",
+        "rule:frontend"
+      ],
+      "routing_role": "verification",
+      "routing_rule": "frontend"
+    }
+  ],
+  "commands": [
+    {
+      "label": "Dev",
+      "command": "pnpm run dev",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Test",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Lint",
+      "command": "pnpm run lint",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Typecheck",
+      "command": "Not detected",
+      "cwd": ".",
+      "source": "missing",
+      "component": "gofra-crm-frontend"
+    },
+    {
+      "label": "Build",
+      "command": "pnpm run build",
+      "cwd": ".",
+      "source": "package script",
+      "component": "gofra-crm-frontend"
+    }
+  ],
+  "quality_gaps": [
+    "Typecheck command is not detected."
+  ],
+  "risk_signals": [
+    "Script `test` may be unsafe for automatic runs: Shell operator '&' is forbidden.."
+  ],
+  "selected_files": [
+    {
+      "path": "app/crm/WorkspaceFeatures.tsx",
+      "score": 135,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "filename matches \"feature\"",
+        "filename matches \"work\""
+      ],
+      "size_bytes": 148828,
+      "modified_at": "2026-07-31T11:29:57.925Z",
+      "sha256": "106f637118be87bc2bc15e347d373d93687ca2c87389e58524b712c03539b948",
+      "excerpt": "\"use client\";\r\n\r\nimport {\r\n  useEffect,\r\n  useId,\r\n  useMemo,\r\n  useRef,\r\n  useState,\r\n  type FormEvent,\r\n  type ReactNode,\r\n} from \"react\";\r\nimport {\r\n  DEAL_PIPELINE,\r\n  type CrmSnapshot,\r\n  type Deal,\r\n  type Interaction,\r\n  type StatusEvent,\r\n  type Task,\r\n  type User,\r\n} from \"./domain\";\nimport { isOpenDeal } from \"./sales-automation\";\nimport \"./workspace-features.css\";\n\r\nexport interface WorkspaceFeatureProps {\r\n  snapshot: CrmSnapshot | null;\r\n  currentUser: User | null;\r\n  onSnapshotChange: (snapshot: CrmSnapshot) => void;\r\n  onOpenClient: (clientId: string) => void;\r\n  onOpenDeal: (dealId: string) => void;\r\n  loading?: boolean;\r\n}\r\n\r\ntype CalendarMode = \"month\" | \"agenda\";\r\ntype StatisticsTab = \"overview\" | \"funnel\" | \"sales\" | \"activity\" | \"team\";\r\ntype RangePreset = \"7\" | \"30\" | \"90\" | \"all\";\r\ntype TaskStateFilter = \"open\" | \"completed\" | \"all\";\r\ntype TaskLinkFilter = \"all\" | \"client\" | \"deal\" | \"general\";\r\ntype IconName =\r\n    | \"arrow\"\r\n    | \"calendar\"\r\n    | \"check\"\r\n    | \"chevron-left\"\r\n    | \"chevron-right\"\r\n    | \"clock\"\r\n    | \"close\"\r\n    | \"edit\"\r\n    | \"plus\"\r\n    | \"trend\";\r\n\r\ninterface DrillRow {\r\n  id: string;\r\n  primary: string;\r\n  secondary: string;\r\n  meta: string;\r\n  entity?: \"client\" | \"deal\";\r\n  entityId?: string;\r\n}\r\n\r\ninterface DrillState {\r\n  title: string;\r\n  eyebrow: string;\r\n  rows: DrillRow[];\r\n}\r\n\r\nconst DAY_MS = 86_400_000;\r\nconst TASK_KIND_LABELS: Record<Task[\"kind\"], string> = {\r\n  call: \"Звонок\",\r\n  meeting: \"Встреча\",\r\n  email: \"Письмо\",\r\n  proposal: \"Коммерческое предложение\",\r\n  follow_up: \"Повторный контакт\",\r\n  reminder: \"Напоминание\",\r\n  other: \"Другое\",\r\n};\r\n\r\nconst TASK_KIND_SHORT: Record<Task[\"kind\"], string> = {\r\n  call: \"ЗВ\",\r\n  meeting: \"ВС\"",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/fixtures.ts",
+      "score": 110,
+      "reasons": [
+        "currently changed",
+        "filename matches \"fix\"",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 24974,
+      "modified_at": "2026-07-31T11:32:48.438Z",
+      "sha256": "c26942ae9ea098c36a2314cf34fa4d35a9b37486a9befcf5412d40bfb91d374b",
+      "excerpt": "import {\n  CLIENT_STATUSES,\n  CRM_SCHEMA_VERSION,\n  DEAL_STATUSES,\n  type Client,\n  type Contact,\n  type CrmSnapshot,\n  type Deal,\n  type Interaction,\n  type PriceApproval,\n  type Potential,\n  type Session,\n  type StatusEvent,\n  type Target,\n  type Task,\n  type Team,\n  type User,\n} from \"./domain\";\nimport { isOpenDeal } from \"./sales-automation\";\n\nexport const DEMO_TEAM_ID = \"team-gofra\";\nexport const DEMO_USER_IDS = {\n  sofia: \"user-sofia\",\n  nikolai: \"user-nikolai\",\n  timur: \"user-timur\",\n} as const;\n\nconst DEMO_CREATED_AT = \"2026-06-01T08:00:00.000Z\";\nconst DEMO_UPDATED_AT = \"2026-07-23T08:00:00.000Z\";\n\nexport const demoTeams: Team[] = [\n  {\n    id: DEMO_TEAM_ID,\n    name: \"Команда ГОФРА\",\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n];\n\nexport const demoUsers: User[] = [\n  {\n    id: DEMO_USER_IDS.sofia,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Софья Романова\",\n    email: \"sofia@gofra.demo\",\n    role: \"manager\",\n    jobTitle: \"Руководитель отдела продаж\",\n    initials: \"СР\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n  {\n    id: DEMO_USER_IDS.nikolai,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Николай Ветров\",\n    email: \"nikolai@gofra.demo\",\n    role: \"employee\",\n    jobTitle: \"Менеджер по продажам\",\n    initials: \"НВ\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n  {\n    id: DEMO_USER_IDS.timur,\n    teamId: DEMO_TEAM_ID,\n    fullName: \"Тимур Агапов\",\n    email: \"timur@gofra.demo\",\n    role: \"employee\",\n    jobTitle: \"Менеджер по продажам\",\n    initials: \"ТА\",\n    isActive: true,\n    createdAt: DEMO_CREATED_AT,\n    updatedAt: DEMO_UPDATED_AT,\n  },\n];\n\nexport const demoSession: Sessi",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/CrmApp.tsx",
+      "score": 109,
+      "reasons": [
+        "currently changed",
+        "filename matches \"crm\"",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 157912,
+      "modified_at": "2026-07-31T11:32:31.562Z",
+      "sha256": "e184268d4c8db0794f2bd9e13f097a7a74a2dd2c46ce80167571949c7444eea4",
+      "excerpt": "\"use client\";\r\n\r\nimport {\r\n  useEffect,\r\n  useMemo,\r\n  useRef,\r\n  useState,\n  type ChangeEvent,\n  type DragEvent,\r\n  type FormEvent,\r\n  type ReactNode,\r\n} from \"react\";\r\nimport { crmGateway } from \"./crm-gateway\";\r\nimport { ChatView } from \"./ChatView\";\r\nimport { CrmIcon, type CrmIconName } from \"./Icons\";\r\nimport {\r\n  CalendarView,\r\n  DashboardView,\r\n  StatisticsView,\r\n} from \"./WorkspaceFeatures\";\r\nimport { ThemeSwitch } from \"./theme\";\r\nimport {\r\n  CLIENT_PIPELINE,\n  CLIENT_STATUSES,\n  DECISION_INFLUENCES,\n  DECISION_ROLES,\n  DEAL_PIPELINE,\n  DEAL_STATUSES,\n  PREFERRED_CHANNELS,\n  type Attachment,\n  type AppModule,\r\n  type Client,\r\n  type ClientStatus,\r\n  type Contact,\r\n  type CrmSnapshot,\r\n  type Deal,\r\n  type DealStatus,\r\n  type Interaction,\r\n  type InteractionKind,\n  type PriceApproval,\n  type PriceApprovalStatus,\n  type PipelineGroup,\r\n  type Potential,\r\n  type Task,\r\n  type User,\r\n} from \"./domain\";\nimport {\n  calculateExpectedNextOrder,\n  getDaysWithoutOrder,\n  hasRequiredDealNextAction,\n  isOpenDeal,\n  matchesRepeatSegment,\n  normalizeDealNextAction,\n  recordsShipment,\n  syncClientOrderCycleFromShipment,\n  syncRepeatOrderTasks,\n  TERMINAL_DEAL_STATUSES,\n  type RepeatSegment,\n} from \"./sales-automation\";\nimport {\r\n  canAccessModule,\r\n  canViewFinancials,\r\n  filterAccessibleRecords,\r\n  isManager,\r\n} from \"./permissions\";\r\n\r\ntype ViewMode = \"board\" | \"list\";\r\ntype DrawerTarget =\r\n  | { kind: \"client\"; id: string }\r\n  | { kind: \"deal\"; id: string }\r\n  | null;\r\ntype MoveIntent =\r\n  | {\r\n      kind: \"client\" | \"deal\";\r\n      id: string;\r\n      title: string;\r\n      statuses: readonly string[];\r\n    }\r\n  | null;\r\ntype CreateKind = \"client\" | \"deal\" | \"contact\" | \"interaction\" | null;\r\ntype Glo",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/globals.css",
+      "score": 109,
+      "reasons": [
+        "currently changed",
+        "filename matches \"global\"",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 55232,
+      "modified_at": "2026-07-31T12:01:10.963Z",
+      "sha256": "b70a7ca2e3b36b5878d980b11a8acca400698225feff875e6efc67da7318278c",
+      "excerpt": "@import \"tailwindcss\";\r\n\r\n@font-face {\r\n  font-family: \"Geist\";\r\n  font-style: normal;\r\n  font-weight: 100 900;\r\n  font-display: swap;\r\n  src: url(\"/fonts/geist-cyrillic.woff2\") format(\"woff2\");\r\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\r\n}\r\n\r\n@font-face {\r\n  font-family: \"Geist\";\r\n  font-style: normal;\r\n  font-weight: 100 900;\r\n  font-display: swap;\r\n  src: url(\"/fonts/geist-latin.woff2\") format(\"woff2\");\r\n  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,\r\n  U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,\r\n  U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;\r\n}\r\n\r\n@font-face {\r\n  font-family: \"Geist Mono\";\r\n  font-style: normal;\r\n  font-weight: 100 900;\r\n  font-display: swap;\r\n  src: url(\"/fonts/geist-mono-cyrillic.woff2\") format(\"woff2\");\r\n  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;\r\n}\r\n\r\n@font-face {\r\n  font-family: \"Geist Mono\";\r\n  font-style: normal;\r\n  font-weight: 100 900;\r\n  font-display: swap;\r\n  src: url(\"/fonts/geist-mono-latin.woff2\") format(\"woff2\");\r\n  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,\r\n  U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,\r\n  U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;\r\n}\r\n\r\n:root {\r\n  color-scheme: light;\r\n  --canvas: #ede7dc;\r\n  --surface: #f8f3e9;\r\n  --surface-raised: #fffaf0;\r\n  --surface-muted: #e8e0d3;\r\n  --surface-strong: #ddd3c3;\r\n  --surface-sunken: #e3dacb;\r\n  --surface-glass: rgba(237, 231, 220, 0.94);\r\n  --ink: #29251f;\r\n  --muted: #6d665b;\r\n  --faint: #938a7c;\r\n  --line: #d4c9b9;\r\n  --line-strong: #bbae9a;\r\n  --accent: #a95222;\r\n  --accent-strong: #813913;\r\n  --accent-soft: #ead2bd;\r\n  --accent-line: ",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/crm-gateway.ts",
+      "score": 102,
+      "reasons": [
+        "currently changed",
+        "filename matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 26927,
+      "modified_at": "2026-07-31T11:34:08.689Z",
+      "sha256": "b5ec407f1f4c17cdcaf2a3f94ef6a435f38b12b310301481a4423f0b5c5638ec",
+      "excerpt": "import {\n  CRM_SCHEMA_VERSION,\n  DEAL_STATUSES,\n  DECISION_INFLUENCES,\n  DECISION_ROLES,\n  PREFERRED_CHANNELS,\n  type Attachment,\n  type Client,\n  type Contact,\n  type CrmSnapshot,\n  type Deal,\n  type Dictionaries,\n  type Interaction,\n  type PriceApproval,\n  type PriceApprovalStatus,\n  type Session,\n  type StatusEvent,\n  type Target,\n  type Task,\n  type Team,\n  type User,\n  type UserRole,\n} from \"./domain\";\nimport {\n  calculateExpectedNextOrder,\n  normalizeDealNextAction,\n  resolveExpectedNextOrder,\n  syncRepeatOrderTasks,\n} from \"./sales-automation\";\nimport {\n  DEMO_TEAM_ID,\n  DEMO_USER_IDS,\n  demoSession,\n  demoSnapshot,\n  demoTargets,\n  demoTeams,\n  demoUsers,\n} from \"./fixtures\";\n\nexport const CRM_STORAGE_KEY = \"gofra-crm-prototype:v4\";\nexport const LEGACY_CRM_STORAGE_KEYS = [\n  \"gofra-crm-prototype:v3\",\n  \"gofra-crm-prototype:v2\",\n  \"gofra-crm-prototype:v1\",\n] as const;\n\ntype JsonRecord = Record<string, unknown>;\n\nconst clone = <T,>(value: T): T =>\n  JSON.parse(JSON.stringify(value)) as T;\n\nconst pause = (duration = 320) =>\n  new Promise<void>((resolve) => {\n    window.setTimeout(resolve, duration);\n  });\n\nconst isRecord = (value: unknown): value is JsonRecord =>\n  typeof value === \"object\" && value !== null && !Array.isArray(value);\n\nconst asRecord = (value: unknown): JsonRecord =>\n  isRecord(value) ? value : {};\n\nconst asString = (value: unknown, fallback = \"\"): string =>\n  typeof value === \"string\" ? value : fallback;\n\nconst asNullableString = (\n  value: unknown,\n  fallback: string | null = null,\n): string | null =>\n  typeof value === \"string\" ? value : value === null ? null : fallback;\n\nconst asNumber = (value: unknown, fallback = 0): number =>\n  typeof value === \"number\" && Number.isFin",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "tests/crm-gateway.test.mjs",
+      "score": 100,
+      "reasons": [
+        "currently changed",
+        "filename matches \"crm\"",
+        "test coverage"
+      ],
+      "size_bytes": 3741,
+      "modified_at": "2026-07-31T11:34:39.368Z",
+      "sha256": "ea2652985b5688574f992c406ec52b695213eb30ebe11dada5eaf12805c9c179",
+      "excerpt": "import assert from \"node:assert/strict\";\nimport { readFile } from \"node:fs/promises\";\nimport test from \"node:test\";\nimport ts from \"typescript\";\n\nconst compile = (source) =>\n  ts.transpileModule(source, {\n    compilerOptions: {\n      module: ts.ModuleKind.ESNext,\n      target: ts.ScriptTarget.ES2022,\n    },\n  }).outputText;\n\nconst dataUrl = (source) =>\n  `data:text/javascript;base64,${Buffer.from(source).toString(\"base64\")}`;\n\nconst replaceSpecifier = (source, specifier, replacement) =>\n  source\n    .replaceAll(`\"${specifier}\"`, JSON.stringify(replacement))\n    .replaceAll(`'${specifier}'`, JSON.stringify(replacement));\n\nconst [domainSource, automationSource, fixturesSource, gatewaySource] =\n  await Promise.all(\n    [\"domain.ts\", \"sales-automation.ts\", \"fixtures.ts\", \"crm-gateway.ts\"].map(\n      (file) =>\n        readFile(new URL(`../app/crm/${file}`, import.meta.url), \"utf8\"),\n    ),\n  );\n\nconst domainUrl = dataUrl(compile(domainSource));\nconst automationUrl = dataUrl(compile(automationSource));\nconst fixturesUrl = dataUrl(\n  replaceSpecifier(\n    replaceSpecifier(compile(fixturesSource), \"./domain\", domainUrl),\n    \"./sales-automation\",\n    automationUrl,\n  ),\n);\nconst gatewayUrl = dataUrl(\n  replaceSpecifier(\n    replaceSpecifier(\n      replaceSpecifier(compile(gatewaySource), \"./domain\", domainUrl),\n      \"./sales-automation\",\n      automationUrl,\n    ),\n    \"./fixtures\",\n    fixturesUrl,\n  ),\n);\n\nconst [gateway, fixtures] = await Promise.all([\n  import(gatewayUrl),\n  import(fixturesUrl),\n]);\n\ntest(\"migrates v3 snapshots without losing team data and repairs open deals\", () => {\n  const snapshot = structuredClone(fixtures.demoSnapshot);\n  snapshot.schemaVersion = 3;\n  snapshot.teams[0].name = ",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/domain.ts",
+      "score": 92,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 10244,
+      "modified_at": "2026-07-31T11:31:58.207Z",
+      "sha256": "4ce67389a1c02ef3378fc14db0fe1e0ec0a7130be031fd8235cef71669e2370f",
+      "excerpt": "export const CLIENT_STATUSES = [\n  \"Новый лид\",\n  \"Нужно проверить\",\n  \"Подходит\",\n  \"Не подходит\",\n  \"Контакт найден\",\n  \"Первый контакт\",\n  \"Есть интерес\",\n  \"Запросили потребность\",\n  \"Нужно КП\",\n  \"КП отправлено\",\n  \"Переговоры\",\n  \"Тестовая поставка\",\n  \"Активный клиент\",\n  \"Спящий клиент\",\n  \"Отказ\",\n  \"Черный список\",\n] as const;\n\nexport type ClientStatus = (typeof CLIENT_STATUSES)[number];\n\nexport const DEAL_STATUSES = [\n  \"Новая заявка\",\n  \"Уточняем ТЗ\",\n  \"Считаем цену\",\n  \"КП отправлено\",\n  \"Переговоры\",\n  \"Согласование условий\",\n  \"Счет выставлен\",\n  \"Ожидаем оплату\",\n  \"Оплачено\",\n  \"В закупке / производстве\",\n  \"Готово к отгрузке\",\n  \"Отгружено\",\n  \"Закрыта успешно\",\n  \"Проиграна\",\n  \"Отложена\",\n  \"Отменена\",\n] as const;\n\nexport type DealStatus = (typeof DEAL_STATUSES)[number];\nexport type Potential = \"A\" | \"B\" | \"C\" | \"D\";\n\nexport const CRM_SCHEMA_VERSION = 4 as const;\nexport type CrmSchemaVersion = typeof CRM_SCHEMA_VERSION;\n\nexport const DECISION_ROLES = [\n  \"Закупщик\",\n  \"Технолог\",\n  \"Производство\",\n  \"Качество\",\n  \"Финансовый директор\",\n  \"Генеральный директор\",\n] as const;\n\nexport type DecisionRole = (typeof DECISION_ROLES)[number];\n\nexport const DECISION_INFLUENCES = [\n  \"Принимает решение\",\n  \"Влияет\",\n  \"Блокирует\",\n] as const;\n\nexport type DecisionInfluence = (typeof DECISION_INFLUENCES)[number];\n\nexport const PREFERRED_CHANNELS = [\n  \"Телефон\",\n  \"Email\",\n  \"WhatsApp\",\n  \"Telegram\",\n  \"Встреча\",\n] as const;\n\nexport type PreferredChannel = (typeof PREFERRED_CHANNELS)[number];\nexport type RepeatReminderDays = 7 | 14;\n\nexport interface TimestampedEntity {\n  createdAt: string;\n  updatedAt: string;\n}\n\nexport type UserRole = \"manager\" | \"employee\";\n\nexport interface Team exten",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/crm/sales-automation.ts",
+      "score": 92,
+      "reasons": [
+        "currently changed",
+        "path matches \"crm\"",
+        "application source"
+      ],
+      "size_bytes": 7521,
+      "modified_at": "2026-07-31T11:35:31.498Z",
+      "sha256": "da1505a47690718ca3ed21b9ff5ff279b5d086f232f363aabf134cb38f1a90f6",
+      "excerpt": "import {\n  type Client,\n  type Deal,\n  type DealStatus,\n  type RepeatReminderDays,\n  type Task,\n} from \"./domain\";\n\nexport type RepeatSegment =\n  | \"all\"\n  | \"30\"\n  | \"60\"\n  | \"90\"\n  | \"sleeping\"\n  | \"no_data\";\nexport type RepeatQueueSegment = Exclude<RepeatSegment, \"all\">;\n\nconst DAY_MS = 86_400_000;\nexport const TERMINAL_DEAL_STATUSES = [\n  \"Закрыта успешно\",\n  \"Проиграна\",\n  \"Отменена\",\n] as const satisfies readonly DealStatus[];\nexport const ACTIVE_REPEAT_CLIENT_STATUSES = [\"Активный клиент\"] as const;\nexport const SHIPMENT_DEAL_STATUSES = [\n  \"Отгружено\",\n  \"Закрыта успешно\",\n] as const satisfies readonly DealStatus[];\n\nconst terminalDealStatuses = new Set<DealStatus>(TERMINAL_DEAL_STATUSES);\nconst shipmentDealStatuses = new Set<DealStatus>(SHIPMENT_DEAL_STATUSES);\nconst activeRepeatClientStatuses = new Set<Client[\"status\"]>(\n  ACTIVE_REPEAT_CLIENT_STATUSES,\n);\nconst MIGRATED_NEXT_ACTION = \"Назначить следующий шаг по сделке\";\n\nconst toDateOnly = (value: Date): string => value.toISOString().slice(0, 10);\n\nconst parseDate = (value: string | null | undefined): Date | null => {\n  if (!value) return null;\n  const date = new Date(value.length === 10 ? `${value}T12:00:00.000Z` : value);\n  return Number.isNaN(date.getTime()) ? null : date;\n};\n\nexport const isOpenDeal = (deal: Pick<Deal, \"status\">): boolean =>\n  !terminalDealStatuses.has(deal.status);\n\nexport const recordsShipment = (deal: Pick<Deal, \"status\">): boolean =>\n  shipmentDealStatuses.has(deal.status);\n\nexport const hasRequiredDealNextAction = (\n  deal: Pick<Deal, \"status\" | \"nextAction\" | \"nextActionAt\"> &\n    Partial<Pick<Deal, \"needsNextAction\">>,\n): boolean =>\n  !isOpenDeal(deal) ||\n  (!deal.needsNextAction &&\n    deal.nextAction.trim(",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "app/agency-redesign.css",
+      "score": 91,
+      "reasons": [
+        "currently changed",
+        "frontend file",
+        "application source"
+      ],
+      "size_bytes": 63709,
+      "modified_at": "2026-07-31T12:04:51.343Z",
+      "sha256": "4ebc7ec64d31bc98cc9e8707acecfdf98746247cce0370cbc7f9a6213e082105",
+      "excerpt": "/*\r\n * GOFRA / Operations System\r\n * Industrial-editorial design layer.\r\n *\r\n * This file intentionally sits after the product styles. It keeps the existing\r\n * application behavior while replacing the generic rounded-card language with\r\n * a stricter, brand-specific visual system.\r\n */\r\n\r\n:root {\r\n  --canvas: #e6e9e8;\r\n  --surface: #eff1f0;\r\n  --surface-raised: #f7f8f6;\r\n  --surface-muted: #dde2e0;\r\n  --surface-strong: #c9d0cd;\r\n  --surface-sunken: #d5dad8;\r\n  --surface-glass: rgba(230, 233, 232, 0.94);\r\n  --ink: #151b1a;\r\n  --muted: #566361;\r\n  --faint: #7d8a87;\r\n  --line: #b8c1be;\r\n  --line-strong: #7d8b88;\r\n  --accent: #3f6873;\r\n  --accent-strong: #294f5a;\r\n  --accent-soft: #c8d8dc;\r\n  --accent-line: #85a7af;\r\n  --danger: #a13b33;\r\n  --danger-soft: #e7c0b9;\r\n  --warning: #8a571e;\r\n  --warning-soft: #e3cfad;\r\n  --success: #4f6943;\r\n  --success-soft: #cbd7c4;\r\n  --nav-bg: #11191b;\r\n  --nav-ink: #eaf0ef;\r\n  --nav-muted: rgba(234, 240, 239, 0.58);\r\n  --nav-hover: rgba(234, 240, 239, 0.055);\r\n  --nav-active: rgba(234, 240, 239, 0.095);\r\n  --nav-line: rgba(234, 240, 239, 0.15);\r\n  --on-accent: #f7fbfa;\r\n  --grid-line: rgba(47, 67, 68, 0.055);\r\n  --hover-row: rgba(63, 104, 115, 0.065);\r\n  --focus-ring: color-mix(in srgb, var(--accent) 72%, white);\r\n  --overlay: rgba(7, 16, 18, 0.64);\r\n  --toast-bg: #152023;\r\n  --toast-ink: #eef3f1;\r\n  --hero-surface: #1d2a2d;\r\n  --hero-ink: #edf2f1;\r\n  --hero-muted: rgba(237, 242, 241, 0.62);\r\n  --hero-line: rgba(237, 242, 241, 0.15);\r\n  --hero-tile: rgba(237, 242, 241, 0.08);\r\n  --hero-accent: #8db2bb;\r\n  --shadow: none;\r\n  --shadow-elevated: 0 24px 70px -46px rgba(20, 46, 50, 0.68);\r\n  --shadow-drawer: -24px 0 70px -48px rgba(7, 19, 21, 0.82);\r\n  --radius-lg: 4px;",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "package.json",
+      "score": 85,
+      "reasons": [
+        "currently changed",
+        "project configuration"
+      ],
+      "size_bytes": 685,
+      "modified_at": "2026-07-31T07:15:33.292Z",
+      "sha256": "ae9112a4c6d45897f6625dc17bd603c7b015f82927b7d69851f0b8caba270d21",
+      "excerpt": "{\n  \"name\": \"gofra-crm-frontend\",\n  \"version\": \"0.2.0\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"engines\": {\n    \"node\": \">=22.13.0\"\n  },\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\",\n    \"lint\": \"tsc --noEmit\",\n    \"test\": \"vite build && node --test\"\n  },\n  \"dependencies\": {\n    \"react\": \"19.2.6\",\n    \"react-dom\": \"19.2.6\"\n  },\n  \"devDependencies\": {\n    \"@tailwindcss/vite\": \"4.3.3\",\n    \"@types/node\": \"22.19.19\",\n    \"@types/react\": \"19.2.14\",\n    \"@types/react-dom\": \"19.2.3\",\n    \"@vitejs/plugin-react\": \"6.0.2\",\n    \"tailwindcss\": \"4.3.3\",\n    \"typescript\": \"5.9.3\",\n    \"vite\": \"8.0.13\"\n  },\n  \"packageManager\": \"pnpm@11.9.0\"\n}\n",
+      "excerpt_truncated": false
+    },
+    {
+      "path": "tests/sales-automation.test.mjs",
+      "score": 82,
+      "reasons": [
+        "currently changed",
+        "test coverage"
+      ],
+      "size_bytes": 5920,
+      "modified_at": "2026-07-31T11:31:32.593Z",
+      "sha256": "b8139ca67ff5b7e5f3adafe8393762a7462aa8efb0515980e4a937d82ce83b0a",
+      "excerpt": "import assert from \"node:assert/strict\";\nimport { readFile } from \"node:fs/promises\";\nimport test from \"node:test\";\nimport ts from \"typescript\";\n\nconst source = await readFile(\n  new URL(\"../app/crm/sales-automation.ts\", import.meta.url),\n  \"utf8\",\n);\nconst compiled = ts.transpileModule(source, {\n  compilerOptions: {\n    module: ts.ModuleKind.ESNext,\n    target: ts.ScriptTarget.ES2022,\n  },\n}).outputText;\nconst automation = await import(\n  `data:text/javascript;base64,${Buffer.from(compiled).toString(\"base64\")}`\n);\n\nconst createClient = (overrides = {}) => ({\n  id: \"КЛ-ТЕСТ\",\n  companyName: \"Тестовая упаковка\",\n  ownerId: \"user-test\",\n  status: \"Активный клиент\",\n  lastShipmentAt: \"2026-07-01\",\n  lastContactAt: \"2026-07-01T09:00:00.000Z\",\n  expectedNextOrderAt: \"2026-07-31\",\n  repeatReminderDays: 14,\n  ...overrides,\n});\n\ntest(\"calculates the next expected order from shipment and cadence\", () => {\n  assert.equal(\n    automation.calculateExpectedNextOrder(\"2026-07-01\", 30),\n    \"2026-07-31\",\n  );\n  assert.equal(automation.calculateExpectedNextOrder(null, 30), null);\n  assert.equal(automation.calculateExpectedNextOrder(\"2026-07-01\", null), null);\n});\n\ntest(\"classifies active clients into exclusive 30/60/90/sleeping boundaries\", () => {\n  const now = new Date(\"2026-07-31T12:00:00.000Z\");\n  const dateDaysAgo = (days) =>\n    new Date(now.getTime() - days * 86_400_000).toISOString().slice(0, 10);\n  const queues = [\"30\", \"60\", \"90\", \"sleeping\", \"no_data\"];\n  const cases = [\n    [29, null],\n    [30, \"30\"],\n    [59, \"30\"],\n    [60, \"60\"],\n    [89, \"60\"],\n    [90, \"90\"],\n    [119, \"90\"],\n    [120, \"sleeping\"],\n  ];\n\n  for (const [days, expected] of cases) {\n    const client = createClient({ lastShipmentAt: ",
+      "excerpt_truncated": true
+    },
+    {
+      "path": "tests/static-build.test.mjs",
+      "score": 82,
+      "reasons": [
+        "currently changed",
+        "test coverage"
+      ],
+      "size_bytes": 9407,
+      "modified_at": "2026-07-31T12:01:10.969Z",
+      "sha256": "6937df24b7d3b507d537a7473a3c417684549258d8706c199014e617f15fcedc",
+      "excerpt": "import assert from \"node:assert/strict\";\r\nimport { access, readFile, readdir } from \"node:fs/promises\";\r\nimport test from \"node:test\";\r\n\r\nconst projectRoot = new URL(\"../\", import.meta.url);\r\n\r\ntest(\"builds a self-contained static GitHub Pages artifact\", async () => {\r\n  const index = await readFile(new URL(\"../dist/index.html\", import.meta.url), \"utf8\");\r\n  const assetNames = await readdir(new URL(\"../dist/assets/\", import.meta.url));\r\n\r\n  assert.match(index, /<html lang=\"ru\">/);\r\n  assert.match(index, /<div id=\"root\"><\\/div>/);\r\n  assert.match(index, /ГОФРА CRM/);\r\n  assert.ok(assetNames.some((name) => name.endsWith(\".js\")));\r\n  assert.ok(assetNames.some((name) => name.endsWith(\".css\")));\r\n  await access(new URL(\"../dist/.nojekyll\", import.meta.url));\r\n  await access(new URL(\"../dist/fonts/geist-cyrillic.woff2\", import.meta.url));\r\n});\r\n\r\ntest(\"keeps every CRM status in the frontend contract\", async () => {\r\n  const [app, domain, gateway, packageJson, viteConfig, workflow] =\r\n    await Promise.all([\r\n      readFile(new URL(\"../app/crm/CrmApp.tsx\", import.meta.url), \"utf8\"),\r\n      readFile(new URL(\"../app/crm/domain.ts\", import.meta.url), \"utf8\"),\r\n      readFile(new URL(\"../app/crm/crm-gateway.ts\", import.meta.url), \"utf8\"),\r\n      readFile(new URL(\"../package.json\", import.meta.url), \"utf8\"),\r\n      readFile(new URL(\"../vite.config.ts\", import.meta.url), \"utf8\"),\r\n      readFile(\r\n        new URL(\"../.github/workflows/deploy-pages.yml\", import.meta.url),\r\n        \"utf8\",\r\n      ),\r\n    ]);\r\n\r\n  assert.match(app, /CLIENT_PIPELINE/);\r\n  assert.match(app, /DEAL_PIPELINE/);\r\n  assert.match(domain, /\"Черный список\"/);\r\n  assert.match(domain, /\"В закупке \\/ производстве\"/);\r\n  assert.match(domain, ",
+      "excerpt_truncated": true
+    }
+  ],
+  "context_sources": {
+    "agents": "# AGENTS.md\n\nGenerated by the AI Dev System project bootstrap command.\n\n## Project\n\n- Name: ГОФРА CRM\n- Root: `C:\\Users\\sacha\\OneDrive\\Документы\\Сайт Леха`\n- AI Dev System: `C:\\Users\\sacha\\.codex\\links\\ai-dev-system`\n- Project brief: `.ai-dev/project-brief.md`\n- Project map: `.ai-dev/project-map.md`\n- Quality gate: `.ai-dev/quality-gate.md`\n\n## Agent Startup\n\n1. Read this file before changing code.\n2. Read `.ai-dev/project-brief.md` for the short handoff memory.\n3. Read `.ai-dev/project-map.md` for structure and known commands.\n4. Read `.ai-dev/quality-gate.md` before final verification.\n5. Inspect nearby code and existing patterns before editing.\n6. For substantive work, call `begin_task`. It resolves canonical project identity and compiles a bounded task-specific context pack under `.ai-dev/context/`.\n7. Inspect the returned context pack, keep acceptance criteria current with `checkpoint_task`, then use `verify_task` and `complete_task`.\n8. Use the AI Dev System MCP tools for durable knowledge and skill routing:\n   - `project_identity`\n   - `compile_project_context`\n   - `project_context_status`\n   - `match_auto_command`\n   - `read_auto_command`\n   - `search_knowledge`\n   - `recommend_skills`\n   - `search_skills`\n   - `read_skill`\n9. For frontend product or visual work, call `frontend_product_builder` and pass the implementation gate before changing product UI code.\n\n## Detected Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\nPackage manager: `pnpm`\n\nProject types: `frontend`\n\n## Components\n\n| Component | Path | Ecosystem | Types | Stack |\n| --- | --- | --- | --- | --- |\n| gofra-crm-frontend | . | node | frontend | Node.js, TypeScript, React, Vite, Tailwind CSS |\n\n## Commands\n\n| Task | Component | CWD | Command | Source |\n| --- | --- | --- | --- | --- |\n| Dev | gofra-crm-frontend | . | pnpm run dev | package script |\n| Test | gofra-crm-frontend | . | pnpm run test | package script |\n| Lint | gofra-crm-frontend | . | pnpm run lint | package script |\n| Typecheck | gofra-crm-frontend | . | Not detected | missing |\n| Build | gofra-crm-frontend | . | pnpm run build | package script |\n\n## Agent Standards\n\n### Scope Control\n\n- Keep changes scoped to the requested behavior.\n- Prefer existing architecture, naming, components, utilities, and test style.\n- Do not do unrelated refactors, formatting churn, dependency swaps, or file moves.\n- Preserve user changes and never reset unrelated work.\n- Do not introduce dependencies unless the benefit is clear and the project pattern supports it.\n\n### Code Quality\n\n- Read nearby code before editing.\n- Keep changes small, reviewable, and reversible.\n- Add or update tests for bug fixes, shared logic, data transformations, and user-visible behavior.\n- Do not leave TODO placeholders or partial implementations in final work.\n- Do not commit secrets, tokens, API keys, private credentials, or local-only config.\n\n### Quality Gate\n\n- Read `.ai-dev/quality-gate.md` before final verification.\n- Run the narrowest relevant check first, then broader checks when shared behavior or build config is touched.\n- If checks cannot run, report the exact reason.\n- Do not mark work complete while relevant checks are failing.\n\n### Frontend Quality Gate\n\n- Verify responsive layout on desktop and mobile when UI changes are visible.\n- Check loading, empty, error, hover, focus, and disabled states when touched.\n- Ensure text does not overflow buttons, tables, cards, or navigation.\n- Reuse the existing design system before adding one-off UI.\n- For meaningful visual work, inspect the app in a browser or screenshot and report that verification.\n\n\n## Auto Commands\n\nThese phrases are shortcuts for repeatable agent workflows. When the user writes one of them, resolve it through the AI Dev System MCP auto-command tools.\n\n| Phrase | Command | Primary skills |\n| --- | --- | --- |\n| оформи проект для ИИ | `format_project_for_ai` | repo-onboarding, knowledge-curator, code-reviewer |\n| подготовь проект | `prepare_repository` | repo-onboarding, knowledge-curator |\n| обнови память проекта | `refresh_project_memory` | repo-onboarding, knowledge-curator, code-reviewer |\n| начни новую фичу | `start_feature` | feature-builder, code-reviewer, knowledge-curator |\n| найди баг | `investigate_bug` | bugfix-investigator, code-reviewer |\n| сделай ревью | `review_changes` | code-reviewer |\n| сгенерируй референсы для проекта | `generate_frontend_references` | frontend-product-builder |\n| build frontend product | `build_frontend_product` | frontend-product-builder |\n| улучши frontend/design | `improve_frontend_design` | frontend-product-builder |\n| поддержи frontend/beta | `maintain_beta_frontend` | beta-frontend-maintainer, frontend-quality-gate, code-reviewer |\n| проверь frontend quality gate | `frontend_quality_gate` | frontend-product-builder, frontend-quality-gate |\n| проверь лендинг/конверсию | `review_landing_conversion` | landing-conversion-reviewer, design-taste-frontend, frontend-quality-gate |\n| проверь библиотеку скиллов | `audit_skill_library` | kno",
+    "project_brief": "# Project Brief\n\nGenerated: 2026-07-25T05:44:13.506Z\n\nThis is the short handoff cache for Codex, Claude, and other agents. Read it before loading the larger project map.\n\n## Identity\n\n- Name: gofra-crm\n- Root: `C:\\Users\\sacha\\Documents\\Codex\\2026-07-23\\new-chat`\n- Git repository detected: yes\n- Project types: `frontend`\n- Package manager: `pnpm`\n\n## Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\n## Important Files And Folders\n\n- README.md\n- package.json\n- tsconfig.json\n- vite.config.ts\n- GitHub Actions\n- src/\n- app/\n- tests/\n\n## Command Map\n\n| Task | Command | Source |\n| --- | --- | --- |\n| Install | pnpm install | project files |\n| Dev | pnpm dev | package script: dev |\n| Test | pnpm test | package script: test |\n| Lint | pnpm lint | package script: lint |\n| Typecheck | Not detected | missing |\n| Build | pnpm build | package script: build |\n\n## Quality Gaps\n\n- Typecheck command is not detected.\n\n## Risk Signals\n\n- No automatic risk signals detected.\n\n## Dangerous Or Side-Effectful Scripts\n\n- No package scripts were automatically flagged as side-effectful.\n\n## Documentation\n\n| Item | Status | Type |\n| --- | --- | --- |\n| README.md | present | file |\n| docs | missing | missing |\n| CONTRIBUTING.md | missing | missing |\n| CHANGELOG.md | missing | missing |\n| .github | present | directory |\n| .github/workflows | present | directory |\n\n## Environment And Secrets\n\n- No `.env*` files detected by the lightweight scan.\n\n## Recommended Skills\n\n| Skill | Use when |\n| --- | --- |\n| `repo-onboarding` | Repository setup, AGENTS.md, project map, quality gate. |\n| `feature-builder` | Feature implementation with repo patterns and tests. |\n| `bugfix-investigator` | Bug, regression, failing test, or CI investigation. |\n| `code-reviewer` | Risk review, missing tests, security/data/behavior checks. |\n| `frontend-polisher` | Frontend/UI quality, states, responsiveness. |\n| `beta-frontend-maintainer` | Existing beta frontend support with minimal safe diffs. |\n| `frontend-quality-gate` | Final UI QA: responsive, accessibility, browser checks. |\n| `landing-conversion-reviewer` | Landing page clarity, trust, CTA, and conversion review. |\n| `design-taste-frontend` | Visually important frontend/design work. |\n| `knowledge-curator` | Durable project notes and lessons. |\n\n## Recommended Next Commands\n\n- начни новую фичу: <описание>\n- найди баг: <симптом или ошибка>\n- поддержи frontend/beta: <экран или компонент>\n- проверь frontend quality gate\n- проверь лендинг/конверсию: <страница>\n- улучши frontend/design: <экран или компонент>\n- сделай ревью\n- обнови память проекта\n- обнови базу знаний\n\n## Agent Handoff Rule\n\n- Do not load the whole repository into chat context.\n- Use this file for quick orientation, then `.ai-dev/project-map.md` for structure and `.ai-dev/quality-gate.md` for verification.\n- Use MCP search for specific files, commands, risks, and skills.\n- Do not run side-effectful scripts without explicit user approval.\n",
+    "project_map": "# Project Map\n\nGenerated: 2026-07-25T05:44:13.579Z\n\n## Identity\n\n- Name: gofra-crm\n- Root: `C:\\Users\\sacha\\Documents\\Codex\\2026-07-23\\new-chat`\n- Git repository detected: yes\n- Project types: `frontend`\n\n## Stack\n\n- Node.js\n- TypeScript\n- React\n- Vite\n- Tailwind CSS\n- GitHub Actions\n\nPackage manager: `pnpm`\n\n## Important Files And Folders\n\n- README.md\n- package.json\n- tsconfig.json\n- vite.config.ts\n- GitHub Actions\n- src/\n- app/\n- tests/\n\n## Documentation\n\n| Item | Status | Type |\n| --- | --- | --- |\n| README.md | present | file |\n| docs | missing | missing |\n| CONTRIBUTING.md | missing | missing |\n| CHANGELOG.md | missing | missing |\n| .github | present | directory |\n| .github/workflows | present | directory |\n\n## Environment And Secrets Risk\n\n- No `.env*` files detected by the lightweight scan.\n\n## Commands\n\n| Task | Command | Source |\n| --- | --- | --- |\n| Install | pnpm install | project files |\n| Dev | pnpm dev | package script: dev |\n| Test | pnpm test | package script: test |\n| Lint | pnpm lint | package script: lint |\n| Typecheck | Not detected | missing |\n| Build | pnpm build | package script: build |\n\n## Package Scripts\n\n| Script | Command |\n| --- | --- |\n| dev | vite |\n| build | vite build |\n| preview | vite preview |\n| lint | tsc --noEmit |\n| test | vite build && node --test tests/static-build.test.mjs |\n\n## Quality Gaps\n\n- Typecheck command is not detected.\n\n## Risk Signals\n\n- No automatic risk signals detected.\n\n## Recommended Next Commands\n\n- начни новую фичу: <описание>\n- найди баг: <симптом или ошибка>\n- поддержи frontend/beta: <экран или компонент>\n- проверь frontend quality gate\n- проверь лендинг/конверсию: <страница>\n- улучши frontend/design: <экран или компонент>\n- сделай ревью\n- обнови память проекта\n- обнови базу знаний\n\n## Top-Level Tree\n\n```text\n- .ai-dev/\n  - frontend-qa-report.md\n  - project-brief.md\n  - project-map.md\n- .github/\n  - workflows/\n    - deploy-pages.yml\n- .openai/\n- .vinext/\n  - fonts/\n    - geist-8ac0455e797f/\n    - geist-mono-00e989178794/\n- .wrangler/\n  - deploy/\n    - config.json\n  - registry/\n    - __asset-worker__\n    - __router-worker__\n    - __vite_proxy_worker__\n    - gofra-crm-frontend\n    - site-creator-vinext-starter\n  - state/\n    - v3/\n- app/\n  - _sites-preview/\n  - crm/\n    - chat-gateway.ts\n    - chat.css\n    - ChatView.tsx\n    - crm-gateway.ts\n    - CrmApp.tsx\n    - domain.ts\n    - fixtures.ts\n    - Icons.tsx\n    - permissions.ts\n    - theme.tsx\n    - workspace-features.css\n    - WorkspaceFeatures.tsx\n  - agency-redesign.css\n  - globals.css\n- db/\n- drizzle/\n  - meta/\n- examples/\n  - d1/\n    - app/\n    - db/\n- outputs/\n- public/\n  - fonts/\n    - geist-cyrillic.woff2\n    - geist-latin.woff2\n    - geist-mono-cyrillic.woff2\n    - geist-mono-latin.woff2\n  - .nojekyll\n  - favicon.svg\n  - file.svg\n  - globe.svg\n  - og.png\n  - window.svg\n- src/\n  - main.tsx\n- tests/\n  - static-build.test.mjs\n- work/\n  - agency-redesign-qa/\n    - chat__desktop.png\n    - chat__mobile.png\n    - chat__tablet.png\n    - clients__desktop.png\n    - clients__mobile.png\n    - clients__tablet.png\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - dashboard__tablet.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n    - statistics__tablet.png\n  - custom-icons-stats-qa/\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - dashboard__tablet.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n    - statistics__tablet.png\n  - data-foundation-check/\n  - feature-final-qa/\n    - calendar__mobile.png\n  - feature-routes-qa/\n    - calendar__desktop.png\n    - calendar__mobile.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - frontend-qa/\n    - root__desktop.png\n    - root__mobile.png\n  - frontend-qa-final/\n    - root__desktop.png\n    - root__mobile.png\n  - frontend-qa-retry/\n    - root__desktop.png\n    - root__mobile.png\n  - icon-polish-qa/\n    - root__desktop.png\n    - root__mobile.png\n    - root__tablet.png\n  - redesign-qa/\n    - root__desktop.png\n    - root__mobile.png\n  - sales-light-fix/\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - steel-palette-qa/\n    - chat__desktop.png\n    - chat__mobile.png\n    - clients__desktop.png\n    - clients__mobile.png\n    - dashboard__desktop.png\n    - dashboard__mobile.png\n    - deals__desktop.png\n    - deals__mobile.png\n    - statistics__desktop.png\n    - statistics__mobile.png\n  - dev-server.err.log\n  - dev-server.out.log\n  - gofra-crm-site.tar.gz\n  - pages-preview.err.log\n  - pages-preview.out.log\n  - pnpm-install-retry.err.log\n  - pnpm-install-retry.out.log\n  - pnpm-install.err.log\n  - pnpm-install.out.log\n  - preview-4178.err.log\n  - preview-4178.log\n  - preview-4179.err.log\n  - preview-4179.log\n- worker/\n- .gitignore\n- РАЗДЕЛЫ-СИСТЕМЫ.txt\n- index.html\n- next-env.d.ts\n- package.json\n- pnpm-lock.yaml\n- pnpm-workspace.yaml\n- README.md\n- tsconfig.json\n- tsconfig.tsbuildinfo\n- vite.config.ts\n```\n",
+    "quality_gate": "# Quality Gate\n\nGenerated: 2026-07-30T20:40:45.148Z\n\n## Default Verification\n\n- Test: `pnpm run test`\n- Lint: `pnpm run lint`\n- Build: `pnpm run build`\n\n## Missing Checks\n\n- Typecheck command is not detected.\n\n## Unsafe Or Manual Commands\n\n- `test`: Shell operator '&' is forbidden.. Command: `vite build && node --test tests/static-build.test.mjs`\n\n## Minimum Standard\n\n- Run the narrowest fast check that proves the change.\n- Run broader checks when touching shared utilities, build config, routing, auth, data models, or UI foundations.\n- If a check is unavailable or cannot run locally, record the reason in the final response.\n- Do not mark the task complete while known relevant checks are failing.\n\n## Frontend QA\n\n- Check desktop and mobile layouts.\n- Check loading, empty, and error states when touched by the task.\n- Verify text does not overflow buttons, cards, tables, or navigation.\n- Verify interactive controls have clear hover/focus/disabled states.\n- For visual changes, run or open the app and inspect the changed screens.\n- When Playwright is available, run MCP `run_frontend_qa` for desktop/mobile screenshots, console errors, overflow, and basic accessibility.\n- For product/design work, ordinary `run_frontend_qa` is not sufficient: require an approved direction and design system, then use `run_visual_reference_qa`, independent `record_visual_review`, and `frontend_product_gate` with `gate=handoff`.\n- Check hierarchy, composition, typography, density, action clarity, content quality, asset authenticity, mobile UX, state coverage, and brand coherence separately. Do not use one overall design score.\n- For handoff or beta release, use the `frontend-quality-gate` skill and report Gate: pass, warn, or block.\n\n## Final Response Checklist\n\n- Mention changed files.\n- Mention checks run and results.\n- Mention any skipped checks or residual risk.\n"
+  },
+  "unknowns": [],
+  "boundaries": [
+    "Read selected files and their nearby dependencies before editing.",
+    "Do not load unrelated repository files or the full skill catalog.",
+    "Never include .env, private keys, certificates, or secret values in the context pack.",
+    "Recompile after architecture, task scope, project state, or acceptance criteria change."
+  ],
+  "source_state_fingerprint": "ac18184e5d3059059285cc1bfe607def563d2c06867a61561238cdc28ad3c57b",
+  "source_fingerprint": "506f8f3e9e752bdff95a25bbd0e7fccb245e0598df31ac59bc65d5447fe2a4d3",
+  "budget": {
+    "max_chars": 50000,
+    "actual_chars": 34288,
+    "estimated_tokens": 8572,
+    "selected_source_files": 12,
+    "discovered_text_files": 55
+  }
+}
