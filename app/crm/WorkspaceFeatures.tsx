@@ -772,6 +772,72 @@ function Notice({ message }: { message: string }) {
   );
 }
 
+function TaskCompleteDialog({
+                              task,
+                              dueText,
+                              onCancel,
+                              onConfirm,
+                            }: {
+  task: Task;
+  dueText: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const titleId = useId();
+
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onCancel]);
+
+  return (
+      <div
+          className="dialog-backdrop centered"
+          onClick={onCancel}
+          role="presentation"
+      >
+        <section
+            aria-labelledby={titleId}
+            aria-modal="true"
+            className="status-dialog confirm-dialog"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+        >
+          <header>
+            <div>
+              <span className="section-kicker">Подтверждение</span>
+              <h2 id={titleId}>Выполнить задачу?</h2>
+              <p>
+                «{task.title}» — {TASK_KIND_LABELS[task.kind]}, {dueText}.
+                Задача будет отмечена как выполненная.
+              </p>
+            </div>
+          </header>
+          <footer className="confirm-actions">
+            <button
+                autoFocus
+                className="ghost-button"
+                onClick={onCancel}
+                type="button"
+            >
+              Отмена
+            </button>
+            <button
+                className="primary-button"
+                onClick={onConfirm}
+                type="button"
+            >
+              Выполнить
+            </button>
+          </footer>
+        </section>
+      </div>
+  );
+}
+
 function TaskRow({
                    snapshot,
                    task,
@@ -803,6 +869,7 @@ function TaskRow({
       (item) => item.completed,
   ).length;
   const canManage = currentUser.role === "manager";
+  const [confirmingComplete, setConfirmingComplete] = useState(false);
 
   const updateStatus = () => {
     if (!canManage) return;
@@ -819,6 +886,20 @@ function TaskRow({
         onSnapshotChange,
     );
     onNotice(completed ? "Задача возвращена в работу" : "Задача выполнена");
+  };
+
+  const requestStatusChange = () => {
+    if (!canManage) return;
+    if (taskIsCompleted(task)) {
+      updateStatus();
+      return;
+    }
+    setConfirmingComplete(true);
+  };
+
+  const confirmComplete = () => {
+    setConfirmingComplete(false);
+    updateStatus();
   };
 
   const snooze = (amount: number) => {
@@ -870,7 +951,7 @@ function TaskRow({
                       : `Выполнить задачу «${task.title}»`
                 }
                 className="wf-task-check"
-                onClick={updateStatus}
+                onClick={requestStatusChange}
                 type="button"
             >
               {taskIsCompleted(task) ? <Icon name="check" /> : null}
@@ -996,6 +1077,14 @@ function TaskRow({
                   </button>
               ) : null}
             </div>
+        ) : null}
+        {confirmingComplete ? (
+            <TaskCompleteDialog
+                dueText={due.text}
+                onCancel={() => setConfirmingComplete(false)}
+                onConfirm={confirmComplete}
+                task={task}
+            />
         ) : null}
       </article>
   );
