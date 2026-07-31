@@ -1,6 +1,7 @@
 import {
   CLIENT_STATUSES,
   CRM_SCHEMA_VERSION,
+  DEFAULT_SALES_CONTROL_SETTINGS,
   DEAL_STATUSES,
   SENT_IMPLYING_STATUSES,
   createEmptyDealBrief,
@@ -393,6 +394,15 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
     marginPercent: Math.round((margin / ourPrice) * 1000) / 10,
     status,
     proposalDate,
+    forecastCloseAt: terminal
+      ? null
+      : ["2026-08-12", "2026-09-16", "2026-10-21"][index % 3],
+    lossReason:
+      status === "Проиграна"
+        ? "Цена"
+        : status === "Отменена"
+          ? "Проект отложен"
+          : null,
     brief,
     process,
     activeQuoteId: `quote-${id}-1`,
@@ -653,6 +663,11 @@ export const demoPriceApprovals: PriceApproval[] = [
     reason: "Клиент готов зафиксировать объём на три месяца при снижении цены.",
     comment: "Проверить логистику и возможность рамочного графика.",
     attachments: [],
+    trigger: "manual",
+    quoteId: null,
+    marginPercent: null,
+    discountPercent: 6,
+    thresholdPercent: 5,
     status: "pending",
     requestedById: DEMO_USER_IDS.nikolai,
     reviewedById: null,
@@ -672,6 +687,11 @@ export const demoPriceApprovals: PriceApproval[] = [
     reason: "Цена конкурента ниже на 3%.",
     comment: "Согласовано при предоплате 70%.",
     attachments: [],
+    trigger: "manual",
+    quoteId: null,
+    marginPercent: null,
+    discountPercent: 2.4,
+    thresholdPercent: 5,
     status: "approved",
     requestedById: DEMO_USER_IDS.timur,
     reviewedById: DEMO_USER_IDS.sofia,
@@ -791,6 +811,7 @@ export const demoSnapshot: CrmSnapshot = {
   tasks: demoTasks,
   statusEvents: demoStatusEvents,
   targets: demoTargets,
+  salesControl: { ...DEFAULT_SALES_CONTROL_SETTINGS },
   dictionaries: {
     potentials: ["A", "B", "C", "D"],
     industries: [

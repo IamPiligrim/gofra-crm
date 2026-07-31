@@ -312,6 +312,18 @@ export function DealProcessView({
     );
   };
 
+  const changeForecastDate = (value: string) => {
+    const now = new Date().toISOString();
+    onChange(
+      {
+        ...deal,
+        forecastCloseAt: toIsoDate(value),
+        updatedAt: now,
+      },
+      quotes,
+    );
+  };
+
   const addQuote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -457,10 +469,16 @@ export function DealProcessView({
             );
           })}
         </div>
-        <label className="deal-reply-date">
-          <span>Ответ клиента ожидается до</span>
-          <input onChange={(event) => changeReplyDate(event.target.value)} type="date" value={dateValue(deal.process.replyExpectedAt)} />
-        </label>
+        <div className="deal-process-dates">
+          <label className="deal-reply-date">
+            <span>Прогнозная дата закрытия</span>
+            <input onChange={(event) => changeForecastDate(event.target.value)} type="date" value={dateValue(deal.forecastCloseAt)} />
+          </label>
+          <label className="deal-reply-date">
+            <span>Ответ клиента ожидается до</span>
+            <input onChange={(event) => changeReplyDate(event.target.value)} type="date" value={dateValue(deal.process.replyExpectedAt)} />
+          </label>
+        </div>
       </section>
 
       <section className="deal-quotes-panel">

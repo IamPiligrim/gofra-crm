@@ -355,8 +355,25 @@
   justify-content: flex-end;
 }
 
+.deal-process-dates {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.deal-process-dates .deal-reply-date {
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 .deal-reply-date input {
   max-width: 190px;
+}
+
+.deal-process-dates .deal-reply-date input {
+  max-width: none;
+  width: 100%;
 }
 
 .deal-quote-form {
@@ -543,6 +560,10 @@
   .deal-reply-date {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .deal-process-dates {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .deal-reply-date input {
@@ -1450,6 +1471,86 @@ button {
   .chat-view {
     border-left: 0;
     border-right: 0;
+  }
+}
+
+/* Manager dashboard: keep the legacy data blocks in the same visual system
+   as the leader-control surface above them. */
+.wf-manager-metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.wf-manager-metric-grid > .wf-metric-card {
+  background: var(--wf-surface-raised);
+  border: 0;
+  min-height: 0;
+  padding: 15px 16px 16px;
+}
+
+.wf-manager-metric-grid > .wf-metric-card:first-child {
+  border-left: 0;
+}
+
+.wf-manager-metric-grid > .wf-metric-card > strong {
+  font-size: 23px;
+  letter-spacing: -0.045em;
+  margin: 9px 0 5px;
+}
+
+.wf-manager-dashboard-grid {
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wf-manager-dashboard-panel.wf-panel {
+  border-radius: 14px;
+  clip-path: none;
+  min-height: 0;
+}
+
+.wf-manager-dashboard-panel > .wf-panel-heading {
+  min-height: 0;
+  padding: 15px 17px 13px;
+}
+
+.wf-manager-dashboard-panel > .wf-task-list,
+.wf-manager-dashboard-panel > .wf-mini-funnel,
+.wf-manager-dashboard-panel > .wf-team-list,
+.wf-manager-dashboard-panel > .wf-attention-list {
+  border-top: 0;
+}
+
+.wf-manager-dashboard-panel .wf-mini-funnel {
+  padding: 3px 17px 12px;
+}
+
+.wf-manager-dashboard-panel .wf-mini-funnel-row {
+  min-height: 50px;
+}
+
+.wf-manager-dashboard-panel .wf-team-list article,
+.wf-manager-dashboard-panel .wf-attention-list button {
+  min-height: 58px;
+}
+
+@media (max-width: 980px) {
+  .wf-manager-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wf-manager-dashboard-grid {
+    gap: 14px;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .wf-manager-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wf-manager-metric-grid > .wf-metric-card > strong {
+    font-size: 21px;
   }
 }
 

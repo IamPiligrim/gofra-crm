@@ -2136,6 +2136,31 @@ html[data-theme="dark"] textarea {
   max-width: 50ch;
 }
 
+.loss-reason-field {
+  color: var(--muted);
+  display: grid;
+  font-size: 11px;
+  font-weight: 650;
+  gap: 7px;
+  padding: 18px 20px;
+}
+
+.loss-reason-field select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  min-height: 44px;
+  padding: 0 11px;
+}
+
+.loss-reason-dialog > footer {
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 20px;
+}
+
 .status-options {
   display: grid;
   gap: 7px;

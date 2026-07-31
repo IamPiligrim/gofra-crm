@@ -41,7 +41,7 @@ export const DEAL_STATUSES = [
 export type DealStatus = (typeof DEAL_STATUSES)[number];
 export type Potential = "A" | "B" | "C" | "D";
 
-export const CRM_SCHEMA_VERSION = 5 as const;
+export const CRM_SCHEMA_VERSION = 6 as const;
 export type CrmSchemaVersion = typeof CRM_SCHEMA_VERSION;
 
 export const DECISION_ROLES = [
@@ -73,6 +73,19 @@ export const PREFERRED_CHANNELS = [
 
 export type PreferredChannel = (typeof PREFERRED_CHANNELS)[number];
 export type RepeatReminderDays = 7 | 14;
+
+export const LOSS_REASONS = [
+  "Цена",
+  "Сроки поставки",
+  "Не подошли технические требования",
+  "Выбран текущий поставщик",
+  "Нет бюджета",
+  "Проект отложен",
+  "Клиент перестал отвечать",
+  "Другое",
+] as const;
+
+export type LossReason = (typeof LOSS_REASONS)[number];
 
 export interface TimestampedEntity {
   createdAt: string;
@@ -629,6 +642,8 @@ export interface Deal extends OwnedEntity {
   marginPercent: number;
   status: DealStatus;
   proposalDate: string | null;
+  forecastCloseAt: string | null;
+  lossReason: LossReason | null;
   brief: DealBrief;
   process: DealProcess;
   activeQuoteId: string | null;
@@ -679,6 +694,12 @@ export type PriceApprovalStatus =
   | "rejected"
   | "clarification";
 
+export type PriceApprovalTrigger =
+  | "manual"
+  | "discount"
+  | "low_margin"
+  | "discount_and_margin";
+
 export interface PriceApproval extends OwnedEntity {
   id: string;
   clientId: string;
@@ -690,6 +711,11 @@ export interface PriceApproval extends OwnedEntity {
   reason: string;
   comment: string;
   attachments: Attachment[];
+  trigger: PriceApprovalTrigger;
+  quoteId: string | null;
+  marginPercent: number | null;
+  discountPercent: number | null;
+  thresholdPercent: number | null;
   status: PriceApprovalStatus;
   requestedById: string;
   reviewedById: string | null;
@@ -789,6 +815,20 @@ export interface Dictionaries {
   interactionTypes: InteractionKind[];
 }
 
+export interface SalesControlSettings {
+  minMarginPercent: number;
+  maxDiscountPercent: number;
+  stagnantDealDays: number;
+  staleClientDays: number;
+}
+
+export const DEFAULT_SALES_CONTROL_SETTINGS: SalesControlSettings = {
+  minMarginPercent: 20,
+  maxDiscountPercent: 5,
+  stagnantDealDays: 14,
+  staleClientDays: 30,
+};
+
 export interface CrmSnapshot {
   schemaVersion: CrmSchemaVersion;
   teams: Team[];
@@ -803,6 +843,7 @@ export interface CrmSnapshot {
   tasks: Task[];
   statusEvents: StatusEvent[];
   targets: Target[];
+  salesControl: SalesControlSettings;
   dictionaries: Dictionaries;
 }
 

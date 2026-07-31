@@ -1,6 +1,7 @@
 import {
   BRIEF_ASSET_KINDS,
   CRM_SCHEMA_VERSION,
+  DEFAULT_SALES_CONTROL_SETTINGS,
   DEAL_PROCESS_STEPS,
   DEAL_STATUSES,
   DECISION_INFLUENCES,
@@ -8,6 +9,7 @@ import {
   PACKING_METHODS,
   PREFERRED_CHANNELS,
   QUOTE_STATUSES,
+  LOSS_REASONS,
   SENT_IMPLYING_STATUSES,
   createEmptyDealBrief,
   createEmptyDealProcess,
@@ -30,6 +32,7 @@ import {
   type PackingMethod,
   type PriceApproval,
   type PriceApprovalStatus,
+  type PriceApprovalTrigger,
   type Quote,
   type Session,
   type StatusEvent,
@@ -45,6 +48,7 @@ import {
   resolveExpectedNextOrder,
   syncRepeatOrderTasks,
 } from "./sales-automation";
+import { syncThresholdPriceApprovals } from "./leader-control";
 import {
   DEMO_TEAM_ID,
   DEMO_USER_IDS,
@@ -55,8 +59,9 @@ import {
   demoUsers,
 } from "./fixtures";
 
-export const CRM_STORAGE_KEY = "gofra-crm-prototype:v5";
+export const CRM_STORAGE_KEY = "gofra-crm-prototype:v6";
 export const LEGACY_CRM_STORAGE_KEYS = [
+  "gofra-crm-prototype:v5",
   "gofra-crm-prototype:v4",
   "gofra-crm-prototype:v3",
   "gofra-crm-prototype:v2",
@@ -90,6 +95,9 @@ const asNullableString = (
 
 const asNumber = (value: unknown, fallback = 0): number =>
   typeof value === "number" && Number.isFinite(value) ? value : fallback;
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
 
 const asNullableNumber = (
   value: unknown,
@@ -897,6 +905,15 @@ export const migrateCrmSnapshot = (
     )
       ? (rawStatus as Deal["status"])
       : "Новая заявка";
+    const process = normalizeDealProcess(record.process);
+    const rawLossReason = asNullableString(record.lossReason);
+    const lossReason = LOSS_REASONS.includes(
+      rawLossReason as (typeof LOSS_REASONS)[number],
+    )
+      ? (rawLossReason as Deal["lossReason"])
+      : rawLossReason
+        ? "Другое"
+        : null;
     return normalizeDealNextAction({
       ...record,
       ownerId,
@@ -908,8 +925,13 @@ export const migrateCrmSnapshot = (
       margin: asNumber(record.margin),
       marginPercent: asNumber(record.marginPercent),
       proposalDate,
+      forecastCloseAt: asNullableString(
+        record.forecastCloseAt,
+        process.replyExpectedAt ?? asNullableString(record.nextActionAt),
+      ),
+      lossReason,
       brief: normalizeDealBrief(record.brief),
-      process: normalizeDealProcess(record.process),
+      process,
       activeQuoteId: asNullableString(record.activeQuoteId),
       nextAction: asString(record.nextAction),
       nextActionAt: asNullableString(record.nextActionAt),
@@ -969,6 +991,15 @@ export const migrateCrmSnapshot = (
         ? (statusValue as PriceApprovalStatus)
         : "pending";
       const createdAt = asString(record.createdAt, migratedAt);
+      const triggerValue = asString(record.trigger, "manual");
+      const trigger: PriceApprovalTrigger = [
+        "manual",
+        "discount",
+        "low_margin",
+        "discount_and_margin",
+      ].includes(triggerValue)
+        ? (triggerValue as PriceApprovalTrigger)
+        : "manual";
       return {
         id: asString(record.id, `approval-${index + 1}`),
         clientId: asString(record.clientId),
@@ -980,6 +1011,11 @@ export const migrateCrmSnapshot = (
         reason: asString(record.reason),
         comment: asString(record.comment),
         attachments: normalizeAttachments(record.attachments),
+        trigger,
+        quoteId: asNullableString(record.quoteId),
+        marginPercent: asNullableNumber(record.marginPercent),
+        discountPercent: asNullableNumber(record.discountPercent),
+        thresholdPercent: asNullableNumber(record.thresholdPercent),
         status,
         requestedById: asString(record.requestedById, currentUserId),
         reviewedById: asNullableString(record.reviewedById),
@@ -1062,7 +1098,45 @@ export const migrateCrmSnapshot = (
     normalizeTarget(target, migratedAt, index, activeTeamId),
   );
 
-  return {
+  const salesControlSource = asRecord(source.salesControl);
+  const salesControl = {
+    minMarginPercent: clamp(
+      asNumber(
+        salesControlSource.minMarginPercent,
+        DEFAULT_SALES_CONTROL_SETTINGS.minMarginPercent,
+      ),
+      0,
+      100,
+    ),
+    maxDiscountPercent: clamp(
+      asNumber(
+        salesControlSource.maxDiscountPercent,
+        DEFAULT_SALES_CONTROL_SETTINGS.maxDiscountPercent,
+      ),
+      0,
+      100,
+    ),
+    stagnantDealDays: Math.max(
+      1,
+      Math.round(
+        asNumber(
+          salesControlSource.stagnantDealDays,
+          DEFAULT_SALES_CONTROL_SETTINGS.stagnantDealDays,
+        ),
+      ),
+    ),
+    staleClientDays: Math.max(
+      1,
+      Math.round(
+        asNumber(
+          salesControlSource.staleClientDays,
+          DEFAULT_SALES_CONTROL_SETTINGS.staleClientDays,
+        ),
+      ),
+    ),
+  };
+
+  const normalizedSnapshot: CrmSnapshot = {
     schemaVersion: CRM_SCHEMA_VERSION,
     teams,
     users,
@@ -1076,10 +1150,16 @@ export const migrateCrmSnapshot = (
     tasks,
     statusEvents,
     targets,
+    salesControl,
     dictionaries: normalizeDictionaries(
       source.dictionaries,
       demoSnapshot.dictionaries,
     ),
+  };
+
+  return {
+    ...normalizedSnapshot,
+    priceApprovals: syncThresholdPriceApprovals(normalizedSnapshot),
   };
 };
 

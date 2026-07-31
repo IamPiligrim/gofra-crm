@@ -27,6 +27,7 @@ import {
   DECISION_ROLES,
   DEAL_PIPELINE,
   DEAL_STATUSES,
+  LOSS_REASONS,
   PREFERRED_CHANNELS,
   createEmptyDealBrief,
   createEmptyDealProcess,
@@ -40,6 +41,7 @@ import {
   type DealStatus,
   type Interaction,
   type InteractionKind,
+  type LossReason,
   type PriceApproval,
   type PriceApprovalStatus,
   type Quote,
@@ -61,6 +63,7 @@ import {
   TERMINAL_DEAL_STATUSES,
   type RepeatSegment,
 } from "./sales-automation";
+import { syncThresholdPriceApprovals } from "./leader-control";
 import {
   canAccessModule,
   canViewFinancials,
@@ -83,6 +86,10 @@ type MoveIntent =
     }
   | null;
 type CreateKind = "client" | "deal" | "contact" | "interaction" | null;
+type PendingLoss = {
+  dealId: string;
+  status: "Проиграна" | "Отменена";
+} | null;
 type GlobalSearchResult = {
   id: string;
   kind: "client" | "deal" | "contact";
@@ -337,6 +344,7 @@ export function CrmApp() {
   const [globalSearch, setGlobalSearch] = useState("");
   const [drawer, setDrawer] = useState<DrawerTarget>(null);
   const [moveIntent, setMoveIntent] = useState<MoveIntent>(null);
+  const [pendingLoss, setPendingLoss] = useState<PendingLoss>(null);
   const [createKind, setCreateKind] = useState<CreateKind>(null);
   const [createClientId, setCreateClientId] = useState<string | null>(null);
   const [createDealId, setCreateDealId] = useState<string | null>(null);
@@ -517,6 +525,7 @@ export function CrmApp() {
       if (event.key !== "Escape") return;
       setDrawer(null);
       setMoveIntent(null);
+      setPendingLoss(null);
       setCreateKind(null);
       setMobileMoreOpen(false);
     };
@@ -578,10 +587,14 @@ export function CrmApp() {
 
   const commit = (next: CrmSnapshot, message?: string) => {
     const deals = next.deals.map((deal) => normalizeDealNextAction(deal));
-    const normalizedNext = {
+    const normalizedBase = {
       ...next,
       deals,
       tasks: syncRepeatOrderTasks(next.clients, next.tasks),
+    };
+    const normalizedNext = {
+      ...normalizedBase,
+      priceApprovals: syncThresholdPriceApprovals(normalizedBase),
     };
     setSnapshot(normalizedNext);
     void crmGateway.save(normalizedNext).catch(() => {
@@ -625,7 +638,11 @@ export function CrmApp() {
     setMoveIntent(null);
   };
 
-  const moveDeal = (id: string, status: DealStatus) => {
+  const moveDeal = (
+    id: string,
+    status: DealStatus,
+    lossReason: LossReason | null = null,
+  ) => {
     if (!snapshot) return;
     const previous = snapshot.deals.find((deal) => deal.id === id);
     if (!previous || previous.status === status) {
@@ -647,7 +664,17 @@ export function CrmApp() {
       {
         ...snapshot,
         deals: snapshot.deals.map((deal) =>
-          deal.id === id ? { ...deal, status, updatedAt: now } : deal,
+          deal.id === id
+            ? {
+                ...deal,
+                status,
+                lossReason:
+                  status === "Проиграна" || status === "Отменена"
+                    ? lossReason
+                    : null,
+                updatedAt: now,
+              }
+            : deal,
         ),
         clients: recordsNewShipment
           ? snapshot.clients.map((client) =>
@@ -810,6 +837,7 @@ export function CrmApp() {
         snapshot.session.currentUserId;
       const nextAction = String(form.get("nextAction") ?? "").trim();
       const nextActionAt = toIsoOrNull(form.get("nextActionAt"));
+      const forecastCloseAt = toIsoOrNull(form.get("forecastCloseAt"));
       const dealStatus = String(
         form.get("status") ?? "Новая заявка",
       ) as DealStatus;
@@ -851,6 +879,8 @@ export function CrmApp() {
               ) / 10,
         status: dealStatus,
         proposalDate: null,
+        forecastCloseAt,
+        lossReason: null,
         brief: createEmptyDealBrief(),
         process: createEmptyDealProcess(),
         activeQuoteId: quoteId,
@@ -1047,6 +1077,11 @@ export function CrmApp() {
               reason: String(form.get("approvalReason") ?? ""),
               comment: String(form.get("approvalComment") ?? ""),
               attachments,
+              trigger: "manual",
+              quoteId: selectedDeal.activeQuoteId,
+              marginPercent: selectedDeal.marginPercent,
+              discountPercent: null,
+              thresholdPercent: snapshot.salesControl.minMarginPercent,
               status: "pending",
               requestedById:
                 currentUser?.id ?? snapshot.session.currentUserId,
@@ -1672,10 +1707,27 @@ export function CrmApp() {
             if (moveIntent.kind === "client") {
               moveClient(moveIntent.id, status as ClientStatus);
             } else {
-              moveDeal(moveIntent.id, status as DealStatus);
+              const nextStatus = status as DealStatus;
+              if (nextStatus === "Проиграна" || nextStatus === "Отменена") {
+                setPendingLoss({ dealId: moveIntent.id, status: nextStatus });
+                setMoveIntent(null);
+              } else {
+                moveDeal(moveIntent.id, nextStatus);
+              }
             }
           }}
           onClose={() => setMoveIntent(null)}
+        />
+      )}
+
+      {pendingLoss && (
+        <LossReasonDialog
+          onClose={() => setPendingLoss(null)}
+          onSubmit={(reason) => {
+            moveDeal(pendingLoss.dealId, pendingLoss.status, reason);
+            setPendingLoss(null);
+          }}
+          status={pendingLoss.status}
         />
       )}
 
@@ -4145,6 +4197,62 @@ function StatusPicker({
   );
 }
 
+function LossReasonDialog({
+  status,
+  onSubmit,
+  onClose,
+}: {
+  status: "Проиграна" | "Отменена";
+  onSubmit: (reason: LossReason) => void;
+  onClose: () => void;
+}) {
+  const [reason, setReason] = useState<LossReason>(LOSS_REASONS[0]);
+
+  return (
+    <div className="dialog-backdrop centered" role="presentation">
+      <form
+        aria-label="Причина закрытия сделки"
+        aria-modal="true"
+        className="status-dialog loss-reason-dialog"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit(reason);
+        }}
+        role="dialog"
+      >
+        <header>
+          <div>
+            <span className="section-kicker">Контроль результата</span>
+            <h2>Почему сделка {status.toLocaleLowerCase("ru-RU")}?</h2>
+          </div>
+          <button className="ghost-button" onClick={onClose} type="button">
+            Закрыть
+          </button>
+        </header>
+        <label className="loss-reason-field">
+          Причина
+          <select
+            autoFocus
+            onChange={(event) => setReason(event.target.value as LossReason)}
+            value={reason}
+          >
+            {LOSS_REASONS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+        <footer>
+          <button className="primary-button" type="submit">
+            Сохранить причину
+          </button>
+        </footer>
+      </form>
+    </div>
+  );
+}
+
 function CreateDialog({
   kind,
   clientId,
@@ -4350,6 +4458,13 @@ function CreateDialog({
                 name="nextActionAt"
                 required
                 type="datetime-local"
+                wide
+              />
+              <Field
+                label="Прогнозная дата закрытия · обязательно"
+                name="forecastCloseAt"
+                required
+                type="date"
                 wide
               />
             </>

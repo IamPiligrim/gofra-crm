@@ -14,12 +14,14 @@ import {
   type CrmSnapshot,
   type Deal,
   type Interaction,
+  type PriceApprovalStatus,
   type StatusEvent,
   type Task,
   type User,
 } from "./domain";
 import { isOpenDeal } from "./sales-automation";
 import { selectManagerFocus } from "./manager-focus";
+import { selectLeaderControl } from "./leader-control";
 import "./workspace-features.css";
 
 export interface WorkspaceFeatureProps {
@@ -1750,6 +1752,296 @@ function CustomerOverviewDashboard({
   );
 }
 
+const APPROVAL_TRIGGER_LABELS = {
+  manual: "Запрос менеджера",
+  discount: "Скидка выше порога",
+  low_margin: "Маржа ниже порога",
+  discount_and_margin: "Скидка и низкая маржа",
+} as const;
+
+function LeaderControlSection({
+  snapshot,
+  currentUser,
+  onSnapshotChange,
+  onOpenClient,
+  onOpenDeal,
+  onNotice,
+}: {
+  snapshot: CrmSnapshot;
+  currentUser: User;
+  onSnapshotChange: (snapshot: CrmSnapshot) => void;
+  onOpenClient: (clientId: string) => void;
+  onOpenDeal: (dealId: string) => void;
+  onNotice: (message: string) => void;
+}) {
+  const control = useMemo(() => selectLeaderControl(snapshot), [snapshot]);
+  const forecastTotal = control.forecast.reduce(
+    (sum, month) => sum + month.revenue,
+    0,
+  );
+  const weightedTotal = control.forecast.reduce(
+    (sum, month) => sum + month.weightedRevenue,
+    0,
+  );
+  const maxForecast = Math.max(
+    ...control.forecast.map((month) => month.revenue),
+    1,
+  );
+
+  const reviewApproval = (
+    approvalId: string,
+    status: Extract<PriceApprovalStatus, "approved" | "rejected">,
+  ) => {
+    const reviewedAt = new Date().toISOString();
+    onSnapshotChange({
+      ...snapshot,
+      priceApprovals: snapshot.priceApprovals.map((approval) =>
+        approval.id === approvalId
+          ? {
+              ...approval,
+              status,
+              reviewedById: currentUser.id,
+              reviewedAt,
+              updatedAt: reviewedAt,
+            }
+          : approval,
+      ),
+    });
+    onNotice(status === "approved" ? "Условия согласованы" : "Условия отклонены");
+  };
+
+  const savePolicy = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const number = (name: string, fallback: number) => {
+      const value = Number(data.get(name));
+      return Number.isFinite(value) ? value : fallback;
+    };
+    onSnapshotChange({
+      ...snapshot,
+      salesControl: {
+        minMarginPercent: Math.min(
+          100,
+          Math.max(0, number("minMarginPercent", snapshot.salesControl.minMarginPercent)),
+        ),
+        maxDiscountPercent: Math.min(
+          100,
+          Math.max(0, number("maxDiscountPercent", snapshot.salesControl.maxDiscountPercent)),
+        ),
+        stagnantDealDays: Math.max(
+          1,
+          Math.round(number("stagnantDealDays", snapshot.salesControl.stagnantDealDays)),
+        ),
+        staleClientDays: Math.max(
+          1,
+          Math.round(number("staleClientDays", snapshot.salesControl.staleClientDays)),
+        ),
+      },
+    });
+    onNotice("Пороговые значения сохранены");
+  };
+
+  return (
+    <section className="wf-control-board" aria-label="Контроль руководителя">
+      <header className="wf-control-header">
+        <div>
+          <span className="wf-eyebrow">Контроль руководителя</span>
+          <h2>Продажи, риски и согласования</h2>
+        </div>
+        <p>Показатели пересчитываются по текущим сделкам и активности команды.</p>
+      </header>
+
+      <div className="wf-control-summary">
+        <article>
+          <span>Взвешенный прогноз</span>
+          <strong>{formatCompactMoney(weightedTotal)}</strong>
+          <small>{formatCompactMoney(forecastTotal)} без вероятности</small>
+        </article>
+        <article>
+          <span>Средняя маржа</span>
+          <strong>{formatPercent(control.averageMarginPercent)}</strong>
+          <small>{formatCompactMoney(control.activeMargin)} в активной воронке</small>
+        </article>
+        <article className={control.pendingApprovals.length ? "is-warning" : ""}>
+          <span>Ждут согласования</span>
+          <strong>{control.pendingApprovals.length}</strong>
+          <small>скидка или маржа вне порога</small>
+        </article>
+        <article className={control.stagnantDeals.length ? "is-danger" : ""}>
+          <span>Сделки без движения</span>
+          <strong>{control.stagnantDeals.length}</strong>
+          <small>более {snapshot.salesControl.stagnantDealDays} дней</small>
+        </article>
+      </div>
+
+      <div className="wf-control-grid">
+        <section className="wf-control-panel wf-control-forecast">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Прогноз продаж</span>
+              <h3>По месяцам</h3>
+            </div>
+            <small>С учётом вероятности этапа</small>
+          </header>
+          {control.forecast.length ? (
+            <div className="wf-forecast-list">
+              {control.forecast.slice(0, 6).map((month) => (
+                <article key={month.key}>
+                  <strong>{month.label}</strong>
+                  <div className="wf-forecast-track" aria-hidden="true">
+                    <i style={{ transform: `scaleX(${month.revenue / maxForecast})` }} />
+                    <b style={{ transform: `scaleX(${month.weightedRevenue / maxForecast})` }} />
+                  </div>
+                  <span>{formatCompactMoney(month.weightedRevenue)}</span>
+                  <small>{month.deals} сделок · {formatCompactMoney(month.revenue)}</small>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="Прогноз пока не заполнен"
+              description="Укажите прогнозную дату закрытия в открытых сделках."
+            />
+          )}
+        </section>
+
+        <section className="wf-control-panel wf-approval-panel">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Контроль условий</span>
+              <h3>Согласования</h3>
+            </div>
+            <b>{control.pendingApprovals.length}</b>
+          </header>
+          {control.pendingApprovals.length ? (
+            <div className="wf-approval-list">
+              {control.pendingApprovals.slice(0, 5).map((approval) => (
+                <article key={approval.id}>
+                  <button onClick={() => onOpenDeal(approval.dealId)} type="button">
+                    <span>{APPROVAL_TRIGGER_LABELS[approval.trigger]}</span>
+                    <strong>{approval.product}</strong>
+                    <small>
+                      {formatMoney(approval.requestedPrice)}
+                      {approval.marginPercent !== null
+                        ? ` · маржа ${formatPercent(approval.marginPercent)}`
+                        : ""}
+                      {approval.discountPercent !== null
+                        ? ` · скидка ${formatPercent(approval.discountPercent)}`
+                        : ""}
+                    </small>
+                  </button>
+                  <footer>
+                    <button onClick={() => reviewApproval(approval.id, "approved")} type="button">Согласовать</button>
+                    <button onClick={() => reviewApproval(approval.id, "rejected")} type="button">Отклонить</button>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="Очередь пуста" description="Все ценовые условия в допустимых пределах." />
+          )}
+        </section>
+
+        <section className="wf-control-panel">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Риски воронки</span>
+              <h3>Без движения</h3>
+            </div>
+            <b>{control.stagnantDeals.length}</b>
+          </header>
+          <div className="wf-control-row-list">
+            {control.stagnantDeals.slice(0, 6).map((row) => (
+              <button key={row.deal.id} onClick={() => onOpenDeal(row.deal.id)} type="button">
+                <span><strong>{row.deal.title}</strong><small>{row.client?.companyName ?? "Клиент не найден"} · {row.owner?.fullName ?? "Не назначен"}</small></span>
+                <em>{row.inactiveDays} дн.</em>
+              </button>
+            ))}
+            {!control.stagnantDeals.length ? <p className="wf-control-empty">Все открытые сделки двигаются по плану.</p> : null}
+          </div>
+        </section>
+
+        <section className="wf-control-panel">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Клиентская база</span>
+              <h3>Давно не обработаны</h3>
+            </div>
+            <b>{control.staleClients.length}</b>
+          </header>
+          <div className="wf-control-row-list">
+            {control.staleClients.slice(0, 6).map((row) => (
+              <button key={row.client.id} onClick={() => onOpenClient(row.client.id)} type="button">
+                <span><strong>{row.client.companyName}</strong><small>{row.owner?.fullName ?? "Не назначен"}{row.neverProcessed ? " · контактов ещё не было" : ""}</small></span>
+                <em>{row.inactiveDays} дн.</em>
+              </button>
+            ))}
+            {!control.staleClients.length ? <p className="wf-control-empty">Закреплённые клиенты обработаны вовремя.</p> : null}
+          </div>
+        </section>
+
+        <section className="wf-control-panel wf-conversion-panel">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Эффективность</span>
+              <h3>Конверсия</h3>
+            </div>
+          </header>
+          <div className="wf-conversion-columns">
+            <div>
+              <h4>Менеджеры</h4>
+              {control.managerConversion.slice(0, 5).map((row) => (
+                <div key={row.id}><span>{row.label}</span><strong>{formatPercent(row.conversionPercent)}</strong><small>{row.won}/{row.resolved}</small></div>
+              ))}
+            </div>
+            <div>
+              <h4>Источники</h4>
+              {control.sourceConversion.slice(0, 5).map((row) => (
+                <div key={row.id}><span>{row.label}</span><strong>{formatPercent(row.conversionPercent)}</strong><small>{row.won}/{row.resolved}</small></div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="wf-control-panel wf-loss-panel">
+          <header>
+            <div>
+              <span className="wf-eyebrow">Проигранные сделки</span>
+              <h3>Причины проигрыша</h3>
+            </div>
+          </header>
+          <div className="wf-loss-list">
+            {control.lossReasons.map((row) => (
+              <div key={row.reason}>
+                <span><strong>{row.reason}</strong><small>{row.count} сделок</small></span>
+                <i><b style={{ transform: `scaleX(${row.sharePercent / 100})` }} /></i>
+                <em>{formatPercent(row.sharePercent)}</em>
+              </div>
+            ))}
+            {!control.lossReasons.length ? <p className="wf-control-empty">Закрытых с проигрышем сделок пока нет.</p> : null}
+          </div>
+        </section>
+
+        <form className="wf-control-panel wf-policy-panel" onSubmit={savePolicy}>
+          <header>
+            <div>
+              <span className="wf-eyebrow">Правила контроля</span>
+              <h3>Пороговые значения</h3>
+            </div>
+          </header>
+          <div>
+            <label>Минимальная маржа, %<input defaultValue={snapshot.salesControl.minMarginPercent} min="0" max="100" name="minMarginPercent" step="0.1" type="number" /></label>
+            <label>Максимальная скидка, %<input defaultValue={snapshot.salesControl.maxDiscountPercent} min="0" max="100" name="maxDiscountPercent" step="0.1" type="number" /></label>
+            <label>Сделка без движения, дней<input defaultValue={snapshot.salesControl.stagnantDealDays} min="1" name="stagnantDealDays" type="number" /></label>
+            <label>Клиент без обработки, дней<input defaultValue={snapshot.salesControl.staleClientDays} min="1" name="staleClientDays" type="number" /></label>
+          </div>
+          <button className="wf-secondary-button" type="submit">Сохранить правила</button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function LegacyDashboardView({
                                 snapshot,
                                 currentUser,
@@ -1903,7 +2195,31 @@ function LegacyDashboardView({
             />
         ) : (
             <>
-              <div className="wf-metric-grid">
+              {isManager ? (
+                <LeaderControlSection
+                  currentUser={currentUser}
+                  onNotice={showNotice}
+                  onOpenClient={onOpenClient}
+                  onOpenDeal={onOpenDeal}
+                  onSnapshotChange={onSnapshotChange}
+                  snapshot={snapshot}
+                />
+              ) : null}
+
+              {isManager ? (
+                <div className="wf-dashboard-divider">
+                  <span className="wf-eyebrow">Командный дашборд</span>
+                  <h2>Текущая картина команды</h2>
+                </div>
+              ) : null}
+
+              <div
+                className={
+                  isManager
+                    ? "wf-control-summary wf-manager-metric-grid"
+                    : "wf-metric-grid"
+                }
+              >
                 <MetricCard
                     caption={
                       isManager
@@ -1945,8 +2261,18 @@ function LegacyDashboardView({
                 />
               </div>
 
-              <div className="wf-dashboard-grid">
-                <section className="wf-panel wf-focus-panel">
+              <div
+                className={
+                  isManager
+                    ? "wf-control-grid wf-manager-dashboard-grid"
+                    : "wf-dashboard-grid"
+                }
+              >
+                <section
+                  className={`wf-panel wf-focus-panel ${
+                    isManager ? "wf-control-panel wf-manager-dashboard-panel" : ""
+                  }`}
+                >
                   <header className="wf-panel-heading">
                     <div>
                       <span className="wf-eyebrow">Приоритеты</span>
@@ -1982,7 +2308,11 @@ function LegacyDashboardView({
                   )}
                 </section>
 
-                <section className="wf-panel wf-funnel-panel">
+                <section
+                  className={`wf-panel wf-funnel-panel ${
+                    isManager ? "wf-control-panel wf-manager-dashboard-panel" : ""
+                  }`}
+                >
                   <header className="wf-panel-heading">
                     <div>
                       <span className="wf-eyebrow">Воронка</span>
@@ -2019,7 +2349,7 @@ function LegacyDashboardView({
                 </section>
 
                 {isManager ? (
-                    <section className="wf-panel wf-team-panel">
+                    <section className="wf-panel wf-control-panel wf-manager-dashboard-panel wf-team-panel">
                       <header className="wf-panel-heading">
                         <div>
                           <span className="wf-eyebrow">Команда</span>
@@ -2093,7 +2423,11 @@ function LegacyDashboardView({
                     </section>
                 )}
 
-                <section className="wf-panel wf-upcoming-panel">
+                <section
+                  className={`wf-panel wf-upcoming-panel ${
+                    isManager ? "wf-control-panel wf-manager-dashboard-panel" : ""
+                  }`}
+                >
                   <header className="wf-panel-heading">
                     <div>
                   <span className="wf-eyebrow">

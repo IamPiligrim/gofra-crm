@@ -68,6 +68,7 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
     agencyStyles,
     dealProcess,
     managerFocus,
+    leaderControl,
   ] =
     await Promise.all([
       readFile(new URL("../app/crm/CrmApp.tsx", import.meta.url), "utf8"),
@@ -91,9 +92,10 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
       readFile(new URL("../app/agency-redesign.css", import.meta.url), "utf8"),
       readFile(new URL("../app/crm/DealProcessView.tsx", import.meta.url), "utf8"),
       readFile(new URL("../app/crm/manager-focus.ts", import.meta.url), "utf8"),
+      readFile(new URL("../app/crm/leader-control.ts", import.meta.url), "utf8"),
     ]);
 
-  assert.match(domain, /CRM_SCHEMA_VERSION = 5/);
+  assert.match(domain, /CRM_SCHEMA_VERSION = 6/);
   assert.match(domain, /UserRole = "manager" \| "employee"/);
   assert.match(domain, /interface Task/);
   assert.match(domain, /type TaskSource/);
@@ -102,6 +104,7 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(gateway, /LEGACY_CRM_STORAGE_KEY/);
   assert.match(gateway, /gofra-crm-prototype:v4/);
   assert.match(gateway, /gofra-crm-prototype:v5/);
+  assert.match(gateway, /gofra-crm-prototype:v6/);
   assert.match(gateway, /gofra-crm-prototype:v3/);
   assert.match(gateway, /normalizeDealNextAction/);
   assert.match(gateway, /resolveExpectedNextOrder/);
@@ -174,6 +177,11 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(features, /Просроченные действия/);
   assert.match(features, /КП без ответа клиента/);
   assert.match(managerFocus, /selectManagerFocus/);
+  assert.match(leaderControl, /selectLeaderControl/);
+  assert.match(leaderControl, /syncThresholdPriceApprovals/);
+  assert.match(features, /LeaderControlSection/);
+  assert.match(features, /wf-control-forecast/);
+  assert.match(featureStyles, /\.wf-control-board/);
   assert.match(managerFocus, /quote\?\.status === "Отправлено"/);
   assert.match(dealProcess, /Технический бриф/);
   assert.match(dealProcess, /Версии КП/);
