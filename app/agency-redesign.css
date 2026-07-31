@@ -971,6 +971,14 @@ button {
   clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);
 }
 
+.activity-summary {
+  padding: 18px;
+}
+
+.activity-summary > .section-kicker {
+  display: block;
+}
+
 .wf-sales-hero {
   --wf-hero-accent: var(--accent);
   --wf-hero-ink: var(--ink);
@@ -997,11 +1005,6 @@ button {
 .wf-panel-heading h2 {
   font-size: 16px;
   letter-spacing: -0.045em;
-}
-
-.wf-panel-count {
-  font-family: "Geist Mono", monospace;
-  letter-spacing: 0.06em;
 }
 
 .wf-feature-header {
