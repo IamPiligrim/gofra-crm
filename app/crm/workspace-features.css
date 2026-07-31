@@ -985,6 +985,12 @@ button.wf-metric-card:hover > i {
   border-top: 1px solid var(--wf-line);
 }
 
+.wf-focus-panel .wf-task-list,
+.wf-focus-queue .wf-task-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .wf-task-row {
   align-items: flex-start;
   background: var(--wf-surface-raised);
@@ -3400,6 +3406,12 @@ button.wf-metric-card:hover > i {
 
   .wf-day-agenda {
     max-height: none;
+  }
+
+  .wf-focus-panel .wf-task-list,
+  .wf-focus-queue .wf-task-list {
+    max-height: none;
+    overflow-y: visible;
   }
 
   .wf-day-task-list {

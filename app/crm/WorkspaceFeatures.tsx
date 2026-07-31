@@ -1199,7 +1199,7 @@ function ManagerFocusDashboard({
   );
   const renderTasks = (tasks: Task[]) => (
     <div className="wf-task-list">
-      {tasks.slice(0, 8).map((task) => (
+      {tasks.map((task) => (
         <TaskRow
           compact
           currentUser={currentUser}
@@ -2182,8 +2182,7 @@ function LegacyDashboardView({
             (safeDate(left.dueAt)?.getTime() ?? Number.MAX_SAFE_INTEGER) -
             (safeDate(right.dueAt)?.getTime() ?? Number.MAX_SAFE_INTEGER)
         );
-      })
-      .slice(0, 6);
+      });
   const activeDeals = deals.filter(isOpenDeal);
   const wonDeals = deals.filter((deal) => deal.status === "Закрыта успешно");
   const revenue = wonDeals.reduce((sum, deal) => sum + deal.ourPrice, 0);
