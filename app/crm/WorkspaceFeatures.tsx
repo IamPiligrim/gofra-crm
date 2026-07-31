@@ -1911,7 +1911,6 @@ function LeaderControlSection({
               <span className="wf-eyebrow">Контроль условий</span>
               <h3>Согласования</h3>
             </div>
-            <b>{control.pendingApprovals.length}</b>
           </header>
           {control.pendingApprovals.length ? (
             <div className="wf-approval-list">
@@ -1948,7 +1947,6 @@ function LeaderControlSection({
               <span className="wf-eyebrow">Риски воронки</span>
               <h3>Без движения</h3>
             </div>
-            <b>{control.stagnantDeals.length}</b>
           </header>
           <div className="wf-control-row-list">
             {control.stagnantDeals.slice(0, 6).map((row) => (
@@ -1967,7 +1965,6 @@ function LeaderControlSection({
               <span className="wf-eyebrow">Клиентская база</span>
               <h3>Давно не обработаны</h3>
             </div>
-            <b>{control.staleClients.length}</b>
           </header>
           <div className="wf-control-row-list">
             {control.staleClients.slice(0, 6).map((row) => (
@@ -2280,9 +2277,6 @@ function LegacyDashboardView({
                         {isManager ? "Требует внимания" : "Сделать сегодня"}
                       </h2>
                     </div>
-                    <span className="wf-panel-count">
-                  {focusTasks.length.toString().padStart(2, "0")}
-                </span>
                   </header>
                   {focusTasks.length ? (
                       <div className="wf-task-list">
@@ -2318,9 +2312,6 @@ function LegacyDashboardView({
                       <span className="wf-eyebrow">Воронка</span>
                       <h2>{isManager ? "Коммерческий поток" : "Мои сделки"}</h2>
                     </div>
-                    <span className="wf-panel-count">
-                  {activeDeals.length.toString().padStart(2, "0")}
-                </span>
                   </header>
                   <div className="wf-mini-funnel">
                     {pipelineRows.map((row, index) => (
@@ -2355,9 +2346,6 @@ function LegacyDashboardView({
                           <span className="wf-eyebrow">Команда</span>
                           <h2>Нагрузка сотрудников</h2>
                         </div>
-                        <span className="wf-panel-count">
-                    {teamRows.length.toString().padStart(2, "0")}
-                  </span>
                       </header>
                       {teamRows.length ? (
                           <div className="wf-team-list">
@@ -4202,9 +4190,6 @@ export function StatisticsView({
                       <span className="wf-eyebrow">Срез воронки</span>
                       <h2>Сделки по этапам</h2>
                     </div>
-                    <span className="wf-panel-count">
-                  {activeDeals.length.toString().padStart(2, "0")}
-                </span>
                   </header>
                   <DonutChart
                       centerLabel="сделок в работе"
@@ -4218,9 +4203,6 @@ export function StatisticsView({
                       <span className="wf-eyebrow">Каналы</span>
                       <h2>Структура коммуникаций</h2>
                     </div>
-                    <span className="wf-panel-count">
-                  {interactions.length.toString().padStart(2, "0")}
-                </span>
                   </header>
                   <DistributionChart data={activityDistributionData} />
                 </section>
@@ -4368,9 +4350,6 @@ export function StatisticsView({
                     <span className="wf-eyebrow">Закрыто успешно</span>
                     <h2>Последние продажи</h2>
                   </div>
-                  <span className="wf-panel-count">
-                {wonDeals.length.toString().padStart(2, "0")}
-              </span>
                 </header>
                 {wonDeals.length ? (
                     <div>
@@ -4416,9 +4395,6 @@ export function StatisticsView({
                     <span className="wf-eyebrow">Каналы</span>
                     <h2>Структура активности</h2>
                   </div>
-                  <span className="wf-panel-count">
-                {interactions.length.toString().padStart(2, "0")}
-              </span>
                 </header>
                 {activityKinds.length ? (
                     <div>
