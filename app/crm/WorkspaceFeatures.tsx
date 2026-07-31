@@ -1273,7 +1273,6 @@ function FocusQueuePanel({
           <h2>{title}</h2>
         </div>
         {action}
-        <span className="wf-focus-count">{String(count).padStart(2, "0")}</span>
       </header>
       {count ? (
         children

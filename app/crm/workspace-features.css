@@ -848,15 +848,6 @@ button.wf-metric-card:hover > i {
   border-top: 3px solid var(--wf-warning);
 }
 
-.wf-focus-count {
-  color: var(--wf-muted);
-  font-family: "Geist Mono", monospace;
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  padding-top: 2px;
-}
-
 .wf-focus-queue .wf-task-list {
   border-top: 0;
 }
