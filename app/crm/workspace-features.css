@@ -397,6 +397,148 @@ button.wf-metric-card:hover > i {
   grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.75fr);
 }
 
+.wf-manager-focus-lead {
+  color: var(--wf-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: -10px 0 20px;
+}
+
+.wf-manager-focus-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wf-focus-queue {
+  background: var(--wf-surface-raised);
+  border: 1px solid var(--wf-line);
+  border-radius: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.wf-focus-queue:last-child {
+  grid-column: 1 / -1;
+}
+
+.wf-focus-queue > header {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--wf-line);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px 20px 16px;
+}
+
+.wf-focus-queue > header h2 {
+  font-size: 18px;
+  font-weight: 680;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.wf-focus-queue.tone-danger > header {
+  border-top: 3px solid var(--wf-danger);
+}
+
+.wf-focus-queue.tone-warning > header {
+  border-top: 3px solid var(--wf-warning);
+}
+
+.wf-focus-count {
+  color: var(--wf-muted);
+  font-family: "Geist Mono", monospace;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  padding-top: 2px;
+}
+
+.wf-focus-queue .wf-task-list {
+  border-top: 0;
+}
+
+.wf-focus-queue .wf-empty {
+  min-height: 126px;
+  padding: 22px 20px;
+}
+
+.wf-focus-records > button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--wf-ink);
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 40px minmax(0, 1fr) auto 18px;
+  min-height: 72px;
+  padding: 12px 20px;
+  text-align: left;
+  width: 100%;
+}
+
+.wf-focus-records > button + button {
+  border-top: 1px solid var(--wf-line);
+}
+
+.wf-focus-records > button:hover {
+  background: var(--wf-surface-muted);
+}
+
+.wf-focus-records > button > span:nth-child(2) {
+  min-width: 0;
+}
+
+.wf-focus-records strong,
+.wf-focus-records small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.wf-focus-records strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.wf-focus-records small {
+  color: var(--wf-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.wf-focus-records time {
+  color: var(--wf-muted);
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 170px;
+  text-align: right;
+}
+
+.wf-focus-records svg {
+  height: 16px;
+  width: 16px;
+}
+
+.wf-focus-mark {
+  align-items: center;
+  background: var(--wf-surface-muted);
+  border: 1px solid var(--wf-line);
+  border-radius: 6px;
+  color: var(--wf-accent);
+  display: inline-flex !important;
+  font-family: "Geist Mono", monospace;
+  font-size: 12px;
+  font-weight: 750;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
 .wf-focus-panel,
 .wf-funnel-panel {
   min-height: 382px;
@@ -2821,6 +2963,14 @@ button.wf-metric-card:hover > i {
     grid-template-columns: 1fr;
   }
 
+  .wf-manager-focus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wf-focus-queue:last-child {
+    grid-column: auto;
+  }
+
   .wf-focus-panel,
   .wf-funnel-panel {
     min-height: 0;
@@ -2883,6 +3033,47 @@ button.wf-metric-card:hover > i {
 
   .wf-header-actions > * {
     width: 100%;
+  }
+
+  .wf-manager-focus-lead {
+    font-size: 15px;
+    margin-top: -6px;
+  }
+
+  .wf-focus-queue > header {
+    padding: 16px;
+  }
+
+  .wf-focus-queue > header h2 {
+    font-size: 18px;
+  }
+
+  .wf-focus-records > button {
+    align-items: start;
+    gap: 10px;
+    grid-template-columns: 40px minmax(0, 1fr) 16px;
+    padding: 14px 16px;
+  }
+
+  .wf-focus-records time {
+    font-size: 13px;
+    grid-column: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .wf-focus-records > button > svg {
+    grid-column: 3;
+    grid-row: 1;
+    margin-top: 12px;
+  }
+
+  .wf-focus-records strong {
+    font-size: 15px;
+  }
+
+  .wf-focus-records small {
+    font-size: 13px;
   }
 
   .wf-current-date {

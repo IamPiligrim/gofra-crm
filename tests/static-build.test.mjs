@@ -66,6 +66,8 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
     featureStyles,
     chatStyles,
     agencyStyles,
+    dealProcess,
+    managerFocus,
   ] =
     await Promise.all([
       readFile(new URL("../app/crm/CrmApp.tsx", import.meta.url), "utf8"),
@@ -87,9 +89,11 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
       ),
       readFile(new URL("../app/crm/chat.css", import.meta.url), "utf8"),
       readFile(new URL("../app/agency-redesign.css", import.meta.url), "utf8"),
+      readFile(new URL("../app/crm/DealProcessView.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../app/crm/manager-focus.ts", import.meta.url), "utf8"),
     ]);
 
-  assert.match(domain, /CRM_SCHEMA_VERSION = 4/);
+  assert.match(domain, /CRM_SCHEMA_VERSION = 5/);
   assert.match(domain, /UserRole = "manager" \| "employee"/);
   assert.match(domain, /interface Task/);
   assert.match(domain, /type TaskSource/);
@@ -97,6 +101,7 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(domain, /"dashboard"[\s\S]*"calendar"[\s\S]*"statistics"[\s\S]*"chat"/);
   assert.match(gateway, /LEGACY_CRM_STORAGE_KEY/);
   assert.match(gateway, /gofra-crm-prototype:v4/);
+  assert.match(gateway, /gofra-crm-prototype:v5/);
   assert.match(gateway, /gofra-crm-prototype:v3/);
   assert.match(gateway, /normalizeDealNextAction/);
   assert.match(gateway, /resolveExpectedNextOrder/);
@@ -106,6 +111,10 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.match(domain, /DECISION_ROLES/);
   assert.match(domain, /interface PriceApproval/);
   assert.match(domain, /repeatReminderDays/);
+  assert.match(domain, /interface DealBrief/);
+  assert.match(domain, /interface DealProcess/);
+  assert.match(domain, /interface Quote/);
+  assert.match(domain, /Выручка/);
   assert.match(gateway, /syncRepeatOrderTasks/);
 
   assert.match(app, /DashboardView/);
@@ -161,6 +170,14 @@ test("ships the role, theme, calendar, statistics and chat frontend modules", as
   assert.doesNotMatch(features, /Результаты команды, движение воронки/);
 
   assert.match(features, /export function DashboardView/);
+  assert.match(features, /function ManagerFocusDashboard/);
+  assert.match(features, /Просроченные действия/);
+  assert.match(features, /КП без ответа клиента/);
+  assert.match(managerFocus, /selectManagerFocus/);
+  assert.match(managerFocus, /quote\?\.status === "Отправлено"/);
+  assert.match(dealProcess, /Технический бриф/);
+  assert.match(dealProcess, /Версии КП/);
+  assert.doesNotMatch(dealProcess, /Наша цена/);
   assert.match(features, /function CustomerOverviewDashboard/);
   assert.match(features, /Прогноз повторного заказа/);
   assert.match(app, /function DealWorkspace/);

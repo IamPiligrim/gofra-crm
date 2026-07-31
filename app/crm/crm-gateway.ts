@@ -1,18 +1,36 @@
 import {
+  BRIEF_ASSET_KINDS,
   CRM_SCHEMA_VERSION,
+  DEAL_PROCESS_STEPS,
   DEAL_STATUSES,
   DECISION_INFLUENCES,
   DECISION_ROLES,
+  PACKING_METHODS,
   PREFERRED_CHANNELS,
+  QUOTE_STATUSES,
+  SENT_IMPLYING_STATUSES,
+  createEmptyDealBrief,
+  createEmptyDealProcess,
+  getImpliedProcessSteps,
   type Attachment,
+  type BriefAsset,
+  type BriefAssetStatus,
+  type BriefDimensions,
   type Client,
   type Contact,
   type CrmSnapshot,
   type Deal,
+  type DealBrief,
+  type DealProcess,
+  type DealProcessMilestone,
+  type DealProcessStep,
+  type DealStatus,
   type Dictionaries,
   type Interaction,
+  type PackingMethod,
   type PriceApproval,
   type PriceApprovalStatus,
+  type Quote,
   type Session,
   type StatusEvent,
   type Target,
@@ -37,8 +55,9 @@ import {
   demoUsers,
 } from "./fixtures";
 
-export const CRM_STORAGE_KEY = "gofra-crm-prototype:v4";
+export const CRM_STORAGE_KEY = "gofra-crm-prototype:v5";
 export const LEGACY_CRM_STORAGE_KEYS = [
+  "gofra-crm-prototype:v4",
   "gofra-crm-prototype:v3",
   "gofra-crm-prototype:v2",
   "gofra-crm-prototype:v1",
@@ -266,6 +285,8 @@ const normalizeTask = (
     record.source === "client" ||
     record.source === "deal" ||
     record.source === "interaction" ||
+    record.source === "repeat_order" ||
+    record.source === "price_approval" ||
     record.source === "imported"
       ? record.source
       : id.includes("interaction") || id.includes("ИВ")
@@ -482,6 +503,187 @@ const createInitialStatusEvents = (
   })),
 ];
 
+const normalizeDimensions = (value: unknown): BriefDimensions => {
+  const record = asRecord(value);
+  return {
+    length: asNullableNumber(record.length),
+    width: asNullableNumber(record.width),
+    height: asNullableNumber(record.height),
+  };
+};
+
+const normalizeBriefAsset = (value: unknown): BriefAsset => {
+  const record = asRecord(value);
+  const status: BriefAssetStatus =
+    record.status === "received" || record.status === "requested"
+      ? record.status
+      : "missing";
+  return { status, note: asString(record.note) };
+};
+
+const normalizeDealBrief = (value: unknown): DealBrief => {
+  const record = asRecord(value);
+  const empty = createEmptyDealBrief();
+  const packingMethod = PACKING_METHODS.find(
+    (method) => method === record.packingMethod,
+  ) as PackingMethod | undefined;
+
+  return {
+    ...empty,
+    packagingType: asString(record.packagingType),
+    fefco: asString(record.fefco),
+    innerDimensions: normalizeDimensions(record.innerDimensions),
+    outerDimensions: normalizeDimensions(record.outerDimensions),
+    cardboardGrade: asString(record.cardboardGrade),
+    fluteProfile: asString(record.fluteProfile),
+    printMethod: asString(record.printMethod),
+    printColors: asNullableNumber(record.printColors),
+    coating: asString(record.coating),
+    batchVolume: asString(record.batchVolume),
+    monthlyVolume: asString(record.monthlyVolume),
+    annualVolume: asString(record.annualVolume),
+    packingMethod: packingMethod ?? empty.packingMethod,
+    loadRequirement: asString(record.loadRequirement),
+    storageRequirement: asString(record.storageRequirement),
+    palletizing: asString(record.palletizing),
+    currentSupplier: asString(record.currentSupplier),
+    currentPrice: asNullableNumber(record.currentPrice),
+    clientProblem: asString(record.clientProblem),
+    assets: Object.fromEntries(
+      BRIEF_ASSET_KINDS.map((kind) => [
+        kind,
+        normalizeBriefAsset(asRecord(record.assets)[kind]),
+      ]),
+    ) as DealBrief["assets"],
+    updatedAt: asNullableString(record.updatedAt),
+  };
+};
+
+const normalizeMilestone = (value: unknown): DealProcessMilestone => {
+  const record = asRecord(value);
+  return {
+    completedAt: asNullableString(record.completedAt),
+    completedById: asNullableString(record.completedById),
+    note: asString(record.note),
+  };
+};
+
+const normalizeDealProcess = (value: unknown): DealProcess => {
+  const record = asRecord(value);
+  const storedSteps = asRecord(record.steps);
+  const process = createEmptyDealProcess();
+  for (const step of DEAL_PROCESS_STEPS) {
+    process.steps[step] = normalizeMilestone(storedSteps[step]);
+  }
+  process.replyExpectedAt = asNullableString(record.replyExpectedAt);
+  process.sampleSkipped = asBoolean(record.sampleSkipped);
+  process.updatedAt = asNullableString(record.updatedAt);
+  return process;
+};
+
+const backfillProcessFromStatus = (
+  process: DealProcess,
+  deal: Pick<Deal, "id" | "status" | "createdAt" | "ownerId">,
+  statusEvents: readonly StatusEvent[],
+): DealProcess => {
+  const implied = getImpliedProcessSteps(deal.status);
+  const fallbackByStep: Partial<Record<DealProcessStep, DealStatus>> = {
+    specReceived: "Уточняем ТЗ",
+    calculationRequested: "Считаем цену",
+    calculationReceived: "Считаем цену",
+    quoteSent: "КП отправлено",
+  };
+
+  for (const step of implied) {
+    if (process.steps[step].completedAt) continue;
+    const fallbackStatus = fallbackByStep[step];
+    const event = fallbackStatus
+      ? statusEvents.find(
+          (candidate) =>
+            candidate.entityType === "deal" &&
+            candidate.entityId === deal.id &&
+            candidate.toStatus === fallbackStatus,
+        )
+      : undefined;
+    process.steps[step] = {
+      completedAt: event?.changedAt ?? deal.createdAt,
+      completedById: deal.ownerId,
+      note: "",
+    };
+  }
+  return process;
+};
+
+const normalizeQuote = (value: unknown, now: string, index: number): Quote => {
+  const record = asRecord(value);
+  const dealId = asString(record.dealId);
+  const version = Math.max(1, Math.trunc(asNumber(record.version, index + 1)));
+  const rawStatus = asString(record.status) as Quote["status"];
+  const createdAt = asString(record.createdAt, now);
+  return {
+    id: asString(record.id, `КП-${dealId}-${version}`),
+    dealId,
+    version,
+    status: QUOTE_STATUSES.includes(rawStatus) ? rawStatus : "Черновик",
+    revenue: Math.max(0, asNumber(record.revenue)),
+    cost: Math.max(0, asNumber(record.cost)),
+    logistics: Math.max(0, asNumber(record.logistics)),
+    volume: asString(record.volume),
+    validUntil: asNullableString(record.validUntil),
+    changeReason: asString(record.changeReason),
+    sentAt: asNullableString(record.sentAt),
+    authorId: asString(record.authorId),
+    comment: asString(record.comment),
+    createdAt,
+    updatedAt: asString(record.updatedAt, createdAt),
+  };
+};
+
+const createQuoteFromLegacyDeal = (
+  record: JsonRecord,
+  deal: Pick<Deal, "id" | "status" | "ownerId" | "createdAt">,
+  now: string,
+): Quote | null => {
+  const revenue = Math.max(0, asNumber(record.ourPrice, asNumber(record.clientPrice)));
+  const cost = Math.max(0, asNumber(record.purchasePrice));
+  const logistics = Math.max(0, asNumber(record.logistics));
+  if (revenue === 0 && cost === 0 && logistics === 0) return null;
+  const proposalDate = asNullableString(record.proposalDate);
+  const sent = proposalDate !== null || SENT_IMPLYING_STATUSES.includes(deal.status);
+  return {
+    id: `КП-${deal.id}-1`,
+    dealId: deal.id,
+    version: 1,
+    status: sent ? "Отправлено" : "Черновик",
+    revenue,
+    cost,
+    logistics,
+    volume: asString(record.volume),
+    validUntil: null,
+    changeReason: "",
+    sentAt: proposalDate,
+    authorId: deal.ownerId,
+    comment: "",
+    createdAt: asString(record.createdAt, now),
+    updatedAt: asString(record.updatedAt, now),
+  };
+};
+
+const syncLegacyDealEconomics = (deal: Deal, quote: Quote | undefined): void => {
+  if (!quote) return;
+  const margin = quote.revenue - quote.cost - quote.logistics;
+  deal.clientPrice = quote.revenue;
+  deal.ourPrice = quote.revenue;
+  deal.purchasePrice = quote.cost;
+  deal.logistics = quote.logistics;
+  deal.margin = margin;
+  deal.marginPercent =
+    quote.revenue === 0
+      ? 0
+      : Math.round((margin / quote.revenue) * 1000) / 10;
+  deal.proposalDate = quote.sentAt;
+};
+
 /**
  * Upgrades legacy browser snapshots to the current schema.
  * Existing record IDs and legacy display fields are kept verbatim.
@@ -506,9 +708,7 @@ export const migrateCrmSnapshot = (
   }
 
   const sourceSchemaVersion = asNumber(source.schemaVersion, 1);
-  const isTeamAware = [2, 3, CRM_SCHEMA_VERSION].includes(
-    sourceSchemaVersion,
-  );
+  const isTeamAware = sourceSchemaVersion >= 2;
 
   const teamsSource =
     isTeamAware && Array.isArray(source.teams) ? source.teams : demoTeams;
@@ -701,6 +901,16 @@ export const migrateCrmSnapshot = (
       ...record,
       ownerId,
       status,
+      clientPrice: Math.max(0, asNumber(record.clientPrice, asNumber(record.ourPrice))),
+      ourPrice: Math.max(0, asNumber(record.ourPrice, asNumber(record.clientPrice))),
+      purchasePrice: Math.max(0, asNumber(record.purchasePrice)),
+      logistics: Math.max(0, asNumber(record.logistics)),
+      margin: asNumber(record.margin),
+      marginPercent: asNumber(record.marginPercent),
+      proposalDate,
+      brief: normalizeDealBrief(record.brief),
+      process: normalizeDealProcess(record.process),
+      activeQuoteId: asNullableString(record.activeQuoteId),
       nextAction: asString(record.nextAction),
       nextActionAt: asNullableString(record.nextActionAt),
       needsNextAction: asBoolean(record.needsNextAction),
@@ -787,6 +997,64 @@ export const migrateCrmSnapshot = (
       )
     : createInitialStatusEvents(clients, deals);
 
+  const dealRecords = new Map(
+    asArray(source.deals).map((value) => {
+      const record = asRecord(value);
+      return [asString(record.id), record] as const;
+    }),
+  );
+  const dealById = new Map(deals.map((deal) => [deal.id, deal]));
+  const quotes = asArray(source.quotes)
+    .map((value, index) => normalizeQuote(value, migratedAt, index))
+    .filter((quote) => dealById.has(quote.dealId));
+
+  for (const deal of deals) {
+    const record = dealRecords.get(deal.id) ?? {};
+    const proposalDate = asNullableString(record.proposalDate);
+    if (proposalDate && !deal.process.steps.quoteSent.completedAt) {
+      deal.process.steps.quoteSent = {
+        completedAt: proposalDate,
+        completedById: deal.ownerId,
+        note: "",
+      };
+    }
+    if (deal.brief.updatedAt && !deal.process.steps.specReceived.completedAt) {
+      deal.process.steps.specReceived = {
+        completedAt: deal.brief.updatedAt,
+        completedById: deal.ownerId,
+        note: "",
+      };
+    }
+    deal.process = backfillProcessFromStatus(deal.process, deal, statusEvents);
+
+    const dealQuotes = quotes.filter((quote) => quote.dealId === deal.id);
+    if (!dealQuotes.length) {
+      const migratedQuote = createQuoteFromLegacyDeal(record, deal, migratedAt);
+      if (migratedQuote) {
+        quotes.push(migratedQuote);
+        deal.activeQuoteId = migratedQuote.id;
+        syncLegacyDealEconomics(deal, migratedQuote);
+      } else {
+        deal.activeQuoteId = null;
+      }
+      continue;
+    }
+
+    dealQuotes
+      .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+      .forEach((quote, index) => {
+        quote.version = index + 1;
+      });
+    if (!dealQuotes.some((quote) => quote.id === deal.activeQuoteId)) {
+      const liveQuotes = dealQuotes.filter((quote) => quote.status !== "Заменено");
+      deal.activeQuoteId = (liveQuotes.at(-1) ?? dealQuotes.at(-1))?.id ?? null;
+    }
+    syncLegacyDealEconomics(
+      deal,
+      dealQuotes.find((quote) => quote.id === deal.activeQuoteId),
+    );
+  }
+
   const targetSource = Array.isArray(source.targets)
     ? source.targets
     : demoTargets;
@@ -804,6 +1072,7 @@ export const migrateCrmSnapshot = (
     deals,
     interactions,
     priceApprovals,
+    quotes,
     tasks,
     statusEvents,
     targets,

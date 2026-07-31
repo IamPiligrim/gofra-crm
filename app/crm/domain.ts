@@ -41,7 +41,7 @@ export const DEAL_STATUSES = [
 export type DealStatus = (typeof DEAL_STATUSES)[number];
 export type Potential = "A" | "B" | "C" | "D";
 
-export const CRM_SCHEMA_VERSION = 4 as const;
+export const CRM_SCHEMA_VERSION = 5 as const;
 export type CrmSchemaVersion = typeof CRM_SCHEMA_VERSION;
 
 export const DECISION_ROLES = [
@@ -230,6 +230,390 @@ export interface Contact extends OwnedEntity {
   introductionNeeded: string;
 }
 
+export const SENT_IMPLYING_STATUSES: readonly DealStatus[] = [
+  "КП отправлено",
+  "Переговоры",
+  "Согласование условий",
+  "Счет выставлен",
+  "Ожидаем оплату",
+  "Оплачено",
+  "В закупке / производстве",
+  "Готово к отгрузке",
+  "Отгружено",
+  "Закрыта успешно",
+];
+
+export const PACKAGING_TYPES = [
+  "Гофроящик",
+  "Лоток",
+  "Обечайка",
+  "Короб с крышкой",
+  "Вкладыш / решётка",
+  "Листовой гофрокартон",
+  "Другое",
+] as const;
+
+export const FEFCO_CODES = [
+  "0201",
+  "0203",
+  "0215",
+  "0300",
+  "0310",
+  "0401",
+  "0402",
+  "0409",
+  "0426",
+  "0427",
+  "0470",
+  "0711",
+] as const;
+
+export const CARDBOARD_GRADES = [
+  "Т-21",
+  "Т-22",
+  "Т-23",
+  "Т-24",
+  "П-31",
+  "П-32",
+  "П-33",
+  "П-34",
+] as const;
+
+export const FLUTE_PROFILES = [
+  "E (микрогофра)",
+  "B",
+  "C",
+  "BC",
+  "BE",
+  "T (наногофра)",
+] as const;
+
+export const PRINT_METHODS = [
+  "Без печати",
+  "Флексопечать",
+  "Офсет (кашировка)",
+  "Цифровая печать",
+  "Трафарет",
+] as const;
+
+export const COATINGS = [
+  "Без покрытия",
+  "Лак",
+  "Ламинация",
+  "Влагостойкая пропитка",
+  "Парафинирование",
+] as const;
+
+export const PACKING_METHODS = [
+  "Не уточнено",
+  "Вручную",
+  "На линии",
+  "Смешанно",
+] as const;
+
+export type PackingMethod = (typeof PACKING_METHODS)[number];
+
+export const BRIEF_ASSET_KINDS = [
+  "drawing",
+  "photo",
+  "spec",
+  "sample",
+] as const;
+
+export type BriefAssetKind = (typeof BRIEF_ASSET_KINDS)[number];
+
+export const BRIEF_ASSET_LABELS: Record<BriefAssetKind, string> = {
+  drawing: "Чертёж",
+  photo: "Фотография",
+  spec: "ТЗ",
+  sample: "Образец",
+};
+
+export type BriefAssetStatus = "missing" | "requested" | "received";
+
+export const BRIEF_ASSET_STATUS_LABELS: Record<BriefAssetStatus, string> = {
+  missing: "Нет",
+  requested: "Запрошен",
+  received: "Получен",
+};
+
+export interface BriefAsset {
+  status: BriefAssetStatus;
+  note: string;
+}
+
+export interface BriefDimensions {
+  length: number | null;
+  width: number | null;
+  height: number | null;
+}
+
+export interface DealBrief {
+  packagingType: string;
+  fefco: string;
+  innerDimensions: BriefDimensions;
+  outerDimensions: BriefDimensions;
+  cardboardGrade: string;
+  fluteProfile: string;
+  printMethod: string;
+  printColors: number | null;
+  coating: string;
+  batchVolume: string;
+  monthlyVolume: string;
+  annualVolume: string;
+  packingMethod: PackingMethod;
+  loadRequirement: string;
+  storageRequirement: string;
+  palletizing: string;
+  currentSupplier: string;
+  currentPrice: number | null;
+  clientProblem: string;
+  assets: Record<BriefAssetKind, BriefAsset>;
+  updatedAt: string | null;
+}
+
+export const createEmptyDimensions = (): BriefDimensions => ({
+  length: null,
+  width: null,
+  height: null,
+});
+
+export const createEmptyDealBrief = (): DealBrief => ({
+  packagingType: "",
+  fefco: "",
+  innerDimensions: createEmptyDimensions(),
+  outerDimensions: createEmptyDimensions(),
+  cardboardGrade: "",
+  fluteProfile: "",
+  printMethod: "",
+  printColors: null,
+  coating: "",
+  batchVolume: "",
+  monthlyVolume: "",
+  annualVolume: "",
+  packingMethod: "Не уточнено",
+  loadRequirement: "",
+  storageRequirement: "",
+  palletizing: "",
+  currentSupplier: "",
+  currentPrice: null,
+  clientProblem: "",
+  assets: {
+    drawing: { status: "missing", note: "" },
+    photo: { status: "missing", note: "" },
+    spec: { status: "missing", note: "" },
+    sample: { status: "missing", note: "" },
+  },
+  updatedAt: null,
+});
+
+export const hasDimensions = (dimensions: BriefDimensions): boolean =>
+  dimensions.length !== null ||
+  dimensions.width !== null ||
+  dimensions.height !== null;
+
+export const getDealBriefCompletion = (
+  brief: DealBrief,
+): { filled: number; total: number } => {
+  const text = [
+    brief.packagingType,
+    brief.fefco,
+    brief.cardboardGrade,
+    brief.fluteProfile,
+    brief.printMethod,
+    brief.coating,
+    brief.batchVolume,
+    brief.monthlyVolume,
+    brief.annualVolume,
+    brief.loadRequirement,
+    brief.storageRequirement,
+    brief.palletizing,
+    brief.currentSupplier,
+    brief.clientProblem,
+  ].filter((value) => value.trim().length > 0).length;
+  const checks = [
+    hasDimensions(brief.innerDimensions),
+    hasDimensions(brief.outerDimensions),
+    brief.printMethod === "Без печати" || brief.printColors !== null,
+    brief.packingMethod !== "Не уточнено",
+    brief.currentPrice !== null,
+    ...BRIEF_ASSET_KINDS.map(
+      (kind) => brief.assets[kind].status === "received",
+    ),
+  ].filter(Boolean).length;
+
+  return { filled: text + checks, total: 23 };
+};
+
+export const DEAL_PROCESS_STEPS = [
+  "specReceived",
+  "calculationRequested",
+  "calculationReceived",
+  "sampleProduced",
+  "sampleSent",
+  "sampleApproved",
+  "quoteSent",
+] as const;
+
+export type DealProcessStep = (typeof DEAL_PROCESS_STEPS)[number];
+
+export const DEAL_PROCESS_STEP_LABELS: Record<DealProcessStep, string> = {
+  specReceived: "ТЗ получено",
+  calculationRequested: "Расчёт запрошен",
+  calculationReceived: "Расчёт получен",
+  sampleProduced: "Образец изготовлен",
+  sampleSent: "Образец отправлен",
+  sampleApproved: "Образец согласован",
+  quoteSent: "КП отправлено",
+};
+
+export const SAMPLE_STEPS: readonly DealProcessStep[] = [
+  "sampleProduced",
+  "sampleSent",
+  "sampleApproved",
+];
+
+export interface DealProcessMilestone {
+  completedAt: string | null;
+  completedById: string | null;
+  note: string;
+}
+
+export interface DealProcess {
+  steps: Record<DealProcessStep, DealProcessMilestone>;
+  replyExpectedAt: string | null;
+  sampleSkipped: boolean;
+  updatedAt: string | null;
+}
+
+const createEmptyMilestone = (): DealProcessMilestone => ({
+  completedAt: null,
+  completedById: null,
+  note: "",
+});
+
+export const createEmptyDealProcess = (): DealProcess => ({
+  steps: {
+    specReceived: createEmptyMilestone(),
+    calculationRequested: createEmptyMilestone(),
+    calculationReceived: createEmptyMilestone(),
+    sampleProduced: createEmptyMilestone(),
+    sampleSent: createEmptyMilestone(),
+    sampleApproved: createEmptyMilestone(),
+    quoteSent: createEmptyMilestone(),
+  },
+  replyExpectedAt: null,
+  sampleSkipped: false,
+  updatedAt: null,
+});
+
+export const getActiveProcessSteps = (
+  process: DealProcess,
+): readonly DealProcessStep[] =>
+  process.sampleSkipped
+    ? DEAL_PROCESS_STEPS.filter((step) => !SAMPLE_STEPS.includes(step))
+    : DEAL_PROCESS_STEPS;
+
+export const getDealProcessCompletion = (
+  process: DealProcess,
+): { filled: number; total: number } => {
+  const steps = getActiveProcessSteps(process);
+  return {
+    filled: steps.filter((step) => process.steps[step].completedAt !== null)
+      .length,
+    total: steps.length,
+  };
+};
+
+export const getImpliedProcessSteps = (
+  status: DealStatus,
+): readonly DealProcessStep[] => {
+  if (SENT_IMPLYING_STATUSES.includes(status)) {
+    return [
+      "specReceived",
+      "calculationRequested",
+      "calculationReceived",
+      "quoteSent",
+    ];
+  }
+  if (status === "Считаем цену") return ["specReceived", "calculationRequested"];
+  if (status === "Уточняем ТЗ") return ["specReceived"];
+  return [];
+};
+
+export const QUOTE_STATUSES = [
+  "Черновик",
+  "Отправлено",
+  "Принято",
+  "Отклонено",
+  "Заменено",
+] as const;
+
+export type QuoteStatus = (typeof QUOTE_STATUSES)[number];
+
+export interface Quote extends TimestampedEntity {
+  id: string;
+  dealId: string;
+  version: number;
+  status: QuoteStatus;
+  revenue: number;
+  cost: number;
+  logistics: number;
+  volume: string;
+  validUntil: string | null;
+  changeReason: string;
+  sentAt: string | null;
+  authorId: string;
+  comment: string;
+}
+
+export const getQuoteMargin = (
+  quote: Pick<Quote, "revenue" | "cost" | "logistics">,
+): number => quote.revenue - quote.cost - quote.logistics;
+
+export const getQuoteMarginPercent = (
+  quote: Pick<Quote, "revenue" | "cost" | "logistics">,
+): number => {
+  if (quote.revenue === 0) return 0;
+  return Math.round((getQuoteMargin(quote) / quote.revenue) * 1000) / 10;
+};
+
+export const ECONOMICS_LABELS = {
+  revenue: "Выручка",
+  cost: "Себестоимость",
+  logistics: "Логистика",
+  margin: "Маржа",
+} as const;
+
+export interface DealEconomics {
+  revenue: number;
+  cost: number;
+  logistics: number;
+  margin: number;
+  marginPercent: number;
+}
+
+export const getDealEconomics = (
+  deal: Pick<Deal, "activeQuoteId" | "ourPrice" | "purchasePrice" | "logistics">,
+  quotes: readonly Quote[],
+): DealEconomics => {
+  const quote = deal.activeQuoteId
+    ? quotes.find((candidate) => candidate.id === deal.activeQuoteId)
+    : undefined;
+  const revenue = quote?.revenue ?? deal.ourPrice;
+  const cost = quote?.cost ?? deal.purchasePrice;
+  const logistics = quote?.logistics ?? deal.logistics;
+  const margin = revenue - cost - logistics;
+  return {
+    revenue,
+    cost,
+    logistics,
+    margin,
+    marginPercent:
+      revenue === 0 ? 0 : Math.round((margin / revenue) * 1000) / 10,
+  };
+};
+
 export interface Deal extends OwnedEntity {
   id: string;
   clientId: string;
@@ -245,6 +629,9 @@ export interface Deal extends OwnedEntity {
   marginPercent: number;
   status: DealStatus;
   proposalDate: string | null;
+  brief: DealBrief;
+  process: DealProcess;
+  activeQuoteId: string | null;
   nextAction: string;
   nextActionAt: string | null;
   needsNextAction: boolean;
@@ -412,6 +799,7 @@ export interface CrmSnapshot {
   deals: Deal[];
   interactions: Interaction[];
   priceApprovals: PriceApproval[];
+  quotes: Quote[];
   tasks: Task[];
   statusEvents: StatusEvent[];
   targets: Target[];

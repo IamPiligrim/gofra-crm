@@ -6,25 +6,30 @@ Status: draft until a direction is approved.
 
 - Product: ГОФРА CRM
 - Product type: Операционная веб-CRM для B2B-продаж гофроупаковки
-- Audience: Менеджеры по продажам, руководители отдела продаж и руководители компании-производителя упаковки
-- Primary user task: После каждого контакта сохранить результат и обязательный следующий шаг, одновременно поддерживая карту влияния клиента и прогноз повторного заказа
-- Business goal: Снизить потери повторных заказов, сделать возврат спящих клиентов системным и сократить цикл согласования цены
+- Audience: Менеджеры по продажам и руководители отдела продаж
+- Primary user task: Менеджеру видеть задачи дня и вести сделку от технического брифа через расчёт, образец и версии КП; руководителю контролировать команду.
+- Business goal: Не терять следующие шаги, ответы на КП и повторные заказы, сохранив прозрачный процесс расчёта и согласования цены.
 
 ## Voice and Content
 
-- Tone of voice: Краткий, деловой, операционный русский язык без рекламных формулировок
-- Real data source: Типизированные демоданные app/crm/fixtures.ts с персистентностью через CrmGateway и localStorage; будущий backend подключается через тот же контракт
-- Content source: Требования пользователя, существующие CRM-справочники и утверждённые пользователем reference screenshots
-- Brand constraints: Собрать утверждённые пользователем focused-workflow экраны и тёмное navy/steel боковое меню. Основной текст не мельче 14px desktop/15px mobile, secondary не мельче 12/13px при WCAG AA, section title минимум 18px/600, явные active/hover/focus-visible/disabled, 44px touch targets, light/dark themes
+- Tone of voice: Краткий, деловой, операционный русский язык
+- Real data source: Типизированные демоданные app/crm/fixtures.ts с persistence через CrmGateway/localStorage
+- Content source: Требования пользователя и существующие справочники CRM
+- Brand constraints: Сохранить утверждённый crm-focused-workflow, тёмную navy/steel навигацию, крупную читаемую типографику, light/dark themes и текущие компоненты.
 
 ## Screen Scope
 
+- /#/dashboard
+- /#/deals
 - /#/clients
 - /#/activity
 
 ## Required States
 
 - default
+- empty
+- validation
+- success
 
 ## Accessibility Target
 
