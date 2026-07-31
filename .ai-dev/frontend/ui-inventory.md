@@ -3,7 +3,7 @@ Project: ГОФРА CRM
 
 ## Screens and Routes
 
-- `/#/dashboard`: operational overview and upcoming work.
+- `/#/dashboard`: role-aware home; five-list «Мой день» for sales managers and the existing team dashboard for leaders.
 - `/#/clients`: client pipeline/list, repeat-sales segments, client drawer.
 - `/#/deals`: deal pipeline/list and mandatory next-action visibility.
 - `/#/contacts`: contact directory and entry point to log a contact.
@@ -11,7 +11,7 @@ Project: ГОФРА CRM
 - `/#/calendar`: canonical tasks, including contact follow-ups and repeat-order reminders.
 - Global quick-contact dialog: one-screen post-contact workflow.
 - Client drawer: profile, repeat-order data, decision map, related deals, interactions, and price approvals.
-- Deal drawer: economics, required next step, and approval history.
+- Deal drawer: required next step, staged packaging brief, dated calculation/sample/quote process, quote version history, and approval history.
 
 ## Components
 
@@ -21,6 +21,8 @@ Project: ГОФРА CRM
 - `RecordDrawer`: client and deal contextual workspace.
 - `CreateDialog`: client, deal, contact, and quick-contact forms.
 - `CalendarView`: task and reminder surface.
+- `ManagerFocusBoard`: five manager queues backed by pure selectors.
+- `DealProcessView`: milestone controls, progressive technical brief, and quote history.
 - `Field`, `SelectField`, `DrawerSection`, `Detail`: existing shared UI primitives.
 - New domain helpers: expected-order calculation, repeat segment classification, reminder synchronization, and open-deal validation.
 
@@ -34,6 +36,7 @@ Project: ГОФРА CRM
 - New client data: order frequency, last shipment, expected next order, manual override, average monthly volume, reminder window.
 - New interaction data: linked deal and attachment metadata.
 - New price approval data: pricing, volume, reason, attachments, status, requester/reviewer audit fields.
+- New deal data: packaging brief, dated process milestones, active quote link, and normalized quote versions with explicit economics.
 
 ## Required States
 
@@ -45,6 +48,9 @@ Project: ГОФРА CRM
 - Price approval: pending, approved, rejected, clarification.
 - Navigation: default, hover, active, focus-visible, and disabled.
 - Light and dark themes.
+- My Day: populated and zero-result queues for each of the five list types; leaders retain team analytics.
+- Technical brief: each of four stages, preserved draft values, validation, attachment metadata, and saved summary.
+- Deal process: incomplete and complete milestones, reply date, first quote, revised quote, accepted/rejected/replaced versions.
 
 ## Responsive Risks
 

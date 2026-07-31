@@ -19,6 +19,7 @@ import {
   type User,
 } from "./domain";
 import { isOpenDeal } from "./sales-automation";
+import { selectManagerFocus } from "./manager-focus";
 import "./workspace-features.css";
 
 export interface WorkspaceFeatureProps {
@@ -1042,14 +1043,217 @@ export function DashboardView(props: WorkspaceFeatureProps) {
     return <FeatureSkeleton label="Загрузка рабочего кабинета" />;
   }
   if (!currentUser) return <MissingIdentity />;
-  if (!snapshot.clients.length) return <LegacyDashboardView {...props} />;
-
-  return (
-    <CustomerOverviewDashboard
+  return currentUser.role === "employee" ? (
+    <ManagerFocusDashboard
       {...props}
       currentUser={currentUser}
       snapshot={snapshot}
     />
+  ) : (
+    <LegacyDashboardView {...props} />
+  );
+}
+
+function FocusQueuePanel({
+  title,
+  eyebrow,
+  count,
+  tone = "default",
+  emptyTitle,
+  emptyDescription,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  count: number;
+  tone?: "default" | "danger" | "warning";
+  emptyTitle: string;
+  emptyDescription: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className={`wf-focus-queue tone-${tone}`}>
+      <header>
+        <div>
+          <span className="wf-eyebrow">{eyebrow}</span>
+          <h2>{title}</h2>
+        </div>
+        <span className="wf-focus-count">{String(count).padStart(2, "0")}</span>
+      </header>
+      {count ? (
+        children
+      ) : (
+        <EmptyState title={emptyTitle} description={emptyDescription} />
+      )}
+    </section>
+  );
+}
+
+function ManagerFocusDashboard({
+  snapshot,
+  currentUser,
+  onSnapshotChange,
+  onOpenClient,
+  onOpenDeal,
+}: WorkspaceFeatureProps & { snapshot: CrmSnapshot; currentUser: User }) {
+  const { notice, showNotice } = useNotice();
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const focus = useMemo(
+    () => selectManagerFocus(snapshot, currentUser, today),
+    [snapshot, currentUser, today],
+  );
+  const clientsById = useMemo(
+    () => new Map(snapshot.clients.map((client) => [client.id, client])),
+    [snapshot.clients],
+  );
+  const renderTasks = (tasks: Task[]) => (
+    <div className="wf-task-list">
+      {tasks.slice(0, 8).map((task) => (
+        <TaskRow
+          compact
+          currentUser={currentUser}
+          key={task.id}
+          onNotice={showNotice}
+          onOpenClient={onOpenClient}
+          onOpenDeal={onOpenDeal}
+          onSnapshotChange={onSnapshotChange}
+          snapshot={snapshot}
+          task={task}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <section className="wf-view wf-manager-focus">
+      <FeatureHeader
+        actions={
+          <div className="wf-current-date">
+            <Icon name="calendar" />
+            <span>
+              <small>Сегодня</small>
+              {DAY_FORMATTER.format(today)}
+            </span>
+          </div>
+        }
+        eyebrow="Кабинет менеджера"
+        title={`Мой день, ${currentUser.fullName.split(" ")[0]}`}
+      />
+      <p className="wf-manager-focus-lead">
+        Сначала сроки и сделки без движения — аналитика остаётся в разделе
+        статистики.
+      </p>
+
+      <div className="wf-manager-focus-grid">
+        <FocusQueuePanel
+          count={focus.overdueTasks.length}
+          emptyDescription="Все запланированные действия выполнены в срок."
+          emptyTitle="Просрочек нет"
+          eyebrow="Сроки"
+          title="Просроченные действия"
+          tone="danger"
+        >
+          {renderTasks(focus.overdueTasks)}
+        </FocusQueuePanel>
+
+        <FocusQueuePanel
+          count={focus.todayTasks.length}
+          emptyDescription="Возьмите задачу из очередей ниже или запланируйте контакт."
+          emptyTitle="На сегодня задач нет"
+          eyebrow="План дня"
+          title="Задачи на сегодня"
+        >
+          {renderTasks(focus.todayTasks)}
+        </FocusQueuePanel>
+
+        <FocusQueuePanel
+          count={focus.dealsWithoutNextStep.length}
+          emptyDescription="У каждой открытой сделки указан следующий шаг и дата."
+          emptyTitle="Все сделки ведутся по плану"
+          eyebrow="Воронка"
+          title="Сделки без следующего шага"
+          tone="warning"
+        >
+          <div className="wf-focus-records">
+            {focus.dealsWithoutNextStep.slice(0, 8).map((deal) => (
+              <button key={deal.id} onClick={() => onOpenDeal(deal.id)} type="button">
+                <span className="wf-focus-mark">СД</span>
+                <span>
+                  <strong>
+                    {clientsById.get(deal.clientId)?.companyName ?? deal.title}
+                  </strong>
+                  <small>{deal.status} · {deal.product}</small>
+                </span>
+                <time>{formatDate(deal.updatedAt)}</time>
+                <Icon name="arrow" />
+              </button>
+            ))}
+          </div>
+        </FocusQueuePanel>
+
+        <FocusQueuePanel
+          count={focus.silentQuotes.length}
+          emptyDescription="Нет отправленных КП, по которым всё ещё ждём ответ."
+          emptyTitle="Ожидающих ответа КП нет"
+          eyebrow="Коммерческие предложения"
+          title="КП без ответа клиента"
+          tone="warning"
+        >
+          <div className="wf-focus-records">
+            {focus.silentQuotes.slice(0, 8).map(({ deal, quote, replyExpectedAt }) => (
+              <button key={quote.id} onClick={() => onOpenDeal(deal.id)} type="button">
+                <span className="wf-focus-mark">КП</span>
+                <span>
+                  <strong>
+                    {clientsById.get(deal.clientId)?.companyName ?? deal.title}
+                  </strong>
+                  <small>
+                    Версия {quote.version} · {formatMoney(quote.revenue)}
+                  </small>
+                </span>
+                <time>
+                  {replyExpectedAt
+                    ? `Ответ до ${formatDate(replyExpectedAt)}`
+                    : `Отправлено ${formatDate(quote.sentAt)}`}
+                </time>
+                <Icon name="arrow" />
+              </button>
+            ))}
+          </div>
+        </FocusQueuePanel>
+
+        <FocusQueuePanel
+          count={focus.upcomingReorders.length}
+          emptyDescription="В ближайшее окно напоминаний повторных заказов нет."
+          emptyTitle="Повторные заказы не приближаются"
+          eyebrow="Повторные продажи"
+          title="Приближается повторный заказ"
+        >
+          <div className="wf-focus-records">
+            {focus.upcomingReorders.slice(0, 8).map(({ client, expectedAt, daysUntil }) => (
+              <button key={client.id} onClick={() => onOpenClient(client.id)} type="button">
+                <span className="wf-focus-mark">{client.potential}</span>
+                <span>
+                  <strong>{client.companyName}</strong>
+                  <small>
+                    {NUMBER_FORMATTER.format(client.averageMonthlyVolume)} шт./мес.
+                  </small>
+                </span>
+                <time>
+                  {daysUntil < 0
+                    ? `Просрочено на ${Math.abs(daysUntil)} дн.`
+                    : daysUntil === 0
+                      ? "Ожидается сегодня"
+                      : `${formatDate(expectedAt)} · через ${daysUntil} дн.`}
+                </time>
+                <Icon name="arrow" />
+              </button>
+            ))}
+          </div>
+        </FocusQueuePanel>
+      </div>
+      <Notice message={notice} />
+    </section>
   );
 }
 

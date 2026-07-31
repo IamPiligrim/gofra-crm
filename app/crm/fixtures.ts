@@ -2,6 +2,10 @@ import {
   CLIENT_STATUSES,
   CRM_SCHEMA_VERSION,
   DEAL_STATUSES,
+  SENT_IMPLYING_STATUSES,
+  createEmptyDealBrief,
+  createEmptyDealProcess,
+  getImpliedProcessSteps,
   type Client,
   type Contact,
   type CrmSnapshot,
@@ -9,6 +13,7 @@ import {
   type Interaction,
   type PriceApproval,
   type Potential,
+  type Quote,
   type Session,
   type StatusEvent,
   type Target,
@@ -328,14 +333,49 @@ const dealProducts = [
 ] as const;
 
 export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
+  const id = `СД-${String(812 + index).padStart(4, "0")}`;
   const ourPrice = 168000 + index * 21300;
   const purchasePrice = 114000 + index * 16700;
   const logistics = 12000 + (index % 4) * 3900;
   const margin = ourPrice - purchasePrice - logistics;
   const terminal = !isOpenDeal({ status });
+  const proposalDate =
+    status === "КП отправлено"
+      ? "2026-07-30"
+      : index < 3
+        ? null
+        : `2026-07-${String(4 + index).padStart(2, "0")}`;
+  const brief = createEmptyDealBrief();
+  if (index < 6) {
+    brief.packagingType = index % 2 === 0 ? "Гофроящик" : "Лоток";
+    brief.fefco = index % 2 === 0 ? "0201" : "0427";
+    brief.innerDimensions = { length: 600, width: 400, height: 300 };
+    brief.cardboardGrade = index % 2 === 0 ? "Т-23" : "П-32";
+    brief.fluteProfile = index % 2 === 0 ? "B" : "BC";
+    brief.printMethod = index % 3 === 0 ? "Флексопечать" : "Без печати";
+    brief.printColors = index % 3 === 0 ? 2 : null;
+    brief.batchVolume = `${18 + index * 3} тыс. шт.`;
+    brief.monthlyVolume = `${36 + index * 4} тыс. шт.`;
+    brief.packingMethod = index % 2 === 0 ? "На линии" : "Вручную";
+    brief.currentSupplier = "Текущий региональный поставщик";
+    brief.currentPrice = Math.round(ourPrice / Math.max(1, 18 + index * 3));
+    brief.clientProblem = "Нестабильная геометрия и срыв сроков поставки";
+    brief.updatedAt = `2026-07-${String(3 + index).padStart(2, "0")}T10:00:00.000Z`;
+  }
+  const process = createEmptyDealProcess();
+  for (const step of getImpliedProcessSteps(status)) {
+    process.steps[step] = {
+      completedAt: `${proposalDate ?? "2026-07-03"}T09:00:00.000Z`,
+      completedById: managerIds[index % managerIds.length],
+      note: "",
+    };
+  }
+  process.replyExpectedAt =
+    status === "КП отправлено" ? "2026-08-03T17:00:00.000Z" : null;
+  process.updatedAt = brief.updatedAt;
 
   return {
-    id: `СД-${String(812 + index).padStart(4, "0")}`,
+    id,
     clientId: demoClients[(index + 1) % demoClients.length].id,
     ownerId: managerIds[index % managerIds.length],
     createdAt: `2026-07-${String(1 + index).padStart(2, "0")}T08:30:00.000Z`,
@@ -352,10 +392,14 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
     margin,
     marginPercent: Math.round((margin / ourPrice) * 1000) / 10,
     status,
-    proposalDate:
-      index < 3 ? null : `2026-07-${String(4 + index).padStart(2, "0")}`,
+    proposalDate,
+    brief,
+    process,
+    activeQuoteId: `quote-${id}-1`,
     nextAction:
-      terminal
+      index === 1
+        ? "Назначить следующий шаг по сделке"
+        : terminal
         ? "Зафиксировать причину закрытия"
         : [
             "Получить размеры и марку картона",
@@ -363,14 +407,44 @@ export const demoDeals: Deal[] = DEAL_STATUSES.map((status, index) => {
             "Подтвердить график поставки",
           ][index % 3],
     nextActionAt:
-      terminal
+      index === 1
+        ? "2026-07-31T12:00:00.000Z"
+        : terminal
         ? null
         : `2026-07-${String(23 + (index % 7)).padStart(2, "0")}T12:00:00.000Z`,
-    needsNextAction: false,
+    needsNextAction: index === 1,
     managerName: managers[index % managers.length],
     comment: index % 2 === 0 ? "Клиент ждёт два варианта расчёта." : "",
   };
 });
+
+export const demoQuotes: Quote[] = demoDeals.map((deal, index) => ({
+  id: `quote-${deal.id}-1`,
+  dealId: deal.id,
+  version: 1,
+  status:
+    deal.status === "Закрыта успешно"
+      ? "Принято"
+      : deal.status === "Проиграна" || deal.status === "Отменена"
+        ? "Отклонено"
+        : SENT_IMPLYING_STATUSES.includes(deal.status)
+          ? "Отправлено"
+          : "Черновик",
+  revenue: deal.ourPrice,
+  cost: deal.purchasePrice,
+  logistics: deal.logistics,
+  volume: deal.volume,
+  validUntil: `2026-08-${String(5 + (index % 20)).padStart(2, "0")}`,
+  changeReason: "",
+  sentAt: deal.proposalDate,
+  authorId: deal.ownerId,
+  comment:
+    index % 2 === 0
+      ? "Цена действует при согласованном объёме партии."
+      : "",
+  createdAt: deal.createdAt,
+  updatedAt: deal.updatedAt,
+}));
 
 export const demoInteractions: Interaction[] = Array.from(
   { length: 14 },
@@ -711,6 +785,7 @@ export const demoSnapshot: CrmSnapshot = {
   clients: demoClients,
   contacts: demoContacts,
   deals: demoDeals,
+  quotes: demoQuotes,
   interactions: demoInteractions,
   priceApprovals: demoPriceApprovals,
   tasks: demoTasks,

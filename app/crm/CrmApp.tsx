@@ -12,6 +12,7 @@ import {
 } from "react";
 import { crmGateway } from "./crm-gateway";
 import { ChatView } from "./ChatView";
+import { DealProcessView } from "./DealProcessView";
 import { CrmIcon, type CrmIconName } from "./Icons";
 import {
   CalendarView,
@@ -27,6 +28,8 @@ import {
   DEAL_PIPELINE,
   DEAL_STATUSES,
   PREFERRED_CHANNELS,
+  createEmptyDealBrief,
+  createEmptyDealProcess,
   type Attachment,
   type AppModule,
   type Client,
@@ -39,6 +42,7 @@ import {
   type InteractionKind,
   type PriceApproval,
   type PriceApprovalStatus,
+  type Quote,
   type PipelineGroup,
   type Potential,
   type Task,
@@ -60,6 +64,7 @@ import {
 import {
   canAccessModule,
   canViewFinancials,
+  filterAccessibleQuotes,
   filterAccessibleRecords,
   isManager,
 } from "./permissions";
@@ -393,6 +398,12 @@ export function CrmApp() {
         snapshot.priceApprovals,
         snapshot.users,
       ),
+      quotes: filterAccessibleQuotes(
+        currentUser,
+        snapshot.quotes,
+        snapshot.deals,
+        snapshot.users,
+      ).filter((quote) => dealIds.has(quote.dealId)),
       tasks: snapshot.tasks.filter(
         (task) => task.assigneeId === currentUser.id,
       ),
@@ -813,8 +824,12 @@ export function CrmApp() {
         notify("Для незакрытой сделки укажите следующий шаг и дату");
         return;
       }
+      const dealId = `СД-${Date.now().toString().slice(-4)}`;
+      const quoteId = `quote-${dealId}-1`;
+      const cost = Math.round(ourPrice * 0.68);
+      const logistics = Math.round(ourPrice * 0.08);
       const deal: Deal = {
-        id: `СД-${Date.now().toString().slice(-4)}`,
+        id: dealId,
         ownerId,
         createdAt: now,
         updatedAt: now,
@@ -825,17 +840,42 @@ export function CrmApp() {
         volume: String(form.get("volume") ?? ""),
         clientPrice: ourPrice,
         ourPrice,
-        purchasePrice: Math.round(ourPrice * 0.68),
-        logistics: Math.round(ourPrice * 0.08),
-        margin: Math.round(ourPrice * 0.24),
-        marginPercent: 24,
+        purchasePrice: cost,
+        logistics,
+        margin: ourPrice - cost - logistics,
+        marginPercent:
+          ourPrice === 0
+            ? 0
+            : Math.round(
+                ((ourPrice - cost - logistics) / ourPrice) * 1000,
+              ) / 10,
         status: dealStatus,
         proposalDate: null,
+        brief: createEmptyDealBrief(),
+        process: createEmptyDealProcess(),
+        activeQuoteId: quoteId,
         nextAction,
         nextActionAt,
         needsNextAction: false,
         managerName,
         comment: "",
+      };
+      const quote: Quote = {
+        id: quoteId,
+        dealId,
+        version: 1,
+        status: "Черновик",
+        revenue: ourPrice,
+        cost,
+        logistics,
+        volume: deal.volume,
+        validUntil: null,
+        changeReason: "",
+        sentAt: null,
+        authorId: ownerId,
+        comment: "",
+        createdAt: now,
+        updatedAt: now,
       };
       const task: Task | null = nextAction
         ? {
@@ -864,6 +904,7 @@ export function CrmApp() {
         {
           ...snapshot,
           deals: [deal, ...snapshot.deals],
+          quotes: [quote, ...snapshot.quotes],
           tasks: task ? [task, ...snapshot.tasks] : snapshot.tasks,
         },
         "Сделка добавлена",
@@ -1132,6 +1173,27 @@ export function CrmApp() {
     setCreateKind(kind);
     setCreateClientId(clientId ?? null);
     setCreateDealId(dealId ?? null);
+  };
+
+  const updateDealWorkflow = (updatedDeal: Deal, dealQuotes: Quote[]) => {
+    if (!snapshot) return;
+    const quoteIds = new Set(dealQuotes.map((quote) => quote.id));
+    commit(
+      {
+        ...snapshot,
+        deals: snapshot.deals.map((deal) =>
+          deal.id === updatedDeal.id ? updatedDeal : deal,
+        ),
+        quotes: [
+          ...snapshot.quotes.filter(
+            (quote) =>
+              quote.dealId !== updatedDeal.id && !quoteIds.has(quote.id),
+          ),
+          ...dealQuotes,
+        ],
+      },
+      "Процесс сделки обновлён",
+    );
   };
 
   const resetDemo = async () => {
@@ -1596,6 +1658,7 @@ export function CrmApp() {
           onMoveDeal={requestDealMove}
           onReviewApproval={reviewPriceApproval}
           onUpdateRepeatOrder={updateClientRepeatOrder}
+          onUpdateDealWorkflow={updateDealWorkflow}
           showFinancials={
             currentUser ? canViewFinancials(currentUser) : false
           }
@@ -2352,7 +2415,7 @@ function DealCard({
         <span className="exact-status">{deal.status}</span>
         <dl className={`deal-numbers ${showFinancials ? "" : "is-single"}`}>
           <div>
-            <dt>Сумма</dt>
+            <dt>Выручка</dt>
             <dd>{formatMoney(deal.ourPrice)}</dd>
           </div>
           {showFinancials && (
@@ -2410,7 +2473,7 @@ function DealTable({
             <th>Сделка</th>
             <th>Клиент</th>
             <th>Товар / объём</th>
-            <th>Сумма</th>
+            <th>Выручка</th>
             {showFinancials && <th>Маржа</th>}
             <th>Точный статус</th>
             <th>Следующий шаг</th>
@@ -3121,6 +3184,7 @@ function RecordDrawer({
   onAddInteraction,
   onReviewApproval,
   onUpdateRepeatOrder,
+  onUpdateDealWorkflow,
   showFinancials,
 }: {
   currentUser: User | null;
@@ -3146,6 +3210,7 @@ function RecordDrawer({
       expectedNextOrderManual: boolean;
     },
   ) => void;
+  onUpdateDealWorkflow: (deal: Deal, quotes: Quote[]) => void;
   showFinancials: boolean;
 }) {
   const client =
@@ -3186,12 +3251,15 @@ function RecordDrawer({
         currentUser={currentUser}
         deal={deal}
         interactions={relatedInteractions}
+        quotes={snapshot.quotes.filter((quote) => quote.dealId === deal.id)}
+        users={snapshot.users}
         onAddInteraction={() =>
           onAddInteraction(relatedClient.id, deal.id)
         }
         onClose={onClose}
         onMoveDeal={() => onMoveDeal(deal)}
         onReviewApproval={onReviewApproval}
+        onUpdateDealWorkflow={onUpdateDealWorkflow}
         showFinancials={showFinancials}
       />
     );
@@ -3345,19 +3413,14 @@ function RecordDrawer({
                   <Detail label="Товар" value={deal.product} />
                   <Detail label="Объём" value={deal.volume} />
                   <Detail
-                    label="Цена клиенту"
-                    value={formatMoney(deal.clientPrice)}
-                    mono
-                  />
-                  <Detail
-                    label="Наша цена"
+                    label="Выручка"
                     value={formatMoney(deal.ourPrice)}
                     mono
                   />
                   {showFinancials && (
                     <>
                       <Detail
-                        label="Закупка"
+                        label="Себестоимость"
                         value={formatMoney(deal.purchasePrice)}
                         mono
                       />
@@ -3504,10 +3567,13 @@ function DealWorkspace({
   currentUser,
   deal,
   interactions,
+  quotes,
+  users,
   onAddInteraction,
   onClose,
   onMoveDeal,
   onReviewApproval,
+  onUpdateDealWorkflow,
   showFinancials,
 }: {
   approvals: PriceApproval[];
@@ -3516,6 +3582,8 @@ function DealWorkspace({
   currentUser: User | null;
   deal: Deal;
   interactions: Interaction[];
+  quotes: Quote[];
+  users: User[];
   onAddInteraction: () => void;
   onClose: () => void;
   onMoveDeal: () => void;
@@ -3523,6 +3591,7 @@ function DealWorkspace({
     approvalId: string,
     status: PriceApprovalStatus,
   ) => void;
+  onUpdateDealWorkflow: (deal: Deal, quotes: Quote[]) => void;
   showFinancials: boolean;
 }) {
   const latestInteraction = interactions[0];
@@ -3599,7 +3668,7 @@ function DealWorkspace({
         <div className="deal-workspace-scroll">
           <div className="deal-summary-strip">
             <div>
-              <span>Сумма сделки</span>
+              <span>Выручка сделки</span>
               <strong>{formatMoney(deal.ourPrice)}</strong>
             </div>
             <div>
@@ -3691,6 +3760,17 @@ function DealWorkspace({
                 </div>
               </section>
 
+              {currentUser ? (
+                <DealProcessView
+                  currentUser={currentUser}
+                  deal={deal}
+                  onChange={onUpdateDealWorkflow}
+                  quotes={quotes}
+                  showFinancials={showFinancials}
+                  users={users}
+                />
+              ) : null}
+
               <section className="deal-economics-panel">
                 <header>
                   <div>
@@ -3709,19 +3789,14 @@ function DealWorkspace({
                   <Detail label="Товар" value={deal.product} />
                   <Detail label="Объём" value={deal.volume} />
                   <Detail
-                    label="Цена клиенту"
-                    value={formatMoney(deal.clientPrice)}
-                    mono
-                  />
-                  <Detail
-                    label="Наша цена"
+                    label="Выручка"
                     value={formatMoney(deal.ourPrice)}
                     mono
                   />
                   {showFinancials ? (
                     <>
                       <Detail
-                        label="Закупка"
+                        label="Себестоимость"
                         value={formatMoney(deal.purchasePrice)}
                         mono
                       />
@@ -4258,7 +4333,7 @@ function CreateDialog({
               />
               <Field label="Товар" name="product" />
               <Field label="Объём" name="volume" />
-              <Field label="Наша цена" name="ourPrice" type="number" />
+              <Field label="Выручка" name="ourPrice" type="number" />
               <SelectField
                 label="Менеджер"
                 name="manager"

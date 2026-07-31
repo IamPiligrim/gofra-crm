@@ -122,6 +122,24 @@ Approval evidence: the user explicitly approved the dark grouped sidebar shown i
 - The next step and date are visually grouped as mandatory.
 - Successful submit creates a task and presents a confirmation message.
 
+### My day
+
+- Sales managers land on five operational queues: overdue actions, today tasks, deals without a next step, sent quotes awaiting a reply, and approaching repeat orders.
+- Queues use compact list rows with company/deal context, owner, due or reply date, and one clear action; counts are derived from real CRM records.
+- Team leaders retain the existing team dashboard; role changes must not hide the current analytics surface.
+
+### Deal technical brief
+
+- The packaging brief uses four progressive steps: construction and dimensions; material and print; volumes and operation; supplier, problem, and assets.
+- Preserve entered values while switching steps. Show a compact completion summary before the fields and never render all brief fields as one uninterrupted form.
+- On mobile, steps remain single-column and sticky actions must not cover the last input.
+
+### Calculation, sample and quote workflow
+
+- Deal milestones form a chronological checklist with explicit dates for specification, calculation, sample and quote stages plus the expected client-reply date.
+- Quote versions are a structured history. Each version shows revenue, cost, logistics, calculated margin, volume, validity, status, and reason for change.
+- Use the labels «Выручка», «Себестоимость», «Логистика» and «Маржа» consistently; do not reintroduce «Наша цена».
+
 ### Price approval
 
 - Statuses: pending, approved, rejected, clarification.

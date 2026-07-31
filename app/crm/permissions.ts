@@ -1,7 +1,9 @@
 import type {
   AppModule,
   CrmSnapshot,
+  Deal,
   OwnedEntity,
+  Quote,
   User,
   UserRole,
 } from "./domain";
@@ -143,4 +145,18 @@ export const filterAccessibleRecords = <
   users: readonly User[],
 ): T[] =>
   records.filter((record) => canViewRecord(actor, record, users));
+
+export const filterAccessibleQuotes = (
+  actor: User,
+  quotes: readonly Quote[],
+  deals: readonly Deal[],
+  users: readonly User[],
+): Quote[] => {
+  const visibleDealIds = new Set(
+    deals
+      .filter((deal) => canViewRecord(actor, deal, users))
+      .map((deal) => deal.id),
+  );
+  return quotes.filter((quote) => visibleDealIds.has(quote.dealId));
+};
 

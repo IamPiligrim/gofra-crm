@@ -35,6 +35,12 @@ desktop and mobile are visual-reference baselines.
 
 ## State Matrix
 
+- `/dashboard`, sales manager: all five «Мой день» queues are distinguishable, scannable, and use real due/reply/reorder dates.
+- `/dashboard`, leader: existing team metrics, funnel and employee workload remain available.
+- `/dashboard`, empty queue: concise zero-result row without fabricated metrics or an oversized empty panel.
+- Deal drawer, brief: four progressive steps retain values and expose a compact completion summary.
+- Deal drawer, process: milestones show saved dates; quote history distinguishes active, accepted, rejected, and replaced versions.
+- Deal drawer, quote validation: revenue/cost/logistics/volume/validity and revision reason are clear; margin is derived and labelled.
 - `/clients`, default: grouped navigation, repeat segment tabs, readable rows, and client drawer.
 - Client drawer, populated: repeat-order summary and multiple decision contacts.
 - Client drawer, empty: clear empty state with “Добавить контакт”.
