@@ -4077,11 +4077,28 @@ html[data-theme="light"] .module-nav button.is-active {
   font-size: 13px;
 }
 
-/* Statuses listed under the board column titles on the clients page. */
-.crm-app[data-module="clients"] .substatus-list {
+/* Statuses listed under the board column titles on the clients and deals
+   pages. */
+.crm-app[data-module="clients"] .substatus-list,
+.crm-app[data-module="deals"] .substatus-list {
   font-size: 12px;
 }
 
-.crm-app[data-module="clients"] .substatus-list span {
+.crm-app[data-module="clients"] .substatus-list span,
+.crm-app[data-module="deals"] .substatus-list span {
   font-size: inherit;
+}
+
+/* Deals board cards: status chip and the revenue / margin figures. */
+.deal-card .exact-status {
+  font-size: 14px;
+  padding: 5px 10px;
+}
+
+.deal-card .deal-numbers dt {
+  font-size: 12px;
+}
+
+.deal-card .deal-numbers dd {
+  font-size: 13px;
 }
